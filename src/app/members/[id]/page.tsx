@@ -20,6 +20,7 @@ import { MEASURE_FIELDS, bmi, trend } from "@/lib/fitness";
 import { setPlanActive } from "@/server/fitness";
 import { MeasurementForm, PlanEditor } from "@/components/fitness-forms";
 import { PtSlotForm } from "@/components/pt-slot-form";
+import { ReceiptShare } from "@/components/receipt-share";
 import { fmtSlot } from "@/lib/pt";
 import { markSlot } from "@/server/ptslots";
 
@@ -161,6 +162,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
                 <span className="flex-1 truncate text-neutral-500">{i.membership?.plan.name ?? i.notes} · {fmtDate(i.issuedAt)}</span>
                 <span className={i.totalPaise > i.paidPaise ? "font-medium text-red-700" : "text-green-700"}>{i.totalPaise > i.paidPaise ? `${paise(i.totalPaise - i.paidPaise)} due` : "Paid"}</span>
                 <span className="w-20 text-right">{paise(i.totalPaise)}</span>
+                {can(role, "payments:write") && <ReceiptShare invoiceId={i.id} label="WhatsApp" />}
               </li>
             ))}
           </ul>

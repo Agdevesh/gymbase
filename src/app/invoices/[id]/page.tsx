@@ -6,6 +6,7 @@ import { can } from "@/lib/rbac";
 import { requireTenant } from "@/server/tenant";
 import { AppShell, ButtonLink } from "@/components/ui";
 import { CollectForm, RefundForm } from "@/components/payment-forms";
+import { ReceiptShare } from "@/components/receipt-share";
 
 const fmt = (d: Date) => d.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 
@@ -26,7 +27,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   const row = (k: string, v: React.ReactNode, cls = "") => <div className={`flex justify-between py-1 text-sm ${cls}`}><dt className="text-neutral-500">{k}</dt><dd>{v}</dd></div>;
   return (
     <AppShell title={`Invoice ${inv.number}`} back={{ href: `/members/${inv.member.id}`, label: name }}
-      actions={<a href={`/invoices/${inv.id}/pdf`} className="inline-flex items-center rounded border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-100">Download PDF</a>}>
+      actions={<>{can(role, "payments:write") && <span className="self-center"><ReceiptShare invoiceId={inv.id} label="Send on WhatsApp" /></span>}<a href={`/invoices/${inv.id}/pdf`} className="inline-flex items-center rounded border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-100">Download PDF</a></>}>
       <div className="grid gap-4 md:grid-cols-2">
         <section className="rounded border bg-white p-4">
           <p className="text-sm text-neutral-500">{fmt(inv.issuedAt)} · <Link href={`/members/${inv.member.id}`} className="underline">{name}</Link> · {inv.member.phone}</p>

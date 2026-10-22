@@ -34,6 +34,7 @@ export function CollectForm({ memberId, duePaise, invoiceId }: { memberId: strin
         {duePaise > 0 && <span className="text-sm text-neutral-500">Outstanding {paise(duePaise)}</span>}
         {state?.message && <span className="text-xs text-red-600">{state.message}</span>}
         {state && !state.errors && !state.message && <span className="text-sm text-green-700">Recorded ✓</span>}
+        {state?.wa && <a href={state.wa} target="_blank" rel="noreferrer" className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700">Send receipt on WhatsApp</a>}
       </div>
     </form>
   );

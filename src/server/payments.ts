@@ -6,6 +6,20 @@ import { db } from "@/lib/db";
 import { allocatePayment, chargeInput, closingInput, collectInput, refundInput } from "@/lib/payments";
 import { requireTenant } from "@/server/tenant";
 import { raiseCharge } from "@/server/invoices";
+import { newReceiptToken, receiptMessage, receiptUrl } from "@/lib/receipts";
+import { waLink } from "@/lib/portal";
+import { METHOD_LABELS } from "@/lib/payments";
+
+export type CollectState = (FormState & { wa?: string; receipt?: string }) | undefined;
+
+// Ensures the invoice has a shareable token and returns the WhatsApp link + receipt URL for the member.
+export async function receiptLink(invoiceId: string, paidPaise: number, method?: string) {
+  const inv = await db.invoice.findUnique({ where: { id: invoiceId }, include: { member: { select: { firstName: true, phone: true } }, gym: { select: { name: true } } } });
+  if (!inv) return null;
+  const token = inv.publicToken ?? (await db.invoice.update({ where: { id: invoiceId }, data: { publicToken: newReceiptToken() }, select: { publicToken: true } })).publicToken!;
+  const url = receiptUrl(process.env.AUTH_URL ?? "", token);
+  return { receipt: url, wa: waLink(inv.member.phone, receiptMessage({ gymName: inv.gym.name, memberName: inv.member.firstName, number: inv.number, paidPaise, duePaise: inv.totalPaise - inv.paidPaise, url, method })) };
+}
 import { audit } from "@/server/audit";
 const rsFmt = (p: number) => `Rs ${(p / 100).toLocaleString("en-IN")}`;
 import type { FormState } from "@/server/members";
@@ -25,7 +39,7 @@ function refresh(memberId: string, invoiceIds: string[] = []) {
 }
 
 // Collects against the member's unpaid invoices, oldest first (or one invoice when invoiceId is given).
-export async function collectPayment(memberId: string, _prev: FormState, formData: FormData): Promise<FormState> {
+export async function collectPayment(memberId: string, _prev: CollectState, formData: FormData): Promise<CollectState> {
   const { gymId, userId } = await requireTenant("payments:write");
   const parsed = collectInput.safeParse({ amountPaise: str(formData, "amountPaise"), method: str(formData, "method"), reference: str(formData, "reference"), invoiceId: str(formData, "invoiceId") });
   if (!parsed.success) return errorsOf(parsed.error.issues);
@@ -47,7 +61,8 @@ export async function collectPayment(memberId: string, _prev: FormState, formDat
   if ("errors" in result) return result;
   await audit(gymId, userId, "payment.collect", "member", memberId, `Collected ${rsFmt(amountPaise)} by ${method}${reference ? ` (${reference})` : ""}`);
   refresh(memberId, result.ids);
-  return {};
+  const link = await receiptLink(result.ids[result.ids.length - 1], amountPaise, METHOD_LABELS[method]);
+  return link ?? {};
 }
 
 // A one-off charge (registration fee, supplements, locker) raises its own invoice.
@@ -103,4 +118,12 @@ export async function closeDay(_prev: FormState, formData: FormData): Promise<Fo
   if (!result.message) await audit(gymId, userId, "cash.close", "cashclosing", null, `Closed cash for ${date}: counted ${rsFmt(countedPaise)}`);
   revalidatePath("/payments");
   return result;
+}
+
+// Share button on invoices: returns the WhatsApp link for the member's latest payment (or the invoice itself if unpaid).
+export async function shareReceipt(invoiceId: string): Promise<CollectState> {
+  const { gymId } = await requireTenant("payments:write");
+  const inv = await db.invoice.findFirst({ where: { id: invoiceId, gymId }, select: { paidPaise: true, payments: { where: { kind: "PAYMENT" }, orderBy: { paidAt: "desc" }, take: 1, select: { method: true } } } });
+  if (!inv) return { message: "Invoice not found" };
+  return (await receiptLink(invoiceId, inv.paidPaise, inv.payments[0] ? METHOD_LABELS[inv.payments[0].method] : undefined)) ?? {};
 }
