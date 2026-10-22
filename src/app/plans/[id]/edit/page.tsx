@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/server/tenant";
 import { updatePlan } from "@/server/plans";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { PlanForm } from "@/components/plan-form";
 
 export default async function EditPlanPage({ params }: { params: Promise<{ id: string }> }) {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/server/tenant";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 
 export const dynamic = "force-dynamic";
 const PAGE = 100;

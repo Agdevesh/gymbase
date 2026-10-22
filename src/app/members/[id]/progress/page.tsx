@@ -4,7 +4,7 @@ import { MEASURE_FIELDS, bmi, bmiLabel, trend } from "@/lib/fitness";
 import { can } from "@/lib/rbac";
 import { requireTenant } from "@/server/tenant";
 import { deleteMeasurement } from "@/server/fitness";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { MeasurementForm } from "@/components/fitness-forms";
 import { ProgressChart } from "@/components/progress-chart";
 

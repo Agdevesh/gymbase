@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { WEEKDAYS, dateKey, dbDate, fmtTime, occurrences } from "@/lib/classes";
 import { can } from "@/lib/rbac";
 import { requireTenant } from "@/server/tenant";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { ClassForm } from "@/components/class-forms";
 
 export const dynamic = "force-dynamic";

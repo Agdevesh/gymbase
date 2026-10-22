@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { requireTenant } from "@/server/tenant";
 import { updateSettings } from "@/server/settings";
-import { AppShell, ButtonLink } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { ButtonLink } from "@/components/ui";
 import { SettingsForm } from "@/components/settings-forms";
 import { baseUrl } from "@/lib/base-url";
 

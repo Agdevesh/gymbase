@@ -40,39 +40,6 @@ export function StatusBadge({ status }: { status: "ACTIVE" | "FROZEN" | "EXPIRED
   return <span className={`rounded px-2 py-0.5 text-xs font-medium ${styles[status]}`}>{status === "NONE" ? "No plan" : status.toLowerCase()}</span>;
 }
 
-export function AppShell({ title, actions, children, back }: { title: string; actions?: React.ReactNode; back?: { href: string; label: string }; children: React.ReactNode }) {
-  return (
-    <main className="mx-auto max-w-4xl p-4">
-      <nav className="-mx-4 mb-4 flex gap-x-1 overflow-x-auto whitespace-nowrap border-b bg-neutral-50 px-3 text-sm text-neutral-600 [scrollbar-width:none]">
-        <Link href="/dashboard" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Dashboard</Link>
-        <Link href="/checkin" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Check-in</Link>
-        <Link href="/members" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Members</Link>
-        <Link href="/attendance" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Attendance</Link>
-        <Link href="/leads" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Inquiries</Link>
-        <Link href="/payments" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Payments</Link>
-        <Link href="/payments/upi" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">UPI desk</Link>
-        <Link href="/defaulters" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Defaulters</Link>
-        <Link href="/expenses" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Expenses</Link>
-        <Link href="/reports" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Reports</Link>
-        <Link href="/reminders" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Reminders</Link>
-        <Link href="/staff" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Staff</Link>
-        <Link href="/plans" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Plans</Link>
-        <Link href="/classes" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Classes</Link>
-        <Link href="/lockers" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Lockers</Link>
-        <Link href="/settings" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Settings</Link>
-        <Link href="/account" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Account</Link>
-        <Link href="/install" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Get app</Link>
-      </nav>
-      {back && <Link href={back.href} className="text-sm text-neutral-500 hover:text-neutral-900">← {back.label}</Link>}
-      <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold">{title}</h1>
-        {actions && <div className="flex gap-2">{actions}</div>}
-      </header>
-      {children}
-    </main>
-  );
-}
-
 export function ButtonLink(props: ComponentProps<typeof Link> & { secondary?: boolean }) {
   const { secondary, className, ...rest } = props;
   return <Link {...rest} className={`${secondary ? secondaryButtonClass : buttonClass} ${className ?? ""}`} />;

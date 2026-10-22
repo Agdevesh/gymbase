@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/server/tenant";
 import { updateLead } from "@/server/leads";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { LeadForm } from "@/components/lead-form";
 
 export default async function EditLeadPage({ params }: { params: Promise<{ id: string }> }) {

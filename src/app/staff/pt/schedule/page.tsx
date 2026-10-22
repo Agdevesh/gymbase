@@ -5,7 +5,8 @@ import { waLink } from "@/lib/portal";
 import { can } from "@/lib/rbac";
 import { requireTenant } from "@/server/tenant";
 import { completeSlot, markSlot } from "@/server/ptslots";
-import { AppShell, Avatar, inputClass } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { Avatar, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 

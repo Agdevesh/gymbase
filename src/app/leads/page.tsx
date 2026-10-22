@@ -4,7 +4,8 @@ import { db } from "@/lib/db";
 import { LEAD_SOURCES, LEAD_STATUSES, OPEN_STATUSES, SOURCE_LABELS, STATUS_LABELS, followUpBucket, sourceFilter, statusFilter } from "@/lib/leads";
 import { normalizePhone } from "@/lib/members";
 import { requireTenant } from "@/server/tenant";
-import { AppShell, ButtonLink, inputClass } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { ButtonLink, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 

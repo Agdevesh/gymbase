@@ -1,5 +1,5 @@
 import { requireTenant } from "@/server/tenant";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { ImportForm } from "@/components/import-form";
 
 export default async function ImportPage() {

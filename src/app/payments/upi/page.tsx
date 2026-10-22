@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { paise } from "@/lib/payments";
 import { requireTenant } from "@/server/tenant";
 import { assignAlert, cancelUpiRequest } from "@/server/upi";
-import { AppShell, ButtonLink } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { ButtonLink } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 const fmt = (d: Date) => d.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });

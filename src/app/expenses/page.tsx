@@ -6,7 +6,8 @@ import { can } from "@/lib/rbac";
 import { CATEGORY_LABELS, monthRange, sumBy } from "@/lib/reports";
 import { requireTenant } from "@/server/tenant";
 import { deleteExpense } from "@/server/expenses";
-import { AppShell, ButtonLink } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { ButtonLink } from "@/components/ui";
 import { ExpenseForm } from "@/components/expense-form";
 
 export const dynamic = "force-dynamic";

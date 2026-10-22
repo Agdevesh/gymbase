@@ -2,7 +2,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { METHOD_LABELS, PAYMENT_METHODS, localDateKey, paise } from "@/lib/payments";
 import { requireTenant } from "@/server/tenant";
-import { AppShell, inputClass } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { inputClass } from "@/components/ui";
 import { ClosingForm } from "@/components/payment-forms";
 
 export const dynamic = "force-dynamic";
