@@ -29,6 +29,8 @@ model Gym {
   currency    String   @default("INR")
   timezone    String   @default("Asia/Kolkata")
   memberSeq   Int      @default(0) // last number used for Member.code
+  invoiceSeq  Int      @default(0) // last number used for Invoice.number
+  gstPercent  Int      @default(0) // applied to new invoices, e.g. 18
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -232,6 +234,8 @@ model Membership {
   discountPaise Int              @default(0)
   frozenAt      DateTime?
   frozenDays    Int              @default(0)
+  cancelledAt   DateTime?
+  cancelReason  String?
   renewedFromId String?          @unique
   renewedFrom   Membership?      @relation("Renewal", fields: [renewedFromId], references: [id])
   renewedTo     Membership?      @relation("Renewal")

@@ -46,6 +46,7 @@ export function AppShell({ title, actions, children, back }: { title: string; ac
       <nav className="mb-4 flex gap-4 text-sm text-neutral-500">
         <Link href="/dashboard" className="hover:text-neutral-900">Dashboard</Link>
         <Link href="/members" className="hover:text-neutral-900">Members</Link>
+        <Link href="/plans" className="hover:text-neutral-900">Plans</Link>
       </nav>
       {back && <Link href={back.href} className="text-sm text-neutral-500 hover:text-neutral-900">← {back.label}</Link>}
       <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
