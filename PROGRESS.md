@@ -11,10 +11,13 @@ Read this first in each session instead of rescanning the repo.
 - Staff invites: `inviteStaff` / `acceptInvite` server actions in `src/server/staff.ts` (no UI yet).
 - Seed (`npm run db:seed`): gym `demo`, logins `owner@demo.gym`, `reception@demo.gym`, `trainer@demo.gym`, password `password123`. 6 members (one expired, one with dues), 4 plans, 3 leads.
 
+- Stage 2, Members: `/members` (search by name/phone/code/email, paginated, membership status), `/members/new`, `/members/[id]` (photo, emergency contact, documents, timestamped notes, dues, recent check-ins, membership history), `/members/[id]/edit`. Server actions in `src/server/members.ts`, zod schemas + phone normalisation in `src/lib/members.ts`, shared UI in `src/components/ui.tsx`.
+- Uploads (photo, documents) are stored as `StoredFile` bytes in Postgres and served by `/api/files/[id]`, which checks the session's gymId. Limits: photo 2 MB, document 4 MB (server-action body limit 4.5 MB, Vercel's cap).
+- Member codes come from an atomic `Gym.memberSeq` counter (`GB-0001`…). Free-form `Member.notes` stays on the profile; `MemberNote` is the dated log with author.
+
 ## Next
 
-1. Module 2, Members: list/search, create/edit, photo and document upload, member detail page.
-2. Module 3, Plans & memberships.
+1. Module 3, Plans & memberships.
 3. Modules 4 to 10 in the order of the build prompt.
 4. Invite accept page (`/invite/[token]`) and staff list in settings.
 
@@ -24,6 +27,8 @@ Read this first in each session instead of rescanning the repo.
 - Money is integer paise. GST stored per invoice (`gstPercent`, `gstPaise`).
 - Each gym is identified at login by its `slug` (no subdomains yet).
 - Prisma 6 chosen over 8 (rc) for stability. shadcn/ui deferred until a module needs real components; plain Tailwind so far.
+- Files in Postgres rather than S3/Blob to keep the stack to Vercel + Neon; swap `storeFile` in `src/server/members.ts` for object storage if the DB grows.
+- Phones stored as E.164; `normalizePhone` assumes +91 for bare 10-digit numbers.
 - `Membership.renewedFromId` chains renewals; freeze extends `endDate` by `frozenDays`.
 
 ## Setup

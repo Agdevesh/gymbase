@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { db } from "@/lib/db";
 import { signOut } from "@/lib/auth";
 import { requireTenant } from "@/server/tenant";
@@ -26,7 +27,9 @@ export default async function DashboardPage() {
         <div className="rounded border bg-white p-4"><dt className="text-sm text-neutral-500">Members</dt><dd className="text-2xl font-semibold">{members}</dd></div>
         <div className="rounded border bg-white p-4"><dt className="text-sm text-neutral-500">Staff</dt><dd className="text-2xl font-semibold">{staff}</dd></div>
       </dl>
-      <p className="mt-6 text-sm text-neutral-500">Modules land here one at a time. See PROGRESS.md.</p>
+      <nav className="mt-6 flex gap-3 text-sm">
+        <Link href="/members" className="rounded border bg-white px-3 py-2 hover:bg-neutral-100">Members →</Link>
+      </nav>
     </main>
   );
 }

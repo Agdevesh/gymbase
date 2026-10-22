@@ -112,6 +112,8 @@ async function main() {
     }
   }
 
+  await db.gym.update({ where: { id: gym.id }, data: { memberSeq: people.length } });
+
   await db.lead.createMany({
     data: [
       { gymId: gym.id, name: "Kiran Patel", phone: "+919911000001", source: "WALK_IN", status: "NEW", interestedIn: "Monthly", followUpAt: daysFromNow(1), ownerId: reception.id },
