@@ -18,7 +18,7 @@ export default async function SettingsPage() {
         <h2 className="mb-2 font-medium">Export data (CSV, opens in Excel)</h2>
         <p className="mb-2 text-sm text-neutral-500">Your data is yours. Each file downloads everything for this gym.</p>
         <div className="flex flex-wrap gap-2 text-sm">
-          {[["members", "Members"], ["memberships", "Memberships"], ["payments", "Payments"], ["invoices", "Invoices & dues"], ["attendance", "Attendance (90 days)"], ["leads", "Inquiries"]].map(([k, l]) => <a key={k} href={`/api/export/${k}`} className="rounded border bg-white px-3 py-1 hover:bg-neutral-100">⬇ {l}</a>)}
+          {[["members", "Members"], ["memberships", "Memberships"], ["payments", "Payments"], ["invoices", "Invoices & dues"], ["attendance", "Attendance (90 days)"], ["leads", "Inquiries"], ["expenses", "Expenses"]].map(([k, l]) => <a key={k} href={`/api/export/${k}`} className="rounded border bg-white px-3 py-1 hover:bg-neutral-100">⬇ {l}</a>)}
         </div>
       </section>
     </AppShell>

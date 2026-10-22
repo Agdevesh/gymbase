@@ -66,6 +66,7 @@ model Gym {
   classes       GymClass[]
   classBookings ClassBooking[]
   ptSlots       PtSlot[]
+  expenses      Expense[]
 }
 
 model User {
@@ -99,6 +100,7 @@ model User {
   fitnessPlansWritten FitnessPlan[]
   classesLed      GymClass[]
   ptSlotsLed      PtSlot[]         @relation("SlotTrainer")
+  expensesAdded   Expense[]
 
   @@unique([gymId, email])
   @@index([gymId, role])
@@ -209,6 +211,7 @@ model StoredFile {
   createdAt DateTime @default(now())
 
   document MemberDocument?
+  expense  Expense?
 
   @@index([gymId])
 }
@@ -776,4 +779,36 @@ model ClassBooking {
   @@unique([classId, memberId, date])
   @@index([gymId, date])
   @@index([memberId, date])
+}
+
+// ---------- Expenses ----------
+
+enum ExpenseCategory {
+  RENT
+  SALARY
+  ELECTRICITY
+  EQUIPMENT
+  MAINTENANCE
+  MARKETING
+  SUPPLIES
+  OTHER
+}
+
+model Expense {
+  id          String          @id @default(cuid())
+  gymId       String
+  gym         Gym             @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  category    ExpenseCategory
+  amountPaise Int
+  paidAt      DateTime
+  method      PaymentMethod   @default(CASH)
+  vendor      String?
+  notes       String?
+  receiptId   String?         @unique
+  receipt     StoredFile?     @relation(fields: [receiptId], references: [id], onDelete: SetNull)
+  createdById String?
+  createdBy   User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime        @default(now())
+
+  @@index([gymId, paidAt])
 }
