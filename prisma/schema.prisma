@@ -37,6 +37,7 @@ model Gym {
   weeklyOff   String? // e.g. "Sunday"
   holidays    String[] @default([]) // "2026-10-20 Diwali"
   upiId       String? // for UPI pay links / QR on receipts
+  upiAlertToken String? @unique // secret in the bank-SMS webhook URL (/api/upi/alerts/<token>)
   receiptNote String? // footer on invoices and receipts
   whatsapp    String? // gym's WhatsApp number shown to members
   setupDoneAt DateTime? // owner dismissed the getting-started checklist
@@ -59,6 +60,8 @@ model Gym {
   ptAssignments PtAssignment[]
   commissions   Commission[]
   subscription  Subscription?
+  upiRequests   UpiRequest[]
+  bankAlerts    BankAlert[]
   files         StoredFile[]
   auditLogs     AuditLog[]
   measurements  Measurement[]
@@ -89,6 +92,7 @@ model User {
   invitesSent     Invite[]
   checkInsLogged  CheckIn[]        @relation("CheckInBy")
   paymentsTaken   Payment[]        @relation("PaymentBy")
+  upiRequests     UpiRequest[]     @relation("UpiRequestBy")
   leadsAssigned   Lead[]           @relation("LeadOwner")
   cashClosings    CashClosing[]
   staffAttendance StaffAttendance[]
@@ -163,6 +167,7 @@ model Member {
   checkIns      CheckIn[]
   payments      Payment[]
   invoices      Invoice[]
+  upiRequests   UpiRequest[]
   reminders     Reminder[]
   ptAssignments PtAssignment[]
   measurements  Measurement[]
@@ -400,7 +405,8 @@ model Invoice {
   notes         String?
   publicToken   String?     @unique // shareable receipt link /r/<token>
 
-  payments Payment[]
+  payments    Payment[]
+  upiRequests UpiRequest[]
 
   @@unique([gymId, number])
   @@index([gymId, issuedAt])
@@ -427,6 +433,7 @@ model Payment {
   refundOfId  String?
   refundOf    Payment?      @relation("Refund", fields: [refundOfId], references: [id])
   refunds     Payment[]     @relation("Refund")
+  upiRequest  UpiRequest?
 
   @@index([gymId, paidAt])
   @@index([gymId, closingId])
@@ -813,4 +820,65 @@ model Expense {
   createdAt   DateTime        @default(now())
 
   @@index([gymId, paidAt])
+}
+
+// A fixed-amount UPI QR shown for one invoice; verified by a bank alert (SMS forwarded to the webhook) or a UTR typed at reception.
+enum UpiRequestStatus {
+  PENDING
+  PAID
+  EXPIRED
+  CANCELLED
+}
+
+model UpiRequest {
+  id          String           @id @default(cuid())
+  gymId       String
+  gym         Gym              @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  invoiceId   String
+  invoice     Invoice          @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  memberId    String
+  member      Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  amountPaise Int
+  code        String // short reference in the QR note, e.g. GB-7K3M9Q
+  token       String           @unique // public pay-page token (/pay/<token>)
+  status      UpiRequestStatus @default(PENDING)
+  utr         String?
+  paymentId   String?          @unique
+  payment     Payment?         @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  createdById String?
+  createdBy   User?            @relation("UpiRequestBy", fields: [createdById], references: [id], onDelete: SetNull)
+  expiresAt   DateTime
+  paidAt      DateTime?
+  createdAt   DateTime         @default(now())
+  alerts      BankAlert[]
+
+  @@unique([gymId, code])
+  @@index([gymId, status, createdAt])
+  @@index([invoiceId])
+}
+
+enum BankAlertSource {
+  SMS
+  EMAIL
+  MANUAL
+}
+
+// Every bank credit alert that reached the webhook (or a UTR typed by staff), matched or not; UTR is unique per gym so a screenshot cannot be reused.
+model BankAlert {
+  id          String          @id @default(cuid())
+  gymId       String
+  gym         Gym             @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  source      BankAlertSource
+  sender      String?
+  text        String
+  amountPaise Int?
+  utr         String?
+  payerVpa    String?
+  requestId   String?
+  request     UpiRequest?     @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  note        String? // why it was not matched
+  receivedAt  DateTime        @default(now())
+
+  @@unique([gymId, utr])
+  @@index([gymId, receivedAt])
 }

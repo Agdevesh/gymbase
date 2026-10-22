@@ -11,7 +11,7 @@ export default async function SettingsPage() {
   const gym = await db.gym.findUniqueOrThrow({ where: { id: gymId } });
   const base = process.env.AUTH_URL ?? "";
   return (
-    <AppShell title="Settings" actions={<><ButtonLink href="/settings/audit" secondary>Activity log</ButtonLink><ButtonLink href="/billing" secondary>GYMBASE plan</ButtonLink></>}>
+    <AppShell title="Settings" actions={<><ButtonLink href="/settings/upi" secondary>UPI verification</ButtonLink><ButtonLink href="/settings/audit" secondary>Activity log</ButtonLink><ButtonLink href="/billing" secondary>GYMBASE plan</ButtonLink></>}>
       <p className="mb-4 text-sm text-neutral-500">Gym code <span className="font-mono">{gym.slug}</span> · staff sign in at <span className="font-mono">{base}/login</span></p>
       <SettingsForm action={updateSettings} initial={gym} />
       <section className="mt-6 rounded border bg-white p-4">

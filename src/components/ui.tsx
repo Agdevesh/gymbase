@@ -50,6 +50,7 @@ export function AppShell({ title, actions, children, back }: { title: string; ac
         <Link href="/attendance" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Attendance</Link>
         <Link href="/leads" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Inquiries</Link>
         <Link href="/payments" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Payments</Link>
+        <Link href="/payments/upi" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">UPI desk</Link>
         <Link href="/defaulters" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Defaulters</Link>
         <Link href="/expenses" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Expenses</Link>
         <Link href="/reports" className="shrink-0 px-1.5 py-2 hover:text-neutral-900">Reports</Link>
