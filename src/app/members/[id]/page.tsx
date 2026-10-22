@@ -10,6 +10,7 @@ import { MembershipPanel } from "@/components/membership-panel";
 import { expireMemberships } from "@/server/memberships";
 import { prorataCredit, renewalStart } from "@/lib/memberships";
 import { ChargeForm, CollectForm } from "@/components/payment-forms";
+import { CustomMessageForm } from "@/components/reminder-forms";
 
 const fmtDate = (d: Date | null) => (d ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—");
 const paise = (p: number) => `₹${(p / 100).toLocaleString("en-IN")}`;
@@ -132,6 +133,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
       <section className="mt-4 rounded border bg-white p-4">
         <h2 className="mb-2 font-medium">Notes</h2>
         {write && <NoteForm memberId={m.id} />}
+        {write && <CustomMessageForm memberId={m.id} hasEmail={!!m.email} />}
         {m.noteLog.length === 0 ? <p className="text-sm text-neutral-500">No notes yet.</p> : (
           <ul className="mt-3 divide-y">
             {m.noteLog.map((n) => (
