@@ -77,7 +77,7 @@ export function CheckinDesk() {
                 <div className="truncate text-sm text-neutral-500">{m.phone}{m.plan && ` · ${m.plan} till ${fmt(m.endDate!)}`}</div>
                 {!m.allowed && <div className="text-sm text-red-700">{m.blockedReason} <Link href={`/members/${m.id}`} className="underline" onClick={(e) => e.stopPropagation()}>Open profile</Link></div>}
               </div>
-              <StatusBadge status={(m.status as "ACTIVE" | "FROZEN" | "EXPIRED" | "CANCELLED" | null) ?? "NONE"} />
+              <StatusBadge status={(m.status as "ACTIVE" | "FROZEN" | "SUSPENDED" | "EXPIRED" | "CANCELLED" | null) ?? "NONE"} />
             </li>
           ))}
         </ul>

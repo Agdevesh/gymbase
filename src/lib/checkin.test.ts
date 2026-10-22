@@ -9,6 +9,7 @@ describe("entryGate", () => {
   it("blocks lapsed-but-not-yet-swept memberships", () => expect(entryGate({ status: "ACTIVE", endDate: new Date("2026-10-01") }, now)).toEqual({ allowed: false, reason: "EXPIRED" }));
   it("blocks frozen, cancelled and missing", () => {
     expect(entryGate({ status: "FROZEN", endDate: new Date("2026-11-01") }, now).allowed).toBe(false);
+    expect(entryGate({ status: "SUSPENDED", endDate: new Date("2026-11-01") }, now)).toEqual({ allowed: false, reason: "SUSPENDED" });
     expect(entryGate({ status: "CANCELLED", endDate: new Date("2026-11-01") }, now).allowed).toBe(false);
     expect(entryGate(null, now)).toEqual({ allowed: false, reason: "NO_PLAN" });
   });

@@ -14,13 +14,14 @@ export const tokenFromScan = (raw: string) => {
   return m ? m[1].toLowerCase() : null;
 };
 
-export type Gate = { allowed: true } | { allowed: false; reason: "NO_PLAN" | "EXPIRED" | "FROZEN" | "CANCELLED" };
+export type Gate = { allowed: true } | { allowed: false; reason: "NO_PLAN" | "EXPIRED" | "FROZEN" | "CANCELLED" | "SUSPENDED" };
 
 // Reception sees this before the check-in is written; expired or frozen members are blocked.
 export function entryGate(membership: { status: string; endDate: Date } | null | undefined, now: Date): Gate {
   if (!membership) return { allowed: false, reason: "NO_PLAN" };
   if (membership.status === "FROZEN") return { allowed: false, reason: "FROZEN" };
   if (membership.status === "CANCELLED") return { allowed: false, reason: "CANCELLED" };
+  if (membership.status === "SUSPENDED") return { allowed: false, reason: "SUSPENDED" };
   if (membership.status === "EXPIRED" || membership.endDate < now) return { allowed: false, reason: "EXPIRED" };
   return { allowed: true };
 }
@@ -30,6 +31,7 @@ export const GATE_MESSAGES: Record<Exclude<Gate, { allowed: true }>["reason"], s
   EXPIRED: "Membership expired. Renew to check in.",
   FROZEN: "Membership is frozen. Unfreeze to check in.",
   CANCELLED: "Membership cancelled. Start a new plan.",
+  SUSPENDED: "Suspended: dues unpaid. Collect payment to restore.",
 };
 
 export const inGymSince = (now: Date) => new Date(now.getTime() - IN_GYM_WINDOW_HOURS * 3600_000);

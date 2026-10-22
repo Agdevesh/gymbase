@@ -56,8 +56,8 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
   const fitness = can(role, "fitness:write");
   const bmiNow = bmi(trend(m.measurements, "weightKg")?.latest, trend(m.measurements, "heightCm")?.latest);
   const name = [m.firstName, m.lastName].filter(Boolean).join(" ");
-  const current = m.memberships.find((ms) => ms.status === "ACTIVE" || ms.status === "FROZEN") ?? m.memberships[0];
-  const live = current && (current.status === "ACTIVE" || current.status === "FROZEN") ? current : null;
+  const current = m.memberships.find((ms) => ms.status === "ACTIVE" || ms.status === "FROZEN" || ms.status === "SUSPENDED") ?? m.memberships[0];
+  const live = current && (current.status === "ACTIVE" || current.status === "FROZEN" || current.status === "SUSPENDED") ? current : null;
   const now = new Date();
   const dues = m.invoices.reduce((s, i) => s + i.totalPaise - i.paidPaise, 0);
   const row = (k: string, v: React.ReactNode) => (
@@ -81,7 +81,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
         <h2 className="mb-2 font-medium">Membership</h2>
         {live ? (
           <p className="mb-3 text-sm text-neutral-600">
-            {live.plan.name}, {live.status === "FROZEN" ? `frozen since ${fmtDate(live.frozenAt)}` : `${Math.max(0, Math.ceil((live.endDate.getTime() - now.getTime()) / 86400000))} days left`}, ends {fmtDate(live.endDate)}
+            {live.plan.name}, {live.status === "FROZEN" ? `frozen since ${fmtDate(live.frozenAt)}` : live.status === "SUSPENDED" ? `suspended since ${fmtDate(live.suspendedAt)} (${live.suspendReason ?? "dues unpaid"}; restores on payment)` : `${Math.max(0, Math.ceil((live.endDate.getTime() - now.getTime()) / 86400000))} days left`}, ends {fmtDate(live.endDate)}
             {live.frozenDays > 0 && ` (${live.frozenDays} frozen days added)`}
           </p>
         ) : <p className="mb-3 text-sm text-neutral-600">{current ? `Last plan ${current.plan.name} ${current.status.toLowerCase()} on ${fmtDate(current.endDate)}.` : "No plan yet."}</p>}
@@ -89,7 +89,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
           <MembershipPanel
             memberId={m.id}
             plans={plans}
-            current={live ? { id: live.id, status: live.status as "ACTIVE" | "FROZEN", endDate: live.endDate, planName: live.plan.name, credit: prorataCredit(live, now) } : null}
+            current={live ? { id: live.id, status: live.status as "ACTIVE" | "FROZEN" | "SUSPENDED", endDate: live.endDate, planName: live.plan.name, credit: prorataCredit(live, now) } : null}
             renewFrom={renewalStart(live, new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())))}
           />
         )}

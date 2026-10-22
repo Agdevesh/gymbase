@@ -3,7 +3,7 @@ import { holidayOn, settingsInput, toCsv, upiLink } from "./settings";
 
 describe("settings", () => {
   it("validates GSTIN and UPI id", () => {
-    expect(settingsInput.safeParse({ name: "Iron Gym", gstPercent: "18", gstin: "27aabcu9603r1zm", upiId: "irongym@okaxis", holidays: "2026-10-20 Diwali\n\n2026-11-01", phone: "", whatsapp: "", email: "", address: "", receiptNote: "", openTime: "06:00", closeTime: "22:30", weeklyOff: "" }).data).toMatchObject({ gstin: "27AABCU9603R1ZM", holidays: ["2026-10-20 Diwali", "2026-11-01"], openTime: "06:00" });
+    expect(settingsInput.safeParse({ name: "Iron Gym", gstPercent: "18", gstin: "27aabcu9603r1zm", upiId: "irongym@okaxis", holidays: "2026-10-20 Diwali\n\n2026-11-01", phone: "", whatsapp: "", email: "", address: "", receiptNote: "", openTime: "06:00", closeTime: "22:30", weeklyOff: "", autoSuspendEnabled: "on", autoSuspendDays: "14" }).data).toMatchObject({ gstin: "27AABCU9603R1ZM", holidays: ["2026-10-20 Diwali", "2026-11-01"], openTime: "06:00", autoSuspendEnabled: true, autoSuspendDays: 14 });
     expect(settingsInput.safeParse({ name: "X", gstPercent: "0", gstin: "", upiId: "bad id", holidays: "", openTime: "25:00", closeTime: "", weeklyOff: "", phone: "", whatsapp: "", email: "", address: "", receiptNote: "" }).success).toBe(false);
   });
   it("builds a UPI link with amount", () => {

@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { assignInput, cancelInput, endDateFor, formatInvoiceNumber, gstOn, prorataCredit, renewalStart, unfreezeDates } from "@/lib/memberships";
 import { requireTenant } from "@/server/tenant";
 import { audit } from "@/server/audit";
+import { suspendDefaulters } from "@/server/dues";
 import type { FormState } from "@/server/members";
 
 type Tx = Prisma.TransactionClient;
@@ -127,4 +128,21 @@ export async function cancelMembership(memberId: string, membershipId: string, f
   });
   await audit(gymId, userId, "membership.cancel", "member", memberId, `Cancelled membership${reason ? `: ${reason}` : ""}`);
   done(memberId);
+}
+
+// Owner/reception lifts a dues suspension by hand (e.g. the member paid in cash outside GYMBASE or was given time).
+export async function restoreMembership(memberId: string, membershipId: string) {
+  const { gymId, userId } = await requireTenant("members:write");
+  const m = await db.membership.findFirst({ where: { id: membershipId, memberId, gymId, status: "SUSPENDED" } });
+  if (!m) return;
+  await db.membership.update({ where: { id: m.id }, data: { status: m.endDate < new Date() ? "EXPIRED" : "ACTIVE", suspendedAt: null, suspendReason: null } });
+  await audit(gymId, userId, "membership.restore", "member", memberId, "Membership restored by staff.");
+  revalidatePath(`/members/${memberId}`);
+  revalidatePath("/dashboard");
+}
+
+// Expiry plus dues suspension in one call for pages that show membership state.
+export async function tidyMemberships(gymId: string) {
+  await expireMemberships(gymId);
+  await suspendDefaulters(gymId);
 }

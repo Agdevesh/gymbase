@@ -132,7 +132,7 @@ export function AppNav({ groups, gymName, userLabel, signOut }: Props) {
             </Link>
           );
         })}
-        <button type="button" onClick={() => setOpen(true)} className={`flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${!tabActive && active ? "text-brand-600" : "text-slate-500"}`}>
+        <button type="button" onClick={() => setOpen(true)} className={`flex flex-col items-center gap-0.5 py-2 !text-[11px] font-medium ${!tabActive && active ? "text-brand-600" : "text-slate-500"}`}>
           <Icon name="more" size={22} />
           More
         </button>
