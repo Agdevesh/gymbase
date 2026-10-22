@@ -11,6 +11,7 @@ export function MemberShell({ gymName, title, children }: { gymName: string; tit
       {children}
       <nav className="fixed inset-x-0 bottom-0 flex justify-around border-t bg-white py-2 text-xs">
         <Link href="/me" className="px-3 py-1">Home</Link>
+        <Link href="/me/plan" className="px-3 py-1">My plan</Link>
         <Link href="/me/invoices" className="px-3 py-1">Payments</Link>
         <Link href="/me/account" className="px-3 py-1">Account</Link>
       </nav>

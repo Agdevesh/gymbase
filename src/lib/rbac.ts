@@ -10,7 +10,8 @@ export type Permission =
   | "leads:write"
   | "payments:write"
   | "payments:refund"
-  | "reports:read";
+  | "reports:read"
+  | "fitness:write";
 
 const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   OWNER: [
@@ -23,9 +24,10 @@ const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "payments:write",
     "payments:refund",
     "reports:read",
+    "fitness:write",
   ],
-  RECEPTION: ["members:write", "members:read", "checkin:write", "leads:write", "payments:write"],
-  TRAINER: ["members:read", "checkin:write"],
+  RECEPTION: ["members:write", "members:read", "checkin:write", "leads:write", "payments:write", "fitness:write"],
+  TRAINER: ["members:read", "checkin:write", "fitness:write"],
   MEMBER: [],
 };
 
