@@ -1,0 +1,19 @@
+{
+  "name": "gymbase-android",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Capacitor shell that wraps the deployed GYMBASE web app in an Android APK",
+  "scripts": {
+    "sync": "cap sync android",
+    "apk:debug": "cap sync android && cd android && ./gradlew assembleDebug",
+    "apk:release": "cap sync android && cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
+    "typescript": "^5.9.3"
+  }
+}
