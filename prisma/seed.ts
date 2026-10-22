@@ -25,7 +25,7 @@ async function main() {
         create: [
           { email: "owner@demo.gym", name: "Rohit Sharma", role: "OWNER", passwordHash: password, phone: "+919876500001" },
           { email: "reception@demo.gym", name: "Priya Verma", role: "RECEPTION", passwordHash: password, phone: "+919876500002" },
-          { email: "trainer@demo.gym", name: "Amit Yadav", role: "TRAINER", passwordHash: password, phone: "+919876500003" },
+          { email: "trainer@demo.gym", name: "Amit Yadav", role: "TRAINER", passwordHash: password, phone: "+919876500003", commissionPercent: 20 },
         ],
       },
       plans: {
@@ -105,9 +105,11 @@ async function main() {
       },
     });
     if (planType === "PT") {
-      await db.ptAssignment.create({
-        data: { gymId: gym.id, memberId: member.id, trainerId: trainer.id, sessionsTotal: plan.ptSessions!, sessionsUsed: 4, startDate },
+      const pt = await db.ptAssignment.create({
+        data: { gymId: gym.id, memberId: member.id, trainerId: trainer.id, membershipId: membership.id, feePaise: plan.pricePaise, sessionsTotal: plan.ptSessions!, sessionsUsed: 4, startDate,
+          sessions: { create: [1, 2, 3, 4].map((n) => ({ trainerId: trainer.id, at: new Date(startDate.getTime() + n * 3 * DAY) })) } },
       });
+      await db.commission.create({ data: { gymId: gym.id, userId: trainer.id, amountPaise: Math.round(plan.pricePaise * 0.2), reason: `PT ${firstName} ${lastName} (${plan.ptSessions} sessions)`, period: `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, "0")}`, ptAssignmentId: pt.id } });
     }
     if (!expired) {
       await db.checkIn.createMany({

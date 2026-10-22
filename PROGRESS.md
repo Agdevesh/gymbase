@@ -27,12 +27,13 @@ Read this first in each session instead of rescanning the repo.
 
 - Stage 7, Reminders: `ReminderRule` per gym and type (renewal N days before expiry, dues every N days after due date, birthday on the day, lead follow-up on the follow-up date) with channel + template placeholders (`{name} {gym} {plan} {endDate} {amount} {days}`), defaults in `RULE_DEFAULTS`. `generateReminders(gymId)` runs from the daily cron (idempotent via `Reminder.dedupeKey`), `dispatchReminders()` sends due ones through `src/lib/messaging.ts` (WhatsApp Cloud API, Twilio SMS, Resend email via fetch; unconfigured channel → FAILED with a clear error). `/reminders` (pending/sent/failed/cancelled; Open WhatsApp wa.me link, Mark sent, Send now/Retry when a provider is configured, Cancel, Generate today's), `/reminders/settings` (owner). Member profile has a one-off "send a message" box (type CUSTOM).
 
+- Stage 8, Staff & trainers: `/staff` (staff list with role, today's attendance in/out per person: staff mark themselves, owner marks anyone; owner sets trainer commission %, deactivates logins, invites staff; invite link shown and emailed when a provider is set), `/invite/[token]` public accept page (proxy exempt) → `/login` prefilled. `/staff/pt` (trainers see own clients, owner/reception all; log session with notes, end), `/staff/commissions` (owner; by period, auto commission = fee × trainer % on PT assignment, manual commissions, mark period paid). Member profile has a Personal training section (assign trainer, optionally linked to a PT membership which prefills sessions and fee). Schema: `User.commissionPercent`, `PtAssignment.membershipId/feePaise`, `PtSession`, `Commission.ptAssignmentId`.
+
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
 
 1. Modules 4 to 10 in the order of the build prompt.
-2. Invite accept page (`/invite/[token]`) and staff list in settings.
 
 ## Decisions
 
@@ -46,6 +47,7 @@ Asked by the owner on 2026-10-22, to land in their modules:
 - Editing a plan never changes existing memberships (they keep their own `pricePaise`); retire a plan instead of deleting it.
 - QR payload is `GB:<32-hex qrToken>`; `tokenFromScan` also accepts bare tokens and `/checkin/scan/<token>` URLs. Duplicate check-ins within the 4 h window are ignored (reported as "already in").
 - Payments never carry credit: an amount above the outstanding total is rejected. Refunds are separate `Payment` rows (`kind` REFUND) that decrement `Invoice.paidPaise`. Cash closing only stamps CASH payments; UPI/card reconcile with the bank.
+- Any FK to `User` that is reachable from `Gym` must cascade (seed deletes the demo gym); RESTRICT there breaks teardown.
 - Reminders without an API provider are a to-do list for reception (wa.me / sms: / mailto: links + "Mark sent"), never silently faked. Cron runs at 04:30 UTC = 10:00 IST, matching `sendTimeFor`.
 - pdfkit's built-in Helvetica has no ₹ glyph, so PDFs print "Rs.".
 - Form checkboxes use a hidden `off` input before the checkbox; server actions read `formData.getAll(name).includes("on")`.
