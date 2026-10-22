@@ -56,6 +56,7 @@ export function AppShell({ title, actions, children, back }: { title: string; ac
         <Link href="/plans" className="hover:text-neutral-900">Plans</Link>
         <Link href="/settings" className="hover:text-neutral-900">Settings</Link>
         <Link href="/account" className="hover:text-neutral-900">Account</Link>
+        <Link href="/install" className="hover:text-neutral-900">Get app</Link>
       </nav>
       {back && <Link href={back.href} className="text-sm text-neutral-500 hover:text-neutral-900">← {back.label}</Link>}
       <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
