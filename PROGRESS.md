@@ -69,7 +69,7 @@ Asked by the owner on 2026-10-22, to land in their modules:
 ## Android app: build, sign, Play Store
 
 - Local build: `cd android-app && npm ci && GYMBASE_URL=https://<your-domain> npx cap sync android && cd android && ./gradlew assembleDebug` (needs Android SDK + Java 21). Debug APK lands in `android/app/build/outputs/apk/debug/`.
-- Release via CI: push a tag `v1.2.3` (or run the "Android APK" workflow manually and grab the `gymbase-apk` artifact). Set repo variable `GYMBASE_URL` to the production domain once it exists.
+- Release via CI: every push to `main` that touches `android-app/` (or a manual run of the "Android APK" workflow on main) publishes a GitHub release `android-v0.1.<run>` with `gymbase.apk`; a tag `v1.2.3` publishes under that tag. Set repo variable `GYMBASE_URL` to the production domain once it exists.
 - Signing: generate a key once, `keytool -genkeypair -keystore gymbase.jks -alias gymbase -keyalg RSA -keysize 2048 -validity 10000`, then add repo secrets `ANDROID_KEYSTORE_BASE64` (`base64 -w0 gymbase.jks`), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`. Until those exist CI signs with a throwaway key, so phones must uninstall before installing a newer APK. Never commit the keystore.
 - Play Store later: switch the workflow to `bundleRelease` (`.aab`), enrol the keystore in Play App Signing, add a privacy-policy URL on `/install`, and set `targetSdkVersion` to Play's current minimum (Capacitor's `variables.gradle`). Google rejects pure web wrappers only when they add no value; GYMBASE is the owner's own SaaS so it qualifies, but a Trusted Web Activity (Bubblewrap) is the alternative if a review complains.
 

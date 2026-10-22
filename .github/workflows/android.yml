@@ -59,7 +59,7 @@ jobs:
         working-directory: android-app/android
         env:
           ANDROID_VERSION_CODE: ${{ github.run_number }}
-          ANDROID_VERSION_NAME: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('0.0.{0}', github.run_number) }}
+          ANDROID_VERSION_NAME: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('0.1.{0}', github.run_number) }}
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon assembleRelease
@@ -71,9 +71,13 @@ jobs:
           name: gymbase-apk
           path: ${{ runner.temp }}/gymbase.apk
 
+      # Every main push touching the Android shell (and every manual run from main) publishes a release, so
+      # /install's "latest release" link always has an APK. A v* tag publishes under that tag instead.
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('android-v0.1.{0}', github.run_number) }}
+          name: GYMBASE Android ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('0.1.{0}', github.run_number) }}
           files: ${{ runner.temp }}/gymbase.apk
           generate_release_notes: true
