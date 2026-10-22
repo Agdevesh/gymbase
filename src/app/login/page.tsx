@@ -27,8 +27,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       {joined && <p className="mb-4 rounded bg-green-50 p-2 text-sm text-green-800">Your login is ready. Sign in below.</p>}
       <form action={login} className="space-y-3">
         <input name="gym" placeholder="Gym code (e.g. demo)" defaultValue={gym ?? ""} required autoFocus className={input} />
-        <input name="email" type="email" placeholder="Email" defaultValue={email ?? ""} required className={input} />
-        <input name="password" type="password" placeholder="Password" required className={input} />
+        <input name="email" placeholder="Email (staff) or phone (members)" defaultValue={email ?? ""} required className={input} autoComplete="username" />
+        <input name="password" type="password" placeholder="Password or PIN" required className={input} />
         <button className="w-full rounded bg-neutral-900 py-2 font-medium text-white">Sign in</button>
       </form>
       <p className="mt-3 text-center text-sm"><a href="/forgot" className="text-neutral-500 underline">Forgot password?</a></p>
