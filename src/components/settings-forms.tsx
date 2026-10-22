@@ -42,7 +42,7 @@ export function SettingsForm({ action, initial }: { action: (prev: FormState, fd
       </section>
       <section className="rounded-xl border border-slate-200 bg-white shadow-sm p-4">
         <h2 className="mb-1 font-semibold text-slate-900">Unpaid dues</h2>
-        <p className="mb-3 text-sm text-slate-500">When a member's dues stay unpaid this long, their membership is suspended automatically (no check-in) and restored the moment they pay. Staff can also restore it from the profile.</p>
+        <p className="mb-3 text-sm text-slate-500">When a member's dues stay unpaid this long, their membership is suspended automatically and restored the moment they pay. Staff can also restore it from the profile.</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Auto-suspend" error={e.autoSuspendEnabled}><select name="autoSuspendEnabled" defaultValue={initial.autoSuspendEnabled ? "on" : "off"} className={inputClass}><option value="on">On (recommended)</option><option value="off">Off</option></select></Field>
           <Field label="After how many days unpaid" error={e.autoSuspendDays}><input name="autoSuspendDays" type="number" min={1} max={90} defaultValue={initial.autoSuspendDays} className={inputClass} /></Field>
@@ -55,7 +55,7 @@ export function SettingsForm({ action, initial }: { action: (prev: FormState, fd
           <Field label="Closes at" error={e.closeTime}><input name="closeTime" type="time" defaultValue={initial.closeTime ?? ""} className={inputClass} /></Field>
           <Field label="Weekly off" error={e.weeklyOff}><input name="weeklyOff" placeholder="e.g. Sunday" defaultValue={initial.weeklyOff ?? ""} className={inputClass} /></Field>
         </div>
-        <div className="mt-4"><Field label="Holidays (one per line: date then name)" error={e.holidays} hint="e.g. 2026-10-20 Diwali. Reception sees a holiday banner on those days."><textarea name="holidays" rows={4} defaultValue={initial.holidays.join("\n")} className={`${inputClass} font-mono text-sm`} /></Field></div>
+        <div className="mt-4"><Field label="Holidays (one per line: date then name)" error={e.holidays} hint="e.g. 2026-10-20 Diwali. Members see a gym-closed note in their app on those days."><textarea name="holidays" rows={4} defaultValue={initial.holidays.join("\n")} className={`${inputClass} font-mono text-sm`} /></Field></div>
       </section>
       <button disabled={pending} className={buttonClass}>{pending ? "Saving…" : "Save settings"}</button>
     </form>

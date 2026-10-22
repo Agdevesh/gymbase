@@ -142,7 +142,7 @@ export async function assignPt(memberId: string, _prev: FormState, formData: For
 }
 
 export async function logPtSession(assignmentId: string, formData: FormData) {
-  const { gymId, userId, role } = await requireTenant("checkin:write");
+  const { gymId, userId, role } = await requireTenant("attendance:write");
   const a = await db.ptAssignment.findFirst({ where: { id: assignmentId, gymId }, select: { trainerId: true, memberId: true, sessionsTotal: true, sessionsUsed: true } });
   if (!a || a.sessionsUsed >= a.sessionsTotal) return;
   if (role === "TRAINER" && a.trainerId !== userId) return; // trainers log only their own clients

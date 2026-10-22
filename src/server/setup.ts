@@ -27,7 +27,7 @@ export async function setupStatus(gymId: string) {
     { key: "members", label: "Add your first member (or import your Excel list)", done: members > 0, href: "/members/import", hint: "Import brings members, plans and paid amounts in one go." },
     { key: "staff", label: "Invite reception and trainers", done: staff > 0, href: "/staff", hint: "Each gets their own login with the right access." },
     { key: "classes", label: "Set up group classes (optional)", done: classes > 0, href: "/classes", hint: "Zumba, yoga, batches with fixed timings." },
-    { key: "phone", label: "Put GYMBASE on the reception phone", done: false, href: "/install", hint: "Install as an app; the check-in desk and QR scan work from it." },
+    { key: "phone", label: "Put GYMBASE on the reception phone", done: false, href: "/install", hint: "Install as an app; dues, payments and WhatsApp reminders work from it." },
   ];
   const required = steps.filter((s) => s.key !== "classes" && s.key !== "phone");
   return { steps, done: required.filter((s) => s.done).length, total: required.length, complete: required.every((s) => s.done), dismissed: !!gym.setupDoneAt };

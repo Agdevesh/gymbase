@@ -52,7 +52,6 @@ model Gym {
   members       Member[]
   plans         Plan[]
   memberships   Membership[]
-  checkIns      CheckIn[]
   leads         Lead[]
   payments      Payment[]
   invoices      Invoice[]
@@ -93,7 +92,6 @@ model User {
   ptSessionsLed   PtSession[]
   member          Member?
   invitesSent     Invite[]
-  checkInsLogged  CheckIn[]        @relation("CheckInBy")
   paymentsTaken   Payment[]        @relation("PaymentBy")
   upiRequests     UpiRequest[]     @relation("UpiRequestBy")
   leadsAssigned   Lead[]           @relation("LeadOwner")
@@ -143,7 +141,6 @@ model Member {
   gymId          String
   gym            Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
   code           String // short human id shown on cards, e.g. GB-0042
-  qrToken        String    @unique
   firstName      String
   lastName       String?
   phone          String
@@ -167,7 +164,6 @@ model Member {
   documents     MemberDocument[]
   noteLog       MemberNote[]
   memberships   Membership[]
-  checkIns      CheckIn[]
   payments      Payment[]
   invoices      Invoice[]
   upiRequests   UpiRequest[]
@@ -291,31 +287,6 @@ model Membership {
 
   @@index([gymId, status, endDate])
   @@index([memberId])
-}
-
-// ---------- Entry / check-in ----------
-
-enum CheckInSource {
-  QR
-  RECEPTION
-  MANUAL
-}
-
-model CheckIn {
-  id          String        @id @default(cuid())
-  gymId       String
-  gym         Gym           @relation(fields: [gymId], references: [id], onDelete: Cascade)
-  memberId    String
-  member      Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  checkedInAt DateTime      @default(now())
-  checkedOutAt DateTime?
-  source      CheckInSource
-  loggedById  String?
-  loggedBy    User?         @relation("CheckInBy", fields: [loggedById], references: [id])
-
-  @@index([gymId, checkedInAt])
-  @@index([gymId, checkedOutAt])
-  @@index([memberId, checkedInAt])
 }
 
 // ---------- Inquiries / leads ----------

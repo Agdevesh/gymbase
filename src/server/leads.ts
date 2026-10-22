@@ -1,6 +1,5 @@
 "use server";
 
-import { randomBytes } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -89,7 +88,7 @@ export async function convertLead(leadId: string) {
     } else {
       const gym = await tx.gym.update({ where: { id: gymId }, data: { memberSeq: { increment: 1 } }, select: { memberSeq: true } });
       const m = await tx.member.create({
-        data: { gymId, ...splitName(lead.name), phone: lead.phone, email: lead.email, notes: lead.notes, leadId: lead.id, code: formatMemberCode(gym.memberSeq), qrToken: randomBytes(16).toString("hex") },
+        data: { gymId, ...splitName(lead.name), phone: lead.phone, email: lead.email, notes: lead.notes, leadId: lead.id, code: formatMemberCode(gym.memberSeq) },
         select: { id: true },
       });
       id = m.id;

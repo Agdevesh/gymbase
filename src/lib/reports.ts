@@ -27,13 +27,6 @@ export function sumBy<T, K extends string>(rows: T[], key: (r: T) => K, amount: 
   return Object.entries(out).sort((a, b) => b[1] - a[1]) as [K, number][];
 }
 
-// Visits per hour of day (0-23) and per weekday (0-6) for peak-hour planning.
-export function visitHistogram(times: Date[]) {
-  const hours = Array.from({ length: 24 }, () => 0), days = Array.from({ length: 7 }, () => 0);
-  for (const t of times) { hours[t.getHours()]++; days[t.getDay()]++; }
-  return { hours, days };
-}
-
 // Of the memberships that ended in the period, how many were renewed (chained via renewedTo).
 export function renewalRate(ended: { renewed: boolean }[]) {
   if (!ended.length) return null;

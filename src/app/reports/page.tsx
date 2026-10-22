@@ -2,18 +2,17 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { SOURCE_LABELS } from "@/lib/leads";
 import { METHOD_LABELS, paise } from "@/lib/payments";
-import { CATEGORY_LABELS, monthRange, pct, renewalRate, sumBy, visitHistogram } from "@/lib/reports";
-import { WEEKDAYS } from "@/lib/classes";
+import { CATEGORY_LABELS, monthRange, pct, renewalRate, sumBy } from "@/lib/reports";
 import { requireTenant } from "@/server/tenant";
 import { AppShell } from "@/components/app-shell";
 
 export const dynamic = "force-dynamic";
 
-function Bars({ values, labels, highlight }: { values: number[]; labels: string[]; highlight?: (i: number) => boolean }) {
+function Bars({ values, labels }: { values: number[]; labels: string[] }) {
   const max = Math.max(1, ...values);
   return (
     <svg viewBox={`0 0 ${values.length * 14} 60`} className="h-20 w-full" role="img">
-      {values.map((v, i) => { const h = Math.round((v / max) * 44); return <g key={i}><rect x={i * 14 + 2} y={48 - h} width={10} height={h} rx={1} className={highlight?.(i) ? "fill-green-600" : "fill-slate-800"} /><text x={i * 14 + 7} y={57} textAnchor="middle" fontSize={6} className="fill-slate-500">{labels[i]}</text></g>; })}
+      {values.map((v, i) => { const h = Math.round((v / max) * 44); return <g key={i}><rect x={i * 14 + 2} y={48 - h} width={10} height={h} rx={1} className="fill-slate-800" /><text x={i * 14 + 7} y={57} textAnchor="middle" fontSize={6} className="fill-slate-500">{labels[i]}</text></g>; })}
     </svg>
   );
 }
@@ -23,14 +22,13 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const { gymId } = await requireTenant("reports:read");
   const { month = "" } = await searchParams;
   const r = monthRange(month);
-  const now = new Date(), since30 = new Date(now.getTime() - 30 * 86400_000);
-  const [payments, expenses, endedMemberships, newMembers, activeNow, visits, leads, sixMonths, invoicesDue, staffPt] = await Promise.all([
+  const now = new Date();
+  const [payments, expenses, endedMemberships, newMembers, activeNow, leads, sixMonths, invoicesDue, staffPt] = await Promise.all([
     db.payment.findMany({ where: { gymId, paidAt: { gte: r.start, lt: r.end } }, select: { amountPaise: true, kind: true, method: true, invoice: { select: { membership: { select: { plan: { select: { name: true } } } }, notes: true } } } }),
     db.expense.findMany({ where: { gymId, paidAt: { gte: r.start, lt: r.end } }, select: { amountPaise: true, category: true } }),
     db.membership.findMany({ where: { gymId, endDate: { gte: r.start, lt: r.end }, status: { in: ["EXPIRED", "ACTIVE", "FROZEN"] } }, select: { renewedTo: { select: { id: true } } } }),
     db.member.count({ where: { gymId, joinedAt: { gte: r.start, lt: r.end } } }),
     db.membership.count({ where: { gymId, status: { in: ["ACTIVE", "FROZEN"] } } }),
-    db.checkIn.findMany({ where: { gymId, checkedInAt: { gte: since30 } }, select: { checkedInAt: true, memberId: true } }),
     db.lead.findMany({ where: { gymId, createdAt: { gte: r.start, lt: r.end } }, select: { source: true, status: true } }),
     db.member.groupBy({ by: ["joinedAt"], where: { gymId, joinedAt: { gte: new Date(now.getFullYear(), now.getMonth() - 5, 1) } }, _count: true }),
     db.invoice.aggregate({ where: { gymId, paidPaise: { lt: db.invoice.fields.totalPaise } }, _sum: { totalPaise: true, paidPaise: true } }),
@@ -45,9 +43,6 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const byPlan = sumBy(payments, (p) => p.invoice?.membership?.plan.name ?? (p.invoice?.notes ? "Other charges" : "Unlinked"), (p) => (p.kind === "REFUND" ? -p.amountPaise : p.amountPaise));
   const byCat = sumBy(expenses, (e) => e.category, (e) => e.amountPaise);
   const renewal = renewalRate(endedMemberships.map((m) => ({ renewed: !!m.renewedTo })));
-  const hist = visitHistogram(visits.map((v) => v.checkedInAt));
-  const uniqueVisitors = new Set(visits.map((v) => v.memberId)).size;
-  const peakHour = hist.hours.indexOf(Math.max(...hist.hours));
   const bySource = sumBy(leads, (l) => l.source, () => 1);
   const converted = leads.filter((l) => l.status === "CONVERTED").length;
   const growth = Array.from({ length: 6 }, (_, i) => { const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1); const k = `${d.getFullYear()}-${d.getMonth()}`; return { label: d.toLocaleDateString("en-IN", { month: "short" }), n: sixMonths.filter((g) => `${g.joinedAt.getFullYear()}-${g.joinedAt.getMonth()}` === k).reduce((s, g) => s + g._count, 0) }; });
@@ -86,13 +81,6 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           <Row k="Renewal rate" v={renewal == null ? "—" : `${renewal}%`} tone={renewal != null && renewal < 50 ? "text-red-700" : ""} />
           <p className="mb-1 mt-3 text-xs text-slate-500">New members, last 6 months</p>
           <Bars values={growth.map((g) => g.n)} labels={growth.map((g) => g.label)} />
-        </section>
-        <section className={card}>
-          <h2 className="mb-1 font-semibold text-slate-900">Peak hours (last 30 days)</h2>
-          <p className="mb-1 text-xs text-slate-500">{visits.length} visits by {uniqueVisitors} members · busiest around {peakHour}:00</p>
-          <Bars values={hist.hours.slice(5, 23)} labels={hist.hours.slice(5, 23).map((_, i) => String(i + 5))} highlight={(i) => i + 5 === peakHour} />
-          <p className="mb-1 mt-2 text-xs text-slate-500">By weekday</p>
-          <Bars values={hist.days} labels={[...WEEKDAYS]} />
         </section>
         <section className={card}>
           <h2 className="mb-1 font-semibold text-slate-900">Inquiries</h2>

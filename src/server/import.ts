@@ -1,6 +1,5 @@
 "use server";
 
-import { randomBytes } from "node:crypto";
 import { db } from "@/lib/db";
 import { formatMemberCode } from "@/lib/members";
 import { parseCsv, parseRows, type ImportRow } from "@/lib/import";
@@ -54,7 +53,7 @@ export async function runImport(_prev: ImportState, formData: FormData): Promise
       await db.$transaction(async (tx) => {
         const gym = await tx.gym.update({ where: { id: gymId }, data: { memberSeq: { increment: 1 } }, select: { memberSeq: true } });
         const [firstName, ...rest] = row.name.split(/\s+/);
-        const member = await tx.member.create({ data: { gymId, code: formatMemberCode(gym.memberSeq), qrToken: randomBytes(16).toString("hex"), firstName, lastName: rest.join(" ") || null, phone: row.phone, email: row.email, gender: row.gender, dob: row.dob, joinedAt: row.joined ?? row.start ?? new Date(), notes: row.notes }, select: { id: true } });
+        const member = await tx.member.create({ data: { gymId, code: formatMemberCode(gym.memberSeq), firstName, lastName: rest.join(" ") || null, phone: row.phone, email: row.email, gender: row.gender, dob: row.dob, joinedAt: row.joined ?? row.start ?? new Date(), notes: row.notes }, select: { id: true } });
         if (plan && row.start) {
           const end = row.end ?? new Date(row.start.getTime() + plan.durationDays * 86400_000);
           const status = end < new Date() ? "EXPIRED" : "ACTIVE";

@@ -20,7 +20,7 @@ export default async function ClassRosterPage({ params, searchParams }: { params
   const now = new Date();
   const next = occurrences([cls], now, 14);
   const dayKey = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : next[0]?.dayKey ?? dateKey(now);
-  const write = can(role, "members:write"), mark = can(role, "checkin:write");
+  const write = can(role, "members:write"), mark = can(role, "attendance:write");
   const [bookings, members] = await Promise.all([
     db.classBooking.findMany({ where: { classId: cls.id, date: dbDate(dayKey) }, orderBy: { createdAt: "asc" }, include: { member: { select: { id: true, firstName: true, lastName: true, code: true, photoUrl: true, phone: true } } } }),
     write ? db.member.findMany({ where: { gymId, memberships: { some: { status: "ACTIVE" } } }, select: { id: true, firstName: true, lastName: true, code: true }, orderBy: { firstName: "asc" }, take: 2000 }) : [],

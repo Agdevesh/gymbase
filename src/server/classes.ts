@@ -65,7 +65,7 @@ async function book(gymId: string, classId: string, dayKey: string, memberId: st
 }
 
 export async function setBookingStatus(bookingId: string, status: BookingStatus) {
-  const { gymId } = await requireTenant("checkin:write");
+  const { gymId } = await requireTenant("attendance:write");
   const b = await db.classBooking.findFirst({ where: { id: bookingId, gymId }, select: { classId: true } });
   if (!b) return;
   await db.classBooking.update({ where: { id: bookingId }, data: { status } });

@@ -1,6 +1,5 @@
 "use server";
 
-import { randomBytes } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -59,7 +58,7 @@ export async function createMember(_prev: FormState, formData: FormData): Promis
       const gym = await tx.gym.update({ where: { id: gymId }, data: { memberSeq: { increment: 1 } }, select: { memberSeq: true } });
       const photoUrl = photoError === null && photo instanceof File && photo.size > 0 ? fileUrl(await storeFile(tx, gymId, photo)) : null;
       const m = await tx.member.create({
-        data: { ...parsed.data, gymId, code: formatMemberCode(gym.memberSeq), qrToken: randomBytes(16).toString("hex"), photoUrl },
+        data: { ...parsed.data, gymId, code: formatMemberCode(gym.memberSeq), photoUrl },
         select: { id: true },
       });
       return m.id;

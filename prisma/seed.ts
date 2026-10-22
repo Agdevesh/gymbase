@@ -1,6 +1,5 @@
 import { PrismaClient, type PlanType } from "@prisma/client";
 import { hash } from "bcryptjs";
-import { randomBytes } from "node:crypto";
 
 const db = new PrismaClient();
 const DAY = 24 * 3600 * 1000;
@@ -71,7 +70,6 @@ async function main() {
       data: {
         gymId: gym.id,
         code: `GB-${String(i).padStart(4, "0")}`,
-        qrToken: randomBytes(16).toString("hex"),
         firstName,
         lastName,
         phone,
@@ -115,11 +113,6 @@ async function main() {
           sessions: { create: [1, 2, 3, 4].map((n) => ({ trainerId: trainer.id, at: new Date(startDate.getTime() + n * 3 * DAY) })) } },
       });
       await db.commission.create({ data: { gymId: gym.id, userId: trainer.id, amountPaise: Math.round(plan.pricePaise * 0.2), reason: `PT ${firstName} ${lastName} (${plan.ptSessions} sessions)`, period: `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, "0")}`, ptAssignmentId: pt.id } });
-    }
-    if (!expired) {
-      await db.checkIn.createMany({
-        data: [0, 1, 2].map((d) => ({ gymId: gym.id, memberId: member.id, checkedInAt: daysFromNow(-d), checkedOutAt: new Date(daysFromNow(-d).getTime() + 3600 * 1000), source: "RECEPTION" as const, loggedById: reception.id })),
-      });
     }
   }
 

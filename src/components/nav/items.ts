@@ -11,9 +11,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Daily",
     items: [
       { href: "/dashboard", label: "Home", icon: "home" },
-      { href: "/checkin", label: "Check-in", icon: "checkin", permission: "checkin:write" },
       { href: "/members", label: "Members", icon: "members", permission: "members:read" },
-      { href: "/attendance", label: "Attendance", icon: "attendance", permission: "members:read" },
       { href: "/leads", label: "Inquiries", icon: "leads", permission: "leads:write" },
     ],
   },
@@ -53,7 +51,7 @@ export function navForRole(role: Role): NavGroup[] {
 }
 
 // Bottom tab bar on phones: four most-used screens + "More".
-export const TAB_HREFS = ["/dashboard", "/checkin", "/members", "/payments"];
+export const TAB_HREFS = ["/dashboard", "/members", "/payments", "/defaulters"];
 
 // Longest matching href wins, so /payments/upi highlights "UPI desk" and not "Payments".
 export function activeHref(pathname: string, hrefs: string[]): string | null {

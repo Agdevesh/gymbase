@@ -12,7 +12,7 @@ import { LogSessionForm } from "@/components/staff-forms";
 export const dynamic = "force-dynamic";
 
 export default async function PtPage({ searchParams }: { searchParams: Promise<{ all?: string }> }) {
-  const { gymId, userId, role } = await requireTenant("checkin:write");
+  const { gymId, userId, role } = await requireTenant("attendance:write");
   const { all } = await searchParams;
   const mineOnly = role === "TRAINER";
   const rows = await db.ptAssignment.findMany({

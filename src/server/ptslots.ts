@@ -17,7 +17,7 @@ function refresh(memberId: string) { revalidatePath(`/members/${memberId}`); rev
 
 // Books one or a weekly series of PT slots; refuses trainer clashes and more slots than sessions left.
 export async function scheduleSlots(assignmentId: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const { gymId, userId, role } = await requireTenant("checkin:write");
+  const { gymId, userId, role } = await requireTenant("attendance:write");
   const parsed = slotInput.safeParse({ date: str(formData, "date"), time: str(formData, "time"), durationMin: str(formData, "durationMin"), repeatWeeks: str(formData, "repeatWeeks"), weekdays: formData.getAll("weekdays").map(String) });
   if (!parsed.success) return errorsOf(parsed.error.issues);
   const a = await db.ptAssignment.findFirst({ where: { id: assignmentId, gymId, endDate: null }, include: { member: { select: { firstName: true } }, _count: { select: { slots: { where: { status: "SCHEDULED" } } } } } });
@@ -45,7 +45,7 @@ async function loadSlot(slotId: string, gymId: string, userId: string, role: str
 
 // Done = the session happened: log it against the plan exactly like the manual "Log session" button.
 export async function completeSlot(slotId: string, formData: FormData) {
-  const { gymId, userId, role } = await requireTenant("checkin:write");
+  const { gymId, userId, role } = await requireTenant("attendance:write");
   const s = await loadSlot(slotId, gymId, userId, role);
   if (!s) return;
   const notes = str(formData, "notes").trim() || null;
@@ -59,7 +59,7 @@ export async function completeSlot(slotId: string, formData: FormData) {
 }
 
 export async function markSlot(slotId: string, status: "NO_SHOW" | "CANCELLED") {
-  const { gymId, userId, role } = await requireTenant("checkin:write");
+  const { gymId, userId, role } = await requireTenant("attendance:write");
   const s = await loadSlot(slotId, gymId, userId, role);
   if (!s) return;
   await db.ptSlot.update({ where: { id: s.id }, data: { status } });

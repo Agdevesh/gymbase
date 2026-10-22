@@ -11,7 +11,7 @@ import { Avatar, inputClass } from "@/components/ui";
 export const dynamic = "force-dynamic";
 
 export default async function PtSchedulePage({ searchParams }: { searchParams: Promise<{ date?: string; trainer?: string }> }) {
-  const { gymId, userId, role } = await requireTenant("checkin:write");
+  const { gymId, userId, role } = await requireTenant("attendance:write");
   const { date, trainer } = await searchParams;
   const now = new Date();
   const key = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
