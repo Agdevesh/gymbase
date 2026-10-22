@@ -11,6 +11,7 @@ import { changePasswordInput, passwordInput, settingsFields, settingsInput } fro
 import { audit } from "@/server/audit";
 import { requireTenant } from "@/server/tenant";
 import type { FormState } from "@/server/members";
+import { baseUrl } from "@/lib/base-url";
 
 function errorsOf(issues: { path: PropertyKey[]; message: string }[]) {
   const errors: Record<string, string> = {};
@@ -63,7 +64,7 @@ export type ResetState = (FormState & { link?: string }) | undefined;
 async function createResetToken(userId: string) {
   const token = randomBytes(24).toString("hex");
   await db.passwordReset.create({ data: { userId, token, expiresAt: new Date(Date.now() + 2 * 3600_000) } });
-  return `${process.env.AUTH_URL ?? ""}/reset/${token}`;
+  return `${baseUrl()}/reset/${token}`;
 }
 
 // Owner resets any staff/member login from /staff; the link is shown so it can be WhatsApped.

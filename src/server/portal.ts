@@ -9,6 +9,7 @@ import { memberLoginEmail, newPin, pinMessage, waLink } from "@/lib/portal";
 import { audit } from "@/server/audit";
 import { requireTenant } from "@/server/tenant";
 import type { FormState } from "@/server/members";
+import { baseUrl } from "@/lib/base-url";
 
 export type AccessState = (FormState & { pin?: string; wa?: string }) | undefined;
 
@@ -27,7 +28,7 @@ export async function enableMemberAccess(memberId: string): Promise<AccessState>
   }
   await audit(gymId, userId, m.user ? "member.pin_reset" : "member.access_enabled", "member", m.id, `${m.user ? "Reset PIN for" : "Enabled app login for"} ${name}`);
   revalidatePath(`/members/${memberId}`);
-  return { pin, wa: waLink(m.phone, pinMessage(m.gym.name, m.firstName, m.gym.slug, m.phone, pin, process.env.AUTH_URL ?? "")) };
+  return { pin, wa: waLink(m.phone, pinMessage(m.gym.name, m.firstName, m.gym.slug, m.phone, pin, baseUrl())) };
 }
 
 export async function disableMemberAccess(memberId: string) {

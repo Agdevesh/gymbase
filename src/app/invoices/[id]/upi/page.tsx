@@ -8,6 +8,7 @@ import { cancelUpiRequest } from "@/server/upi";
 import { AppShell, ButtonLink } from "@/components/ui";
 import { UpiQrPanel } from "@/components/upi-qr";
 import { UpiWaiting, UtrForm } from "@/components/upi-forms";
+import { baseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export default async function InvoiceUpiPage({ params }: { params: Promise<{ id:
   if (!request || !inv.gym.upiId) redirect(`/invoices/${id}`);
   const status = request.status === "PENDING" && request.expiresAt <= new Date() ? "EXPIRED" : request.status;
   const uri = upiPayUri({ upiId: inv.gym.upiId, payee: inv.gym.name, amountPaise: request.amountPaise, code: request.code, note: inv.number });
-  const base = process.env.AUTH_URL ?? "";
+  const base = baseUrl();
   const name = [inv.member.firstName, inv.member.lastName].filter(Boolean).join(" ");
   const sameAmount = status === "PENDING" ? await db.upiRequest.count({ where: { gymId, status: "PENDING", expiresAt: { gt: new Date() }, amountPaise: request.amountPaise, id: { not: request.id } } }) : 0;
   return (

@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { requireTenant } from "@/server/tenant";
 import { regenerateUpiAlertToken } from "@/server/upi";
 import { AppShell, ButtonLink, secondaryButtonClass } from "@/components/ui";
+import { baseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 const fmt = (d: Date) => d.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -13,7 +14,7 @@ export default async function UpiSetupPage() {
     db.gym.findUniqueOrThrow({ where: { id: gymId }, select: { upiId: true, upiAlertToken: true } }),
     db.bankAlert.findMany({ where: { gymId }, orderBy: { receivedAt: "desc" }, take: 15, include: { request: { select: { code: true, amountPaise: true } } } }),
   ]);
-  const base = process.env.AUTH_URL ?? "";
+  const base = baseUrl();
   const url = gym.upiAlertToken ? `${base}/api/upi/alerts/${gym.upiAlertToken}` : null;
   return (
     <AppShell title="Automatic UPI verification" back={{ href: "/settings", label: "Settings" }} actions={<ButtonLink href="/payments/upi" secondary>UPI desk</ButtonLink>}>
