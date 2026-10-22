@@ -278,6 +278,8 @@ model CheckIn {
 enum LeadSource {
   WALK_IN
   PHONE
+  WHATSAPP
+  INSTAGRAM
   WEB
   REFERRAL
   SOCIAL
@@ -323,8 +325,11 @@ model LeadActivity {
   id        String   @id @default(cuid())
   leadId    String
   lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  authorId  String?
   note      String
   createdAt DateTime @default(now())
+
+  @@index([leadId, createdAt])
 }
 
 // ---------- Payments ----------

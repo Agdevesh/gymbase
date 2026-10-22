@@ -123,6 +123,8 @@ async function main() {
       { gymId: gym.id, name: "Kiran Patel", phone: "+919911000001", source: "WALK_IN", status: "NEW", interestedIn: "Monthly", followUpAt: daysFromNow(1), ownerId: reception.id },
       { gymId: gym.id, name: "Deepak Singh", phone: "+919911000002", source: "PHONE", status: "CONTACTED", interestedIn: "PT", followUpAt: daysFromNow(2), ownerId: reception.id },
       { gymId: gym.id, name: "Meera Iyer", phone: "+919911000003", source: "WEB", status: "LOST", lostReason: "Joined another gym" },
+      { gymId: gym.id, name: "Farhan Ali", phone: "+919911000004", source: "WHATSAPP", status: "NEW", interestedIn: "Quarterly", followUpAt: daysFromNow(-1), ownerId: reception.id },
+      { gymId: gym.id, name: "Ritu Sharma", phone: "+919911000005", source: "INSTAGRAM", status: "TRIAL", interestedIn: "Yearly", followUpAt: new Date(), ownerId: reception.id },
     ],
   });
 

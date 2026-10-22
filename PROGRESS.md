@@ -20,11 +20,13 @@ Read this first in each session instead of rescanning the repo.
 
 - Stage 4, Entry/check-in: `/checkin` desk (`CheckinDesk` client component: debounced search by name/phone/code, ↑↓/Enter/Esc, hardware QR scanners type `GB:<qrToken>` + Enter), live "in gym now" list with check-out, today's count, refresh every 30 s. `/checkin/scan/[token]` for phone-camera scans (logged-in staff). `/members/[id]/card` printable QR card (`qrcode` SVG). `/attendance` by day or `?member=`. Gate logic in `src/lib/checkin.ts` (`entryGate` blocks NO_PLAN/EXPIRED/FROZEN/CANCELLED), actions in `src/server/checkin.ts`. A member counts as in-gym for 4 h without checkout; the daily cron closes visits older than 6 h at 90 min.
 
+- Stage 5, Inquiries/leads: `/leads` pipeline with status chips (Open, Due today, each stage) and source chips (walk-in, phone, WhatsApp, Instagram, website, referral, other), combinable with search. `/leads/new`, `/leads/[id]` (follow-up form: note + stage + next date with +1d/+2d/+7d, lost reason; activity log; tel: and wa.me links), `/leads/[id]/edit`. "Convert to member" creates the Member from the lead (or links an existing member with the same phone) and redirects to the profile to start a plan. Logic in `src/lib/leads.ts`, actions in `src/server/leads.ts`. `LeadSource` gained WHATSAPP and INSTAGRAM.
+- `requireTenant(permission)` now redirects a logged-in user lacking the permission to `/dashboard?denied=…` (notice shown there) instead of throwing.
+
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
 - Payments (module 6): a "Defaulters" screen on the main nav: member name, last plan, days since dues started, amount.
-- Inquiries (module 5): filter leads by source, including WhatsApp and Instagram (add to `LeadSource` enum alongside walk-in/phone/web).
 
 1. Modules 4 to 10 in the order of the build prompt.
 2. Invite accept page (`/invite/[token]`) and staff list in settings.

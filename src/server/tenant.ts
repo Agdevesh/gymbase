@@ -13,6 +13,7 @@ export async function requireTenant(permission?: Permission) {
   const session = await auth();
   if (!session?.user) redirect("/login");
   const { id: userId, gymId, role } = session.user;
-  if (permission && !can(role, permission)) throw new ForbiddenError(permission);
+  // Staff who open a screen outside their role land on the dashboard with a notice instead of an error page.
+  if (permission && !can(role, permission)) redirect(`/dashboard?denied=${permission}`);
   return { userId, gymId, role };
 }
