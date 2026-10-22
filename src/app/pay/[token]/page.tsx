@@ -16,14 +16,14 @@ export default async function PayPage({ params }: { params: Promise<{ token: str
   const uri = upiPayUri({ upiId: r.gym.upiId, payee: r.gym.name, amountPaise: r.amountPaise, code: r.code, note: r.invoice.number });
   return (
     <main className="mx-auto max-w-md p-4">
-      <p className="text-xs uppercase tracking-wide text-neutral-500">{r.gym.name}</p>
+      <p className="text-xs uppercase tracking-wide text-slate-500">{r.gym.name}</p>
       <h1 className="mb-3 text-xl font-semibold">Hi {r.member.firstName}, pay {paise(r.amountPaise)}</h1>
       <section className="rounded-lg border bg-white p-4">
         <UpiWaiting token={r.token} initial={status} amount={paise(r.amountPaise)} paidNote={<p className="mt-2 text-sm text-green-800">Your dues are updated. Thank you!</p>}>
           <UpiQrPanel uri={uri} amountPaise={r.amountPaise} code={r.code} upiId={r.gym.upiId} />
         </UpiWaiting>
       </section>
-      <p className="mt-3 text-xs text-neutral-500">Invoice {r.invoice.number}. On a phone, tap the button to open GPay, PhonePe or Paytm. The gym is told automatically once the money arrives.</p>
+      <p className="mt-3 text-xs text-slate-500">Invoice {r.invoice.number}. On a phone, tap the button to open GPay, PhonePe or Paytm. The gym is told automatically once the money arrives.</p>
     </main>
   );
 }

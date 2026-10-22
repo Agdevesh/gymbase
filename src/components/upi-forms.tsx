@@ -38,8 +38,8 @@ export function UpiWaiting({ token, initial, amount, children, paidNote }: { tok
       {paidNote}
     </div>
   );
-  if (status !== "PENDING") return <div className="rounded-lg border bg-neutral-50 p-6 text-center text-neutral-600">This payment request is {status.toLowerCase()}. Ask reception for a fresh QR.</div>;
-  return <>{children}<p className="mt-3 flex items-center justify-center gap-2 text-sm text-neutral-600"><span className="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-500" />Waiting for payment… this screen updates by itself.</p></>;
+  if (status !== "PENDING") return <div className="rounded-lg border bg-slate-50 p-6 text-center text-slate-600">This payment request is {status.toLowerCase()}. Ask reception for a fresh QR.</div>;
+  return <>{children}<p className="mt-3 flex items-center justify-center gap-2 text-sm text-slate-600"><span className="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-500" />Waiting for payment… this screen updates by itself.</p></>;
 }
 
 export function UtrForm({ requestId }: { requestId: string }) {

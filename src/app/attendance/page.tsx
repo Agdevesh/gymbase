@@ -26,26 +26,26 @@ export default async function AttendancePage({ searchParams }: { searchParams: P
     <AppShell title={memberName ? `Attendance · ${memberName}` : "Attendance"} back={member ? { href: `/members/${member}`, label: "Profile" } : undefined}>
       {!member && (
         <form className="mb-4 flex items-center gap-2" action="/attendance">
-          <Link href={`/attendance?date=${key(prev)}`} className="rounded border bg-white px-3 py-2 text-sm">←</Link>
+          <Link href={`/attendance?date=${key(prev)}`} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">←</Link>
           <input type="date" name="date" defaultValue={day.key} className={`${inputClass} w-auto`} />
-          <button className="rounded border bg-white px-3 py-2 text-sm">Go</button>
-          {next <= now && <Link href={`/attendance?date=${key(next)}`} className="rounded border bg-white px-3 py-2 text-sm">→</Link>}
-          <span className="ml-auto text-sm text-neutral-500">{rows.length} visits · {uniqueWeek} members in last 7 days</span>
+          <button className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">Go</button>
+          {next <= now && <Link href={`/attendance?date=${key(next)}`} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">→</Link>}
+          <span className="ml-auto text-sm text-slate-500">{rows.length} visits · {uniqueWeek} members in last 7 days</span>
         </form>
       )}
-      {rows.length === 0 ? <p className="rounded border bg-white p-6 text-center text-neutral-500">No check-ins.</p> : (
-        <table className="w-full rounded border bg-white text-sm">
-          <thead className="text-left text-neutral-500"><tr><th className="p-2">Member</th>{member && <th className="p-2">Date</th>}<th className="p-2">In</th><th className="p-2">Out</th><th className="p-2">Via</th></tr></thead>
-          <tbody className="divide-y">
+      {rows.length === 0 ? <p className="rounded-xl border border-slate-200 bg-white shadow-sm p-6 text-center text-slate-500">No check-ins.</p> : (
+        <table className="rounded-xl border border-slate-200 bg-white shadow-sm w-full text-sm">
+          <thead className="text-left text-slate-500"><tr><th className="p-2">Member</th>{member && <th className="p-2">Date</th>}<th className="p-2">In</th><th className="p-2">Out</th><th className="p-2">Via</th></tr></thead>
+          <tbody className="divide-y divide-slate-100">
             {rows.map((c) => {
               const name = [c.member.firstName, c.member.lastName].filter(Boolean).join(" ");
               return (
                 <tr key={c.id}>
-                  <td className="p-2"><Link href={`/members/${c.member.id}`} className="flex items-center gap-2"><Avatar name={name} photoUrl={c.member.photoUrl} size={28} />{name} <span className="text-neutral-400">{c.member.code}</span></Link></td>
+                  <td className="p-2"><Link href={`/members/${c.member.id}`} className="flex items-center gap-2"><Avatar name={name} photoUrl={c.member.photoUrl} size={28} />{name} <span className="text-slate-400">{c.member.code}</span></Link></td>
                   {member && <td className="p-2">{c.checkedInAt.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</td>}
                   <td className="p-2">{time(c.checkedInAt)}</td>
                   <td className="p-2">{time(c.checkedOutAt)}</td>
-                  <td className="p-2 text-neutral-500">{c.source.toLowerCase()}</td>
+                  <td className="p-2 text-slate-500">{c.source.toLowerCase()}</td>
                 </tr>
               );
             })}

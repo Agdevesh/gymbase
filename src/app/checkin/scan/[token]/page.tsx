@@ -19,15 +19,15 @@ export default async function ScanPage({ params, searchParams }: { params: Promi
   }
   return (
     <AppShell title="QR check-in" back={{ href: "/checkin", label: "Check-in desk" }}>
-      <section className="rounded border bg-white p-6 text-center">
+      <section className="rounded-xl border border-slate-200 bg-white shadow-sm p-6 text-center">
         {!m ? <p className="text-red-700">QR code not recognised for this gym.</p> : (
           <>
             <div className="flex justify-center"><Avatar name={name} photoUrl={m.photoUrl} size={96} /></div>
             <h2 className="mt-3 text-2xl font-semibold">{name}</h2>
-            <p className="text-neutral-500">{m.code}</p>
-            {r === "ok" && <p className="mt-4 rounded bg-green-100 p-3 text-lg text-green-900">✓ Checked in</p>}
-            {r === "already" && <p className="mt-4 rounded bg-green-100 p-3 text-lg text-green-900">Already in the gym</p>}
-            {r && r !== "ok" && r !== "already" && <p className="mt-4 rounded bg-red-100 p-3 text-lg text-red-900">✕ {r}</p>}
+            <p className="text-slate-500">{m.code}</p>
+            {r === "ok" && <p className="mt-4 rounded-lg bg-green-100 p-3 text-lg text-green-900">✓ Checked in</p>}
+            {r === "already" && <p className="mt-4 rounded-lg bg-green-100 p-3 text-lg text-green-900">Already in the gym</p>}
+            {r && r !== "ok" && r !== "already" && <p className="mt-4 rounded-lg bg-red-100 p-3 text-lg text-red-900">✕ {r}</p>}
             {!r && <form action={act} className="mt-4"><button className={`${buttonClass} w-full justify-center py-3 text-lg`} autoFocus>Check in</button></form>}
             <div className="mt-4"><ButtonLink href={`/members/${m.id}`} secondary>Open profile</ButtonLink></div>
           </>

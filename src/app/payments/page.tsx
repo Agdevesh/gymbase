@@ -28,25 +28,25 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   return (
     <AppShell title="Payments" actions={<span className="text-lg font-semibold">{paise(total)}</span>}>
       <form className="mb-4 flex items-center gap-2" action="/payments">
-        <Link href={`/payments?date=${shift(-1)}`} className="rounded border bg-white px-3 py-2 text-sm">←</Link>
+        <Link href={`/payments?date=${shift(-1)}`} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">←</Link>
         <input type="date" name="date" defaultValue={key} className={`${inputClass} w-auto`} />
-        <button className="rounded border bg-white px-3 py-2 text-sm">Go</button>
-        {end <= now && <Link href={`/payments?date=${shift(1)}`} className="rounded border bg-white px-3 py-2 text-sm">→</Link>}
+        <button className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">Go</button>
+        {end <= now && <Link href={`/payments?date=${shift(1)}`} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">→</Link>}
       </form>
       <div className="mb-4 flex flex-wrap gap-3">
-        {byMethod.map(({ m, total }) => <div key={m} className="rounded border bg-white px-4 py-2"><div className="text-xs text-neutral-500">{METHOD_LABELS[m]}</div><div className="font-semibold">{paise(total)}</div></div>)}
-        {byMethod.length === 0 && <p className="text-sm text-neutral-500">No payments on this day.</p>}
+        {byMethod.map(({ m, total }) => <div key={m} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-4 py-2"><div className="text-xs text-slate-500">{METHOD_LABELS[m]}</div><div className="font-semibold">{paise(total)}</div></div>)}
+        {byMethod.length === 0 && <p className="text-sm text-slate-500">No payments on this day.</p>}
       </div>
       {payments.length > 0 && (
-        <table className="w-full rounded border bg-white text-sm">
-          <thead className="text-left text-neutral-500"><tr><th className="p-2">Time</th><th className="p-2">Member</th><th className="p-2">Invoice</th><th className="p-2">Method</th><th className="p-2 text-right">Amount</th></tr></thead>
-          <tbody className="divide-y">
+        <table className="rounded-xl border border-slate-200 bg-white shadow-sm w-full text-sm">
+          <thead className="text-left text-slate-500"><tr><th className="p-2">Time</th><th className="p-2">Member</th><th className="p-2">Invoice</th><th className="p-2">Method</th><th className="p-2 text-right">Amount</th></tr></thead>
+          <tbody className="divide-y divide-slate-100">
             {payments.map((p) => (
               <tr key={p.id} className={p.kind === "REFUND" ? "text-red-700" : ""}>
                 <td className="p-2">{p.paidAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</td>
-                <td className="p-2"><Link href={`/members/${p.member.id}`} className="underline">{[p.member.firstName, p.member.lastName].filter(Boolean).join(" ")}</Link></td>
-                <td className="p-2">{p.invoice && <Link href={`/invoices/${p.invoice.id}`} className="underline">{p.invoice.number}</Link>}</td>
-                <td className="p-2">{p.kind === "REFUND" ? "Refund · " : ""}{METHOD_LABELS[p.method]}{p.reference && <span className="text-neutral-400"> {p.reference}</span>}{p.takenBy && <span className="text-neutral-400"> · {p.takenBy.name}</span>}</td>
+                <td className="p-2"><Link href={`/members/${p.member.id}`} className="font-medium text-brand-700 hover:underline">{[p.member.firstName, p.member.lastName].filter(Boolean).join(" ")}</Link></td>
+                <td className="p-2">{p.invoice && <Link href={`/invoices/${p.invoice.id}`} className="font-medium text-brand-700 hover:underline">{p.invoice.number}</Link>}</td>
+                <td className="p-2">{p.kind === "REFUND" ? "Refund · " : ""}{METHOD_LABELS[p.method]}{p.reference && <span className="text-slate-400"> {p.reference}</span>}{p.takenBy && <span className="text-slate-400"> · {p.takenBy.name}</span>}</td>
                 <td className="p-2 text-right">{p.kind === "REFUND" ? "− " : ""}{paise(p.amountPaise)}</td>
               </tr>
             ))}
@@ -54,16 +54,16 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
         </table>
       )}
       <section className="mt-6">
-        <h2 className="mb-2 font-medium">Cash closing · {start.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</h2>
+        <h2 className="mb-2 font-semibold text-slate-900">Cash closing · {start.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</h2>
         {closing ? (
-          <p className={`rounded border bg-white p-3 text-sm ${closing.countedPaise === closing.expectedPaise ? "" : "border-red-300"}`}>
+          <p className={`rounded-xl border border-slate-200 bg-white shadow-sm p-3 text-sm ${closing.countedPaise === closing.expectedPaise ? "" : "border-red-300"}`}>
             Closed by {closing.closedBy.name}: expected {paise(closing.expectedPaise)}, counted {paise(closing.countedPaise)}
             {closing.countedPaise !== closing.expectedPaise && <span className="text-red-700"> ({closing.countedPaise > closing.expectedPaise ? "excess" : "short"} {paise(Math.abs(closing.countedPaise - closing.expectedPaise))})</span>}
             {closing.notes && ` · ${closing.notes}`}
           </p>
         ) : <ClosingForm date={key} expectedPaise={cashExpected} />}
         {recentClosings.length > 0 && (
-          <ul className="mt-3 divide-y rounded border bg-white text-sm">
+          <ul className="rounded-xl border border-slate-200 bg-white shadow-sm mt-3 divide-y text-sm divide-slate-100">
             {recentClosings.map((c) => <li key={c.id} className="flex justify-between px-3 py-1.5"><span>{c.date.toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "UTC" })} · {c.closedBy.name}</span><span className={c.countedPaise === c.expectedPaise ? "text-green-700" : "text-red-700"}>{paise(c.countedPaise)} / {paise(c.expectedPaise)}</span></li>)}
           </ul>
         )}

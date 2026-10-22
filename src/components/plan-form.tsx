@@ -16,7 +16,7 @@ export function PlanForm({ action, initial }: { action: (prev: FormState, fd: Fo
   const e = state?.errors ?? {};
   return (
     <form action={formAction} className="space-y-4">
-      {state?.message && <p className="rounded bg-red-50 p-2 text-sm text-red-700">{state.message}</p>}
+      {state?.message && <p className="rounded-lg bg-red-50 p-2 text-sm text-red-700">{state.message}</p>}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Plan name" error={e.name}><input name="name" defaultValue={initial?.name} required autoFocus className={inputClass} /></Field>
         <Field label="Type" error={e.type}>

@@ -26,17 +26,17 @@ export default async function ProgressPage({ params, searchParams }: { params: P
   return (
     <AppShell title={`${m.firstName} ${m.lastName ?? ""} · progress`} back={{ href: `/members/${m.id}`, label: "Profile" }}>
       <section className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {MEASURE_FIELDS.map(([k, label, u]) => { const t = trend(rows, k); return t ? <a key={k} href={`?metric=${k}`} className={`rounded border bg-white p-2 ${k === key ? "ring-1 ring-neutral-900" : ""}`}><div className="text-xs text-neutral-500">{label}</div><div className="text-lg font-semibold">{t.latest} <span className="text-xs font-normal">{u}</span></div>{t.delta != null && t.delta !== 0 && <div className={`text-xs ${t.delta < 0 ? "text-green-700" : "text-amber-700"}`}>{t.delta > 0 ? "+" : ""}{t.delta} since last</div>}</a> : null; })}
-        {b && <div className="rounded border bg-white p-2"><div className="text-xs text-neutral-500">BMI</div><div className="text-lg font-semibold">{b}</div><div className="text-xs text-neutral-500">{bmiLabel(b)}</div></div>}
+        {MEASURE_FIELDS.map(([k, label, u]) => { const t = trend(rows, k); return t ? <a key={k} href={`?metric=${k}`} className={`rounded-xl border border-slate-200 bg-white shadow-sm p-2 ${k === key ? "ring-1 ring-slate-900" : ""}`}><div className="text-xs text-slate-500">{label}</div><div className="text-lg font-semibold">{t.latest} <span className="text-xs font-normal">{u}</span></div>{t.delta != null && t.delta !== 0 && <div className={`text-xs ${t.delta < 0 ? "text-green-700" : "text-amber-700"}`}>{t.delta > 0 ? "+" : ""}{t.delta} since last</div>}</a> : null; })}
+        {b && <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-2"><div className="text-xs text-slate-500">BMI</div><div className="text-lg font-semibold">{b}</div><div className="text-xs text-slate-500">{bmiLabel(b)}</div></div>}
       </section>
-      <section className="mb-4 rounded border bg-white p-4"><h2 className="mb-1 text-sm font-medium">{MEASURE_FIELDS.find(([k]) => k === key)![1]} over time</h2><ProgressChart points={rows.filter((r) => r[key] != null).map((r) => ({ at: r.at, value: r[key] as number })).reverse()} unit={unit} /></section>
-      {write && <section className="mb-4 rounded border bg-white p-4"><h2 className="mb-2 font-medium">Record measurements</h2><MeasurementForm memberId={m.id} /></section>}
-      <section className="overflow-x-auto rounded border bg-white">
+      <section className="rounded-xl border border-slate-200 bg-white shadow-sm mb-4 p-4"><h2 className="mb-1 text-sm font-semibold text-slate-900">{MEASURE_FIELDS.find(([k]) => k === key)![1]} over time</h2><ProgressChart points={rows.filter((r) => r[key] != null).map((r) => ({ at: r.at, value: r[key] as number })).reverse()} unit={unit} /></section>
+      {write && <section className="rounded-xl border border-slate-200 bg-white shadow-sm mb-4 p-4"><h2 className="mb-2 font-semibold text-slate-900">Record measurements</h2><MeasurementForm memberId={m.id} /></section>}
+      <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left text-neutral-500"><tr><th className="p-2">Date</th>{MEASURE_FIELDS.map(([k, l]) => <th key={k} className="p-2 text-right">{l}</th>)}<th className="p-2">Notes</th><th /></tr></thead>
-          <tbody className="divide-y">{rows.map((r) => <tr key={r.id}><td className="p-2 whitespace-nowrap">{fmt(r.at)}</td>{MEASURE_FIELDS.map(([k]) => <td key={k} className="p-2 text-right">{r[k] ?? ""}</td>)}<td className="p-2 text-neutral-500">{r.notes}</td><td className="p-2">{write && <form action={deleteMeasurement.bind(null, m.id, r.id)}><button className="text-xs text-red-700 underline">Delete</button></form>}</td></tr>)}</tbody>
+          <thead className="text-left text-slate-500"><tr><th className="p-2">Date</th>{MEASURE_FIELDS.map(([k, l]) => <th key={k} className="p-2 text-right">{l}</th>)}<th className="p-2">Notes</th><th /></tr></thead>
+          <tbody className="divide-y divide-slate-100">{rows.map((r) => <tr key={r.id}><td className="p-2 whitespace-nowrap">{fmt(r.at)}</td>{MEASURE_FIELDS.map(([k]) => <td key={k} className="p-2 text-right">{r[k] ?? ""}</td>)}<td className="p-2 text-slate-500">{r.notes}</td><td className="p-2">{write && <form action={deleteMeasurement.bind(null, m.id, r.id)}><button className="text-xs text-red-700 underline">Delete</button></form>}</td></tr>)}</tbody>
         </table>
-        {rows.length === 0 && <p className="p-6 text-center text-sm text-neutral-500">No measurements yet.</p>}
+        {rows.length === 0 && <p className="p-6 text-center text-sm text-slate-500">No measurements yet.</p>}
       </section>
     </AppShell>
   );

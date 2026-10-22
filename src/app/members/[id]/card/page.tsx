@@ -19,15 +19,15 @@ export default async function MemberCardPage({ params }: { params: Promise<{ id:
   return (
     <main className="mx-auto max-w-sm p-4 text-center">
       <div className="rounded-xl border bg-white p-6 shadow-sm print:shadow-none">
-        <p className="text-sm uppercase tracking-wide text-neutral-500">{gym.name}</p>
+        <p className="text-sm uppercase tracking-wide text-slate-500">{gym.name}</p>
         <h1 className="mt-1 text-2xl font-semibold">{name}</h1>
-        <p className="font-mono text-neutral-500">{m.code}</p>
+        <p className="font-mono text-slate-500">{m.code}</p>
         <div className="mx-auto mt-4 w-60" dangerouslySetInnerHTML={{ __html: svg }} />
-        <p className="mt-2 text-xs text-neutral-500">Show this at reception to check in</p>
+        <p className="mt-2 text-xs text-slate-500">Show this at reception to check in</p>
       </div>
       <div className="mt-4 flex justify-center gap-2 print:hidden">
         <ButtonLink href={`/members/${id}`} secondary>Back</ButtonLink>
-        <a href="#" className="inline-flex items-center rounded bg-neutral-900 px-4 py-2 text-sm font-medium text-white" data-print>Print</a>
+        <a href="#" className="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 shadow-sm" data-print>Print</a>
       </div>
       <script dangerouslySetInnerHTML={{ __html: `document.querySelector('[data-print]').onclick=function(e){e.preventDefault();window.print()}` }} />
     </main>

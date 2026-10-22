@@ -47,7 +47,7 @@ export function InstallButton({ className }: { className?: string }) {
     return (
       <button
         type="button"
-        className="w-full rounded bg-neutral-900 py-3 text-base font-medium text-white"
+        className="w-full rounded-lg bg-brand-600 py-3 text-base font-medium text-white hover:bg-brand-700 shadow-sm"
         onClick={async () => {
           if (!deferredPrompt) return;
           await deferredPrompt.prompt();

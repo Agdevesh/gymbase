@@ -27,14 +27,14 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   if (!inv) notFound();
   const due = inv.totalPaise - inv.paidPaise;
   const name = [inv.member.firstName, inv.member.lastName].filter(Boolean).join(" ");
-  const row = (k: string, v: React.ReactNode, cls = "") => <div className={`flex justify-between py-1 text-sm ${cls}`}><dt className="text-neutral-500">{k}</dt><dd>{v}</dd></div>;
+  const row = (k: string, v: React.ReactNode, cls = "") => <div className={`flex justify-between py-1 text-sm ${cls}`}><dt className="text-slate-500">{k}</dt><dd>{v}</dd></div>;
   return (
     <AppShell title={`Invoice ${inv.number}`} back={{ href: `/members/${inv.member.id}`, label: name }}
-      actions={<>{can(role, "payments:write") && <span className="self-center"><ReceiptShare invoiceId={inv.id} label="Send on WhatsApp" /></span>}<a href={`/invoices/${inv.id}/pdf`} className="inline-flex items-center rounded border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-100">Download PDF</a></>}>
+      actions={<>{can(role, "payments:write") && <span className="self-center"><ReceiptShare invoiceId={inv.id} label="Send on WhatsApp" /></span>}<a href={`/invoices/${inv.id}/pdf`} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 inline-flex items-center px-4 py-2 text-sm">Download PDF</a></>}>
       <div className="grid gap-4 md:grid-cols-2">
-        <section className="rounded border bg-white p-4">
-          <p className="text-sm text-neutral-500">{fmt(inv.issuedAt)} · <Link href={`/members/${inv.member.id}`} className="underline">{name}</Link> · {inv.member.phone}</p>
-          <dl className="mt-2 divide-y">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm p-4">
+          <p className="text-sm text-slate-500">{fmt(inv.issuedAt)} · <Link href={`/members/${inv.member.id}`} className="font-medium text-brand-700 hover:underline">{name}</Link> · {inv.member.phone}</p>
+          <dl className="mt-2 divide-y divide-slate-100">
             {row(inv.membership ? `${inv.membership.plan.name} (${inv.membership.startDate.toLocaleDateString("en-IN")} – ${inv.membership.endDate.toLocaleDateString("en-IN")})` : inv.notes ?? "Charge", paise(inv.subtotalPaise + (inv.membership?.discountPaise ?? 0)))}
             {inv.membership && inv.membership.discountPaise > 0 && row("Discount", `− ${paise(inv.membership.discountPaise)}`)}
             {inv.gstPercent > 0 && row(`GST ${inv.gstPercent}%`, paise(inv.gstPaise))}
@@ -43,16 +43,16 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
             {row("Due", paise(Math.max(0, due)), due > 0 ? "font-medium text-red-700" : "text-green-700")}
           </dl>
         </section>
-        <section className="rounded border bg-white p-4">
-          <h2 className="mb-2 font-medium">Payments</h2>
-          {inv.payments.length === 0 ? <p className="text-sm text-neutral-500">Nothing paid yet.</p> : (
-            <ul className="divide-y text-sm">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm p-4">
+          <h2 className="mb-2 font-semibold text-slate-900">Payments</h2>
+          {inv.payments.length === 0 ? <p className="text-sm text-slate-500">Nothing paid yet.</p> : (
+            <ul className="divide-y text-sm divide-slate-100">
               {inv.payments.map((p) => {
                 const refunded = p.refunds.reduce((s, r) => s + r.amountPaise, 0);
                 return (
                   <li key={p.id} className="py-2">
-                    <div className="flex justify-between"><span>{p.kind === "REFUND" ? "Refund" : METHOD_LABELS[p.method]}{p.reference && <span className="text-neutral-500"> · {p.reference}</span>}</span><span className={p.kind === "REFUND" ? "text-red-700" : ""}>{p.kind === "REFUND" ? "− " : ""}{paise(p.amountPaise)}</span></div>
-                    <div className="flex justify-between text-xs text-neutral-500"><span>{fmt(p.paidAt)}{p.takenBy && ` · ${p.takenBy.name}`}</span>
+                    <div className="flex justify-between"><span>{p.kind === "REFUND" ? "Refund" : METHOD_LABELS[p.method]}{p.reference && <span className="text-slate-500"> · {p.reference}</span>}</span><span className={p.kind === "REFUND" ? "text-red-700" : ""}>{p.kind === "REFUND" ? "− " : ""}{paise(p.amountPaise)}</span></div>
+                    <div className="flex justify-between text-xs text-slate-500"><span>{fmt(p.paidAt)}{p.takenBy && ` · ${p.takenBy.name}`}</span>
                       {p.kind === "PAYMENT" && can(role, "payments:refund") && p.amountPaise - refunded > 0 && <RefundForm paymentId={p.id} maxPaise={p.amountPaise - refunded} />}</div>
                   </li>
                 );

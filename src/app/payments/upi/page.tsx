@@ -22,33 +22,33 @@ export default async function UpiDeskPage() {
   const name = (m: { firstName: string; lastName: string | null }) => [m.firstName, m.lastName].filter(Boolean).join(" ");
   return (
     <AppShell title="UPI desk" actions={role === "OWNER" ? <ButtonLink href="/settings/upi" secondary>Verification setup</ButtonLink> : undefined}>
-      {!gym.upiId && <p className="mb-3 rounded bg-amber-50 p-3 text-sm text-amber-900">No UPI ID yet. The owner adds it under Settings, then every invoice gets a fixed-amount QR.</p>}
-      {gym.upiId && !gym.upiAlertToken && <p className="mb-3 rounded bg-amber-50 p-3 text-sm text-amber-900">Bank alerts are not connected, so payments are confirmed by typing the UTR. Owner: set up under Verification setup.</p>}
+      {!gym.upiId && <p className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">No UPI ID yet. The owner adds it under Settings, then every invoice gets a fixed-amount QR.</p>}
+      {gym.upiId && !gym.upiAlertToken && <p className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Bank alerts are not connected, so payments are confirmed by typing the UTR. Owner: set up under Verification setup.</p>}
       <div className="grid gap-4 md:grid-cols-2">
-        <section className="rounded border bg-white p-4">
-          <h2 className="mb-2 font-medium">Waiting for payment ({pending.length})</h2>
-          {pending.length === 0 ? <p className="text-sm text-neutral-500">No open requests. Open an invoice and press "Collect by UPI QR".</p> : (
-            <ul className="divide-y text-sm">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm p-4">
+          <h2 className="mb-2 font-semibold text-slate-900">Waiting for payment ({pending.length})</h2>
+          {pending.length === 0 ? <p className="text-sm text-slate-500">No open requests. Open an invoice and press "Collect by UPI QR".</p> : (
+            <ul className="divide-y text-sm divide-slate-100">
               {pending.map((r) => (
                 <li key={r.id} className="flex items-center justify-between gap-2 py-2">
-                  <span><Link href={`/invoices/${r.invoiceId}/upi`} className="underline">{name(r.member)}</Link> · {r.invoice.number} · <span className="font-mono text-xs">{r.code}</span><br /><span className="text-xs text-neutral-500">since {fmt(r.createdAt)}, expires {fmt(r.expiresAt)}</span></span>
+                  <span><Link href={`/invoices/${r.invoiceId}/upi`} className="font-medium text-brand-700 hover:underline">{name(r.member)}</Link> · {r.invoice.number} · <span className="font-mono text-xs">{r.code}</span><br /><span className="text-xs text-slate-500">since {fmt(r.createdAt)}, expires {fmt(r.expiresAt)}</span></span>
                   <span className="flex items-center gap-2"><strong>{paise(r.amountPaise)}</strong><form action={cancelUpiRequest.bind(null, r.id)}><button className="text-xs text-red-700 underline">Cancel</button></form></span>
                 </li>
               ))}
             </ul>
           )}
         </section>
-        <section className="rounded border bg-white p-4">
-          <h2 className="mb-2 font-medium">Bank credits not matched ({unmatched.length})</h2>
-          {unmatched.length === 0 ? <p className="text-sm text-neutral-500">Every credit alert in the last 7 days was matched.</p> : (
-            <ul className="divide-y text-sm">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm p-4">
+          <h2 className="mb-2 font-semibold text-slate-900">Bank credits not matched ({unmatched.length})</h2>
+          {unmatched.length === 0 ? <p className="text-sm text-slate-500">Every credit alert in the last 7 days was matched.</p> : (
+            <ul className="divide-y text-sm divide-slate-100">
               {unmatched.map((a) => {
                 const candidates = pending.filter((p) => p.amountPaise === a.amountPaise);
                 return (
                   <li key={a.id} className="py-2">
-                    <div className="flex justify-between"><span><strong>{paise(a.amountPaise!)}</strong>{a.payerVpa && <span className="text-neutral-500"> from {a.payerVpa}</span>}{a.utr && <span className="font-mono text-xs text-neutral-500"> · {a.utr}</span>}</span><span className="text-xs text-neutral-500">{fmt(a.receivedAt)}</span></div>
-                    <p className="text-xs text-neutral-500">{a.note ?? "Unmatched"}{a.sender && ` · ${a.sender}`}</p>
-                    {candidates.length > 0 && <div className="mt-1 flex flex-wrap gap-1">{candidates.map((p) => <form key={p.id} action={assignAlert.bind(null, a.id, p.id)}><button className="rounded border px-2 py-0.5 text-xs">This is {name(p.member)} ({p.invoice.number})</button></form>)}</div>}
+                    <div className="flex justify-between"><span><strong>{paise(a.amountPaise!)}</strong>{a.payerVpa && <span className="text-slate-500"> from {a.payerVpa}</span>}{a.utr && <span className="font-mono text-xs text-slate-500"> · {a.utr}</span>}</span><span className="text-xs text-slate-500">{fmt(a.receivedAt)}</span></div>
+                    <p className="text-xs text-slate-500">{a.note ?? "Unmatched"}{a.sender && ` · ${a.sender}`}</p>
+                    {candidates.length > 0 && <div className="mt-1 flex flex-wrap gap-1">{candidates.map((p) => <form key={p.id} action={assignAlert.bind(null, a.id, p.id)}><button className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-2 py-0.5 text-xs">This is {name(p.member)} ({p.invoice.number})</button></form>)}</div>}
                   </li>
                 );
               })}
@@ -56,11 +56,11 @@ export default async function UpiDeskPage() {
           )}
         </section>
       </div>
-      <section className="mt-4 rounded border bg-white p-4">
-        <h2 className="mb-2 font-medium">Recent</h2>
-        {recent.length === 0 ? <p className="text-sm text-neutral-500">Nothing yet.</p> : (
-          <ul className="divide-y text-sm">
-            {recent.map((r) => <li key={r.id} className="flex justify-between py-1"><span><Link href={`/invoices/${r.invoiceId}`} className="underline">{r.invoice.number}</Link> · {name(r.member)}{r.utr && <span className="font-mono text-xs text-neutral-500"> · {r.utr}</span>}</span><span className={r.status === "PAID" ? "text-green-700" : "text-neutral-500"}>{paise(r.amountPaise)} · {r.status.toLowerCase()} · {fmt(r.paidAt ?? r.createdAt)}</span></li>)}
+      <section className="rounded-xl border border-slate-200 bg-white shadow-sm mt-4 p-4">
+        <h2 className="mb-2 font-semibold text-slate-900">Recent</h2>
+        {recent.length === 0 ? <p className="text-sm text-slate-500">Nothing yet.</p> : (
+          <ul className="divide-y text-sm divide-slate-100">
+            {recent.map((r) => <li key={r.id} className="flex justify-between py-1"><span><Link href={`/invoices/${r.invoiceId}`} className="font-medium text-brand-700 hover:underline">{r.invoice.number}</Link> · {name(r.member)}{r.utr && <span className="font-mono text-xs text-slate-500"> · {r.utr}</span>}</span><span className={r.status === "PAID" ? "text-green-700" : "text-slate-500"}>{paise(r.amountPaise)} · {r.status.toLowerCase()} · {fmt(r.paidAt ?? r.createdAt)}</span></li>)}
           </ul>
         )}
       </section>

@@ -18,7 +18,7 @@ export function InviteForm() {
         <button disabled={pending} className={`${buttonClass} shrink-0`}>{pending ? "…" : "Invite"}</button>
       </div>
       {(e.email || state?.message) && <p className="text-xs text-red-600">{e.email ?? state?.message}</p>}
-      {state?.link && <p className="rounded bg-green-50 p-2 text-sm text-green-900">Invite created. Share this link (valid 7 days): <a href={state.link} className="break-all underline">{state.link}</a></p>}
+      {state?.link && <p className="rounded-lg bg-green-50 p-2 text-sm text-green-900">Invite created. Share this link (valid 7 days): <a href={state.link} className="break-all font-medium text-brand-700 hover:underline">{state.link}</a></p>}
     </form>
   );
 }
@@ -28,8 +28,8 @@ export function AcceptInviteForm({ token, email, gymName }: { token: string; ema
   const e = state?.errors ?? {};
   return (
     <form action={action} className="space-y-3">
-      {state?.message && <p className="rounded bg-red-50 p-2 text-sm text-red-700">{state.message}</p>}
-      <p className="text-sm text-neutral-600">Joining <strong>{gymName}</strong> as {email}</p>
+      {state?.message && <p className="rounded-lg bg-red-50 p-2 text-sm text-red-700">{state.message}</p>}
+      <p className="text-sm text-slate-600">Joining <strong>{gymName}</strong> as {email}</p>
       <Field label="Your name" error={e.name}><input name="name" required autoFocus className={inputClass} /></Field>
       <Field label="Phone (optional)" error={e.phone}><input name="phone" type="tel" className={inputClass} /></Field>
       <Field label="Choose a password" error={e.password} hint="At least 8 characters"><input name="password" type="password" required minLength={8} className={inputClass} /></Field>
@@ -50,7 +50,7 @@ export function AssignPtForm({ memberId, trainers, memberships }: { memberId: st
   const e = state?.errors ?? {};
   if (!open) return <button onClick={() => setOpen(true)} className={buttonClass}>Assign trainer</button>;
   return (
-    <form action={action} className="space-y-2 rounded border bg-neutral-50 p-3">
+    <form action={action} className="space-y-2 rounded-lg border bg-slate-50 p-3">
       {state?.message && <p className="text-sm text-red-700">{state.message}</p>}
       <div className="grid gap-2 sm:grid-cols-2">
         <Field label="Trainer" error={e.trainerId}><select name="trainerId" className={inputClass} autoFocus>{trainers.map((t) => <option key={t.id} value={t.id}>{t.name}{t.commissionPercent ? ` (${t.commissionPercent}% commission)` : ""}</option>)}</select></Field>
@@ -82,7 +82,7 @@ export function CommissionForm({ staff, period }: { staff: { id: string; name: s
   const e = state?.errors ?? {};
   const err = e.userId ?? e.amountPaise ?? e.reason ?? e.period ?? state?.message;
   return (
-    <form ref={ref} action={action} className="flex flex-col gap-2 rounded border bg-neutral-50 p-3 sm:flex-row sm:items-center">
+    <form ref={ref} action={action} className="flex flex-col gap-2 rounded-lg border bg-slate-50 p-3 sm:flex-row sm:items-center">
       <select name="userId" className={inputClass} aria-label="Staff">{staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
       <input name="amountPaise" inputMode="decimal" placeholder="Amount ₹" className={`${inputClass} sm:w-32`} />
       <input name="reason" placeholder="Reason (sales incentive, bonus…)" className={inputClass} />

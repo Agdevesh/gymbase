@@ -37,14 +37,14 @@ export function PlanEditor({ memberId, plan }: { memberId: string; plan?: { id: 
   const e = state?.errors ?? {};
   if (!open) return <button type="button" onClick={() => setOpen(true)} className={plan ? "text-xs underline" : secondaryButtonClass}>{plan ? "Edit" : "+ New diet / workout plan"}</button>;
   return (
-    <form action={action} className="mt-2 space-y-2 rounded border bg-neutral-50 p-3">
+    <form action={action} className="mt-2 space-y-2 rounded-lg border bg-slate-50 p-3">
       {state?.message && <p className="text-xs text-red-600">{state.message}</p>}
       <div className="grid gap-2 sm:grid-cols-3">
         <Field label="Type" error={e.type}><select name="type" value={type} onChange={(ev) => setType(ev.target.value as "DIET" | "WORKOUT")} className={inputClass} disabled={!!plan}><option value="DIET">Diet</option><option value="WORKOUT">Workout</option></select>{plan && <input type="hidden" name="type" value={plan.type} />}</Field>
         <div className="sm:col-span-2"><Field label="Title" error={e.title}><input name="title" defaultValue={plan?.title ?? (type === "DIET" ? "Diet plan" : "Workout plan")} required className={inputClass} /></Field></div>
       </div>
       <Field label="Plan" error={e.body} hint="Plain text; the member sees this in their app"><textarea name="body" rows={10} value={body} onChange={(ev) => setBody(ev.target.value)} required className={`${inputClass} font-mono text-sm`} /></Field>
-      {!body && <button type="button" onClick={() => setBody(type === "DIET" ? DIET_TEMPLATE : WORKOUT_TEMPLATE)} className="text-xs underline">Start from a template</button>}
+      {!body && <button type="button" onClick={() => setBody(type === "DIET" ? DIET_TEMPLATE : WORKOUT_TEMPLATE)} className="text-xs font-medium text-brand-700 hover:underline">Start from a template</button>}
       <div className="flex gap-2"><button disabled={pending} className={buttonClass}>{pending ? "Saving…" : "Save plan"}</button><button type="button" onClick={() => setOpen(false)} className={secondaryButtonClass}>Cancel</button></div>
     </form>
   );

@@ -23,38 +23,38 @@ export default async function PtSchedulePage({ searchParams }: { searchParams: P
     db.gym.findUniqueOrThrow({ where: { id: gymId }, select: { name: true } }),
   ]);
   const shift = (n: number) => new Date(start.getTime() + n * 86400_000).toISOString().slice(0, 10);
-  const btn = "rounded border bg-white px-2 py-0.5 text-xs hover:bg-neutral-100";
+  const btn = "rounded border bg-white px-2 py-0.5 text-xs hover:bg-slate-100";
   const tone: Record<string, string> = { SCHEDULED: "", DONE: "bg-green-50", NO_SHOW: "bg-red-50", CANCELLED: "opacity-50" };
   const q = (d: string) => `/staff/pt/schedule?date=${d}${trainerId && role !== "TRAINER" ? `&trainer=${trainerId}` : ""}`;
   return (
     <AppShell title="PT schedule" back={{ href: "/staff/pt", label: "PT clients" }}>
       <form className="mb-4 flex flex-wrap items-center gap-2" action="/staff/pt/schedule">
-        <Link href={q(shift(-1))} className="rounded border bg-white px-3 py-2 text-sm">←</Link>
+        <Link href={q(shift(-1))} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">←</Link>
         <input type="date" name="date" defaultValue={key} className={`${inputClass} w-auto`} />
         {trainers.length > 0 && <select name="trainer" defaultValue={trainerId ?? ""} className={`${inputClass} w-auto`}><option value="">All trainers</option>{trainers.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select>}
-        <button className="rounded border bg-white px-3 py-2 text-sm">Go</button>
-        <Link href={q(shift(1))} className="rounded border bg-white px-3 py-2 text-sm">→</Link>
-        <span className="ml-auto text-sm text-neutral-500">{slots.filter((s) => s.status !== "CANCELLED").length} sessions</span>
+        <button className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">Go</button>
+        <Link href={q(shift(1))} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">→</Link>
+        <span className="ml-auto text-sm text-slate-500">{slots.filter((s) => s.status !== "CANCELLED").length} sessions</span>
       </form>
-      {slots.length === 0 ? <p className="rounded border bg-white p-6 text-center text-neutral-500">No PT sessions booked for this day. Book slots from a member's profile.</p> : (
-        <ul className="divide-y rounded border bg-white">
+      {slots.length === 0 ? <p className="rounded-xl border border-slate-200 bg-white shadow-sm p-6 text-center text-slate-500">No PT sessions booked for this day. Book slots from a member's profile.</p> : (
+        <ul className="rounded-xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-100">
           {slots.map((s) => { const mem = s.member; const name = [mem.firstName, mem.lastName].filter(Boolean).join(" "); const past = s.at.getTime() + s.durationMin * 60_000 < now.getTime(); return (
             <li key={s.id} className={`flex flex-wrap items-center gap-3 px-3 py-2 ${tone[s.status]}`}>
               <span className="w-16 font-mono text-sm">{fmtTimeOnly(s.at)}</span>
               <Avatar name={name} photoUrl={s.member.photoUrl} size={28} />
-              <div className="min-w-0 flex-1"><Link href={`/members/${s.member.id}`} className="font-medium hover:underline">{name}</Link><div className="text-xs text-neutral-500">{s.durationMin} min{!trainerId && ` · ${s.assignment.trainer.name}`} · session {Math.min(s.assignment.sessionsUsed + 1, s.assignment.sessionsTotal)}/{s.assignment.sessionsTotal}{s.notes && ` · ${s.notes}`}</div></div>
+              <div className="min-w-0 flex-1"><Link href={`/members/${s.member.id}`} className="font-medium hover:underline">{name}</Link><div className="text-xs text-slate-500">{s.durationMin} min{!trainerId && ` · ${s.assignment.trainer.name}`} · session {Math.min(s.assignment.sessionsUsed + 1, s.assignment.sessionsTotal)}/{s.assignment.sessionsTotal}{s.notes && ` · ${s.notes}`}</div></div>
               {s.status === "SCHEDULED" ? (
                 <span className="flex flex-wrap items-center gap-1">
                   {!past && <a href={waLink(mem.phone, `Hi ${mem.firstName}, reminder: your PT session at ${gym.name} is on ${s.at.toLocaleDateString("en-IN", { day: "numeric", month: "short" })} at ${fmtTimeOnly(s.at)}. See you!`)} target="_blank" rel="noreferrer" className={btn}>Remind</a>}
-                  <form action={completeSlot.bind(null, s.id)} className="flex gap-1"><input name="notes" placeholder="Notes" className="w-28 rounded border px-1 py-0.5 text-xs" /><button className={`${btn} text-green-800`}>Done</button></form>
+                  <form action={completeSlot.bind(null, s.id)} className="flex gap-1"><input name="notes" placeholder="Notes" className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 w-28 px-1 py-0.5 text-xs" /><button className={`${btn} text-green-800`}>Done</button></form>
                   <form action={markSlot.bind(null, s.id, "NO_SHOW")}><button className={btn}>No-show</button></form>
                   <form action={markSlot.bind(null, s.id, "CANCELLED")}><button className={`${btn} text-red-700`}>Cancel</button></form>
                 </span>
-              ) : <span className="text-xs text-neutral-500">{s.status.toLowerCase().replace("_", " ")}</span>}
+              ) : <span className="text-xs text-slate-500">{s.status.toLowerCase().replace("_", " ")}</span>}
             </li>); })}
         </ul>
       )}
-      {!can(role, "staff:manage") && <p className="mt-2 text-xs text-neutral-500">Marking Done logs the session and reduces sessions left.</p>}
+      {!can(role, "staff:manage") && <p className="mt-2 text-xs text-slate-500">Marking Done logs the session and reduces sessions left.</p>}
     </AppShell>
   );
 }

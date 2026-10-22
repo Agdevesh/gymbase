@@ -10,7 +10,7 @@ export function StartUpiButton({ invoiceId, duePaise }: { invoiceId: string; due
   return (
     <form action={action} className="flex items-center gap-3">
       <button disabled={pending} className={buttonClass}>{pending ? "Opening…" : `Collect ${paise(duePaise)} by UPI QR`}</button>
-      <span className="text-xs text-neutral-500">Fixed amount, verified from the bank alert</span>
+      <span className="text-xs text-slate-500">Fixed amount, verified from the bank alert</span>
       {state?.message && <span className="text-xs text-red-600">{state.message}</span>}
     </form>
   );

@@ -14,7 +14,7 @@ export function LeadForm({ action, initial, plans, cancelHref }: { action: (prev
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); tomorrow.setHours(11, 0, 0, 0);
   return (
     <form action={formAction} className="space-y-4">
-      {state?.message && <p className="rounded bg-red-50 p-2 text-sm text-red-700">{state.message}</p>}
+      {state?.message && <p className="rounded-lg bg-red-50 p-2 text-sm text-red-700">{state.message}</p>}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Name" error={e.name}><input name="name" defaultValue={v?.name} required autoFocus className={inputClass} /></Field>
         <Field label="Phone" error={e.phone}><input name="phone" type="tel" inputMode="tel" defaultValue={v?.phone} required className={inputClass} /></Field>

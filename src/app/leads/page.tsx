@@ -9,8 +9,8 @@ import { ButtonLink, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
-const chip = (active: boolean) => `rounded-full border px-3 py-1 text-sm ${active ? "border-neutral-900 bg-neutral-900 text-white" : "bg-white hover:bg-neutral-100"}`;
-const BUCKET_STYLE = { OVERDUE: "bg-red-100 text-red-800", TODAY: "bg-amber-100 text-amber-800", UPCOMING: "bg-neutral-100 text-neutral-600", NONE: "" };
+const chip = (active: boolean) => `rounded-full border px-3 py-1 text-sm ${active ? "border-brand-600 bg-brand-600 text-white" : "bg-white hover:bg-slate-100"}`;
+const BUCKET_STYLE = { OVERDUE: "bg-red-100 text-red-800", TODAY: "bg-amber-100 text-amber-800", UPCOMING: "bg-slate-100 text-slate-600", NONE: "" };
 
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ status?: string; source?: string; q?: string }> }) {
   const { gymId } = await requireTenant("leads:write");
@@ -52,28 +52,28 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         {LEAD_STATUSES.map((s) => <Link key={s} href={link({ status: s })} className={chip(status === s)}>{STATUS_LABELS[s]} {countOf(s)}</Link>)}
       </div>
       <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-        <span className="text-neutral-500">Source:</span>
+        <span className="text-slate-500">Source:</span>
         <Link href={link({ source: "" })} className={chip(!source)}>All</Link>
         {LEAD_SOURCES.map((s) => <Link key={s} href={link({ source: s })} className={chip(source === s)}>{SOURCE_LABELS[s]}{srcCount(s) ? ` ${srcCount(s)}` : ""}</Link>)}
       </div>
       <form className="mb-4 flex gap-2" action="/leads">
         <input type="hidden" name="status" value={status} />{source && <input type="hidden" name="source" value={source} />}
         <input name="q" defaultValue={q} type="search" placeholder="Search name or phone" className={inputClass} />
-        <button className="rounded border bg-white px-4 text-sm">Search</button>
+        <button className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-4 text-sm">Search</button>
       </form>
-      {leads.length === 0 ? <p className="rounded border bg-white p-6 text-center text-neutral-500">No leads here.</p> : (
-        <ul className="divide-y rounded border bg-white">
+      {leads.length === 0 ? <p className="rounded-xl border border-slate-200 bg-white shadow-sm p-6 text-center text-slate-500">No leads here.</p> : (
+        <ul className="rounded-xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-100">
           {leads.map((l) => {
             const b = followUpBucket(l.followUpAt, now);
             return (
               <li key={l.id}>
-                <Link href={`/leads/${l.id}`} className="flex items-center gap-3 px-3 py-2 hover:bg-neutral-50">
+                <Link href={`/leads/${l.id}`} className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50">
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium">{l.name} <span className="font-normal text-neutral-400">{SOURCE_LABELS[l.source]}</span></div>
-                    <div className="truncate text-sm text-neutral-500">{l.phone}{l.interestedIn && ` · ${l.interestedIn}`}{l.owner && ` · ${l.owner.name}`}</div>
+                    <div className="truncate font-medium">{l.name} <span className="font-normal text-slate-400">{SOURCE_LABELS[l.source]}</span></div>
+                    <div className="truncate text-sm text-slate-500">{l.phone}{l.interestedIn && ` · ${l.interestedIn}`}{l.owner && ` · ${l.owner.name}`}</div>
                   </div>
-                  {l.followUpAt && OPEN_STATUSES.includes(l.status) && <span className={`rounded px-2 py-0.5 text-xs ${BUCKET_STYLE[b]}`}>{b === "OVERDUE" ? "Overdue" : b === "TODAY" ? "Today" : l.followUpAt.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>}
-                  <span className="rounded bg-neutral-100 px-2 py-0.5 text-xs">{STATUS_LABELS[l.status]}</span>
+                  {l.followUpAt && OPEN_STATUSES.includes(l.status) && <span className={`rounded-lg px-2 py-0.5 text-xs ${BUCKET_STYLE[b]}`}>{b === "OVERDUE" ? "Overdue" : b === "TODAY" ? "Today" : l.followUpAt.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>}
+                  <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-xs">{STATUS_LABELS[l.status]}</span>
                 </Link>
               </li>
             );
