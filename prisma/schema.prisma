@@ -63,9 +63,11 @@ model User {
   role         Role
   phone        String?
   active       Boolean  @default(true)
+  commissionPercent Int @default(0) // trainer's cut of PT fees
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  ptSessionsLed   PtSession[]
   member          Member?
   invitesSent     Invite[]
   checkInsLogged  CheckIn[]        @relation("CheckInBy")
@@ -243,7 +245,8 @@ model Membership {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
-  invoices Invoice[]
+  invoices      Invoice[]
+  ptAssignments PtAssignment[]
 
   @@index([gymId, status, endDate])
   @@index([memberId])
@@ -499,13 +502,32 @@ model PtAssignment {
   member        Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   trainerId     String
   trainer       User     @relation("Trainer", fields: [trainerId], references: [id])
+  membershipId  String?
+  membership    Membership? @relation(fields: [membershipId], references: [id])
+  feePaise      Int      @default(0)
   sessionsTotal Int
   sessionsUsed  Int      @default(0)
   startDate     DateTime
   endDate       DateTime?
   createdAt     DateTime @default(now())
 
+  sessions    PtSession[]
+  commissions Commission[]
+
   @@index([gymId, trainerId])
+  @@index([memberId])
+}
+
+model PtSession {
+  id           String       @id @default(cuid())
+  assignmentId String
+  assignment   PtAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  trainerId    String
+  trainer      User         @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  at           DateTime     @default(now())
+  notes        String?
+
+  @@index([assignmentId, at])
 }
 
 model Commission {
@@ -518,6 +540,8 @@ model Commission {
   reason      String
   period      String // e.g. 2026-10
   paidAt      DateTime?
+  ptAssignmentId String?
+  ptAssignment   PtAssignment? @relation(fields: [ptAssignmentId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
 
   @@index([gymId, userId, period])

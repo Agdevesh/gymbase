@@ -11,6 +11,9 @@ import { expireMemberships } from "@/server/memberships";
 import { prorataCredit, renewalStart } from "@/lib/memberships";
 import { ChargeForm, CollectForm } from "@/components/payment-forms";
 import { CustomMessageForm } from "@/components/reminder-forms";
+import { AssignPtForm, LogSessionForm } from "@/components/staff-forms";
+import { endPt } from "@/server/staff";
+import { sessionsLeft } from "@/lib/staff";
 
 const fmtDate = (d: Date | null) => (d ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—");
 const paise = (p: number) => `₹${(p / 100).toLocaleString("en-IN")}`;
@@ -23,7 +26,8 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
   const m = await db.member.findFirst({
     where: { id, gymId },
     include: {
-      memberships: { orderBy: { endDate: "desc" }, include: { plan: { select: { name: true } } } },
+      memberships: { orderBy: { endDate: "desc" }, include: { plan: { select: { name: true, type: true, ptSessions: true } } } },
+      ptAssignments: { orderBy: { createdAt: "desc" }, include: { trainer: { select: { name: true } }, sessions: { orderBy: { at: "desc" }, take: 5, include: { trainer: { select: { name: true } } } } } },
       documents: { orderBy: { createdAt: "desc" } },
       noteLog: { orderBy: { createdAt: "desc" }, include: { author: { select: { name: true } } } },
       checkIns: { orderBy: { checkedInAt: "desc" }, take: 5 },
@@ -31,7 +35,9 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
     },
   });
   if (!m) notFound();
-  const plans = await plansQ;
+  const [plans, trainers] = await Promise.all([plansQ, db.user.findMany({ where: { gymId, role: { in: ["TRAINER", "OWNER"] }, active: true }, select: { id: true, name: true, commissionPercent: true }, orderBy: { name: "asc" } })]);
+  const activePt = m.ptAssignments.find((a) => !a.endDate);
+  const ptMemberships = m.memberships.filter((ms) => ms.plan.type === "PT" && (ms.status === "ACTIVE" || ms.status === "FROZEN")).map((ms) => ({ id: ms.id, label: `${ms.plan.name} (${fmtDate(ms.startDate)})`, ptSessions: ms.plan.ptSessions, pricePaise: ms.pricePaise - ms.discountPaise }));
   const write = can(role, "members:write");
   const name = [m.firstName, m.lastName].filter(Boolean).join(" ");
   const current = m.memberships.find((ms) => ms.status === "ACTIVE" || ms.status === "FROZEN") ?? m.memberships[0];
@@ -111,6 +117,18 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
           )}
         </section>
       </div>
+
+      <section className="mt-4 rounded border bg-white p-4">
+        <h2 className="mb-2 font-medium">Personal training</h2>
+        {activePt ? (
+          <div className="space-y-2">
+            <p className="text-sm">{activePt.trainer.name} · {activePt.sessionsUsed}/{activePt.sessionsTotal} sessions, <strong>{sessionsLeft(activePt)} left</strong>{activePt.feePaise > 0 && ` · fee ${paise(activePt.feePaise)}`} · since {fmtDate(activePt.startDate)}</p>
+            {can(role, "checkin:write") && <div className="flex gap-2"><div className="flex-1"><LogSessionForm assignmentId={activePt.id} /></div>{write && <form action={endPt.bind(null, activePt.id)}><button className="rounded border px-2 py-1 text-xs text-red-700">End</button></form>}</div>}
+            {activePt.sessions.length > 0 && <ul className="text-xs text-neutral-500">{activePt.sessions.map((s) => <li key={s.id}>{s.at.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })} · {s.trainer.name}{s.notes && ` · ${s.notes}`}</li>)}</ul>}
+          </div>
+        ) : <p className="mb-2 text-sm text-neutral-500">{m.ptAssignments[0] ? `Last PT with ${m.ptAssignments[0].trainer.name}, ${m.ptAssignments[0].sessionsUsed}/${m.ptAssignments[0].sessionsTotal} sessions.` : "No trainer assigned."}</p>}
+        {write && !activePt && (trainers.length ? <div className="mt-2"><AssignPtForm memberId={m.id} trainers={trainers} memberships={ptMemberships} /></div> : <p className="text-sm text-neutral-500">Invite a trainer under Staff first.</p>)}
+      </section>
 
       <section className="mt-4 rounded border bg-white p-4">
         <h2 className="mb-2 flex items-center justify-between font-medium">Billing {dues > 0 && <span className="text-red-700">{paise(dues)} due</span>}</h2>
