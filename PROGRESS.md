@@ -23,10 +23,11 @@ Read this first in each session instead of rescanning the repo.
 - Stage 5, Inquiries/leads: `/leads` pipeline with status chips (Open, Due today, each stage) and source chips (walk-in, phone, WhatsApp, Instagram, website, referral, other), combinable with search. `/leads/new`, `/leads/[id]` (follow-up form: note + stage + next date with +1d/+2d/+7d, lost reason; activity log; tel: and wa.me links), `/leads/[id]/edit`. "Convert to member" creates the Member from the lead (or links an existing member with the same phone) and redirects to the profile to start a plan. Logic in `src/lib/leads.ts`, actions in `src/server/leads.ts`. `LeadSource` gained WHATSAPP and INSTAGRAM.
 - `requireTenant(permission)` now redirects a logged-in user lacking the permission to `/dashboard?denied=…` (notice shown there) instead of throwing.
 
+- Stage 6, Payments: member profile Billing section (collect against oldest unpaid invoices first, partial payments, "other charge" raises an invoice with optional GST), `/invoices/[id]` (lines, payments, collect, owner-only refund linked via `Payment.refundOfId`), `/invoices/[id]/pdf` (pdfkit, `serverExternalPackages`), `/payments?date=` (day ledger by method + cash closing: expected = unclosed cash of the day, counted, short/excess; `CashClosing` unique per gym+date), `/defaulters` (unpaid dues sorted by days overdue with amount and last plan, plus expired-not-renewed members sorted by days since expiry). Logic in `src/lib/payments.ts`, actions in `src/server/payments.ts`.
+
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
-- Payments (module 6): a "Defaulters" screen on the main nav: member name, last plan, days since dues started, amount.
 
 1. Modules 4 to 10 in the order of the build prompt.
 2. Invite accept page (`/invite/[token]`) and staff list in settings.
@@ -42,6 +43,8 @@ Asked by the owner on 2026-10-22, to land in their modules:
 - `Membership.renewedFromId` chains renewals and upgrades; freeze extends `endDate` by `frozenDays`.
 - Editing a plan never changes existing memberships (they keep their own `pricePaise`); retire a plan instead of deleting it.
 - QR payload is `GB:<32-hex qrToken>`; `tokenFromScan` also accepts bare tokens and `/checkin/scan/<token>` URLs. Duplicate check-ins within the 4 h window are ignored (reported as "already in").
+- Payments never carry credit: an amount above the outstanding total is rejected. Refunds are separate `Payment` rows (`kind` REFUND) that decrement `Invoice.paidPaise`. Cash closing only stamps CASH payments; UPI/card reconcile with the bank.
+- pdfkit's built-in Helvetica has no ₹ glyph, so PDFs print "Rs.".
 - Form checkboxes use a hidden `off` input before the checkbox; server actions read `formData.getAll(name).includes("on")`.
 
 ## Setup

@@ -21,6 +21,7 @@
     "bcryptjs": "^3.0.3",
     "next": "^16.4.2",
     "next-auth": "^5.0.0-beta.32",
+    "pdfkit": "^0.17.2",
     "qrcode": "^1.5.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.5",
+    "@types/pdfkit": "^0.17.3",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

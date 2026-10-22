@@ -9,6 +9,7 @@ import { DocumentForm, NoteForm } from "@/components/member-detail-forms";
 import { MembershipPanel } from "@/components/membership-panel";
 import { expireMemberships } from "@/server/memberships";
 import { prorataCredit, renewalStart } from "@/lib/memberships";
+import { ChargeForm, CollectForm } from "@/components/payment-forms";
 
 const fmtDate = (d: Date | null) => (d ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—");
 const paise = (p: number) => `₹${(p / 100).toLocaleString("en-IN")}`;
@@ -25,7 +26,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
       documents: { orderBy: { createdAt: "desc" } },
       noteLog: { orderBy: { createdAt: "desc" }, include: { author: { select: { name: true } } } },
       checkIns: { orderBy: { checkedInAt: "desc" }, take: 5 },
-      invoices: { select: { totalPaise: true, paidPaise: true } },
+      invoices: { orderBy: { issuedAt: "desc" }, select: { id: true, number: true, totalPaise: true, paidPaise: true, issuedAt: true, notes: true, membership: { select: { plan: { select: { name: true } } } } } },
     },
   });
   if (!m) notFound();
@@ -109,6 +110,24 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
           )}
         </section>
       </div>
+
+      <section className="mt-4 rounded border bg-white p-4">
+        <h2 className="mb-2 flex items-center justify-between font-medium">Billing {dues > 0 && <span className="text-red-700">{paise(dues)} due</span>}</h2>
+        {can(role, "payments:write") && dues > 0 && <div className="mb-3"><CollectForm memberId={m.id} duePaise={dues} /></div>}
+        {m.invoices.length === 0 ? <p className="text-sm text-neutral-500">No invoices yet.</p> : (
+          <ul className="divide-y text-sm">
+            {m.invoices.map((i) => (
+              <li key={i.id} className="flex items-center justify-between gap-2 py-1">
+                <Link href={`/invoices/${i.id}`} className="underline">{i.number}</Link>
+                <span className="flex-1 truncate text-neutral-500">{i.membership?.plan.name ?? i.notes} · {fmtDate(i.issuedAt)}</span>
+                <span className={i.totalPaise > i.paidPaise ? "font-medium text-red-700" : "text-green-700"}>{i.totalPaise > i.paidPaise ? `${paise(i.totalPaise - i.paidPaise)} due` : "Paid"}</span>
+                <span className="w-20 text-right">{paise(i.totalPaise)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {can(role, "payments:write") && <ChargeForm memberId={m.id} />}
+      </section>
 
       <section className="mt-4 rounded border bg-white p-4">
         <h2 className="mb-2 font-medium">Notes</h2>
