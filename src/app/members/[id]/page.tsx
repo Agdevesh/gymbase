@@ -159,7 +159,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
               <li key={i.id} className="flex items-center justify-between gap-2 py-1">
                 <Link href={`/invoices/${i.id}`} className="underline">{i.number}</Link>
                 <span className="flex-1 truncate text-neutral-500">{i.membership?.plan.name ?? i.notes} · {fmtDate(i.issuedAt)}</span>
-                <span className={i.totalPaise > i.paidPaise ? "font-medium text-red-700" : "text-green-700"}>{i.totalPaise > i.paidPaise ? `${paise(i.totalPaise - i.paidPaise)} due` : "Paid"}</span>
+                <span className={i.totalPaise > i.paidPaise ? "font-medium text-red-700" : "text-green-700"}>{i.totalPaise > i.paidPaise ? <>{paise(i.totalPaise - i.paidPaise)} due{can(role, "payments:write") && <> · <Link href={`/invoices/${i.id}`} className="font-normal underline">UPI QR</Link></>}</> : "Paid"}</span>
                 <span className="w-20 text-right">{paise(i.totalPaise)}</span>
               </li>
             ))}
