@@ -60,6 +60,9 @@ model Gym {
   subscription  Subscription?
   files         StoredFile[]
   auditLogs     AuditLog[]
+  measurements  Measurement[]
+  fitnessPlans  FitnessPlan[]
+  lockers       Locker[]
 }
 
 model User {
@@ -89,6 +92,8 @@ model User {
   memberNotes     MemberNote[]
   passwordResets  PasswordReset[]
   auditLogs       AuditLog[]
+  measurementsTaken Measurement[]
+  fitnessPlansWritten FitnessPlan[]
 
   @@unique([gymId, email])
   @@index([gymId, role])
@@ -152,6 +157,9 @@ model Member {
   invoices      Invoice[]
   reminders     Reminder[]
   ptAssignments PtAssignment[]
+  measurements  Measurement[]
+  fitnessPlans  FitnessPlan[]
+  locker        Locker?
 
   @@unique([gymId, code])
   @@unique([gymId, phone])
@@ -617,4 +625,68 @@ model RateLimit {
   key     String   @id
   count   Int      @default(0)
   resetAt DateTime
+}
+
+// ---------- Progress, plans & lockers ----------
+
+model Measurement {
+  id           String   @id @default(cuid())
+  gymId        String
+  gym          Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  memberId     String
+  member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  at           DateTime @default(now())
+  weightKg     Float?
+  heightCm     Float?
+  bodyFatPct   Float?
+  chestCm      Float?
+  waistCm      Float?
+  hipsCm       Float?
+  armCm        Float?
+  thighCm      Float?
+  notes        String?
+  recordedById String?
+  recordedBy   User?    @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([memberId, at])
+  @@index([gymId])
+}
+
+enum FitnessPlanType {
+  DIET
+  WORKOUT
+}
+
+model FitnessPlan {
+  id        String          @id @default(cuid())
+  gymId     String
+  gym       Gym             @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  memberId  String
+  member    Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  type      FitnessPlanType
+  title     String
+  body      String
+  active    Boolean         @default(true)
+  authorId  String?
+  author    User?           @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([memberId, type, active])
+  @@index([gymId])
+}
+
+model Locker {
+  id         String    @id @default(cuid())
+  gymId      String
+  gym        Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  number     String
+  memberId   String?   @unique
+  member     Member?   @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  assignedAt DateTime?
+  until      DateTime?
+  feePaise   Int       @default(0)
+  notes      String?
+
+  @@unique([gymId, number])
 }

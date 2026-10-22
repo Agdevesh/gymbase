@@ -16,6 +16,9 @@ import { endPt } from "@/server/staff";
 import { sessionsLeft } from "@/lib/staff";
 import { MemberAccessButton } from "@/components/portal-forms";
 import { disableMemberAccess, enableMemberAccess } from "@/server/portal";
+import { MEASURE_FIELDS, bmi, trend } from "@/lib/fitness";
+import { setPlanActive } from "@/server/fitness";
+import { MeasurementForm, PlanEditor } from "@/components/fitness-forms";
 
 const fmtDate = (d: Date | null) => (d ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—");
 const paise = (p: number) => `₹${(p / 100).toLocaleString("en-IN")}`;
@@ -32,6 +35,9 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
       ptAssignments: { orderBy: { createdAt: "desc" }, include: { trainer: { select: { name: true } }, sessions: { orderBy: { at: "desc" }, take: 5, include: { trainer: { select: { name: true } } } } } },
       documents: { orderBy: { createdAt: "desc" } },
       user: { select: { active: true } },
+      measurements: { orderBy: { at: "desc" }, take: 10 },
+      fitnessPlans: { orderBy: [{ active: "desc" }, { updatedAt: "desc" }], include: { author: { select: { name: true } } } },
+      locker: { select: { id: true, number: true, until: true } },
       noteLog: { orderBy: { createdAt: "desc" }, include: { author: { select: { name: true } } } },
       checkIns: { orderBy: { checkedInAt: "desc" }, take: 5 },
       invoices: { orderBy: { issuedAt: "desc" }, select: { id: true, number: true, totalPaise: true, paidPaise: true, issuedAt: true, notes: true, membership: { select: { plan: { select: { name: true } } } } } },
@@ -42,6 +48,8 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
   const activePt = m.ptAssignments.find((a) => !a.endDate);
   const ptMemberships = m.memberships.filter((ms) => ms.plan.type === "PT" && (ms.status === "ACTIVE" || ms.status === "FROZEN")).map((ms) => ({ id: ms.id, label: `${ms.plan.name} (${fmtDate(ms.startDate)})`, ptSessions: ms.plan.ptSessions, pricePaise: ms.pricePaise - ms.discountPaise }));
   const write = can(role, "members:write");
+  const fitness = can(role, "fitness:write");
+  const bmiNow = bmi(trend(m.measurements, "weightKg")?.latest, trend(m.measurements, "heightCm")?.latest);
   const name = [m.firstName, m.lastName].filter(Boolean).join(" ");
   const current = m.memberships.find((ms) => ms.status === "ACTIVE" || ms.status === "FROZEN") ?? m.memberships[0];
   const live = current && (current.status === "ACTIVE" || current.status === "FROZEN") ? current : null;
@@ -60,6 +68,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
           <div className="text-lg">{m.phone}</div>
           {current && <div className="text-sm text-neutral-500">{current.plan.name} · {fmtDate(current.startDate)} to {fmtDate(current.endDate)}</div>}
           {dues > 0 && <div className="text-sm font-medium text-red-700">Dues {paise(dues)}</div>}
+          {m.locker && <div className="text-sm text-neutral-500">Locker #{m.locker.number}{m.locker.until && ` till ${fmtDate(m.locker.until)}`} · <Link href="/lockers" className="underline">lockers</Link></div>}
         </div>
       </section>
 
@@ -149,6 +158,35 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
           </ul>
         )}
         {can(role, "payments:write") && <ChargeForm memberId={m.id} />}
+      </section>
+
+      <section className="mt-4 rounded border bg-white p-4">
+        <h2 className="mb-2 flex items-center justify-between font-medium">Body measurements <Link href={`/members/${m.id}/progress`} className="text-sm font-normal underline">History & chart</Link></h2>
+        {m.measurements.length === 0 ? <p className="mb-2 text-sm text-neutral-500">Nothing recorded yet.</p> : (
+          <div className="mb-3 flex flex-wrap gap-3 text-sm">
+            {MEASURE_FIELDS.map(([k, label, u]) => { const t = trend(m.measurements, k); return t ? <span key={k}><span className="text-neutral-500">{label}</span> <strong>{t.latest}</strong> {u}{t.delta != null && t.delta !== 0 && <span className={t.delta < 0 ? "text-green-700" : "text-amber-700"}> ({t.delta > 0 ? "+" : ""}{t.delta})</span>}</span> : null; })}
+            {bmiNow && <span><span className="text-neutral-500">BMI</span> <strong>{bmiNow}</strong></span>}
+            <span className="text-neutral-400">last {fmtDate(m.measurements[0].at)}</span>
+          </div>
+        )}
+        {fitness && <MeasurementForm memberId={m.id} />}
+      </section>
+
+      <section className="mt-4 rounded border bg-white p-4">
+        <h2 className="mb-2 font-medium">Diet & workout plans</h2>
+        {m.fitnessPlans.length === 0 && <p className="mb-2 text-sm text-neutral-500">No plans given yet. The member sees active plans in their app.</p>}
+        <ul className="space-y-2">
+          {m.fitnessPlans.map((p) => (
+            <li key={p.id} className={`rounded border p-3 text-sm ${p.active ? "" : "opacity-60"}`}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span><strong>{p.type === "DIET" ? "Diet" : "Workout"}:</strong> {p.title} <span className="text-neutral-500">· {p.author?.name ?? "—"} · {fmtDate(p.updatedAt)}{!p.active && " · inactive"}</span></span>
+                {fitness && <span className="flex gap-3">{p.active && <PlanEditor memberId={m.id} plan={{ id: p.id, type: p.type, title: p.title, body: p.body }} />}<form action={setPlanActive.bind(null, m.id, p.id, !p.active)}><button className="text-xs underline">{p.active ? "Deactivate" : "Reactivate"}</button></form></span>}
+              </div>
+              {p.active && <details className="mt-1"><summary className="cursor-pointer text-xs text-neutral-500">Show plan</summary><pre className="mt-1 whitespace-pre-wrap font-sans text-sm">{p.body}</pre></details>}
+            </li>
+          ))}
+        </ul>
+        {fitness && <div className="mt-2"><PlanEditor memberId={m.id} /></div>}
       </section>
 
       <section className="mt-4 rounded border bg-white p-4">

@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { formatInvoiceNumber, gstOn } from "@/lib/memberships";
 import { allocatePayment, chargeInput, closingInput, collectInput, refundInput } from "@/lib/payments";
 import { requireTenant } from "@/server/tenant";
+import { raiseCharge } from "@/server/invoices";
 import { audit } from "@/server/audit";
 const rsFmt = (p: number) => `Rs ${(p / 100).toLocaleString("en-IN")}`;
 import type { FormState } from "@/server/members";
@@ -58,15 +58,7 @@ export async function addCharge(memberId: string, _prev: FormState, formData: Fo
   const { description, amountPaise, gst } = parsed.data;
   const id = await db.$transaction(async (tx) => {
     const member = await tx.member.findFirst({ where: { id: memberId, gymId }, select: { id: true } });
-    if (!member) return null;
-    const gym = await tx.gym.update({ where: { id: gymId }, data: { invoiceSeq: { increment: 1 } }, select: { invoiceSeq: true, gstPercent: true } });
-    const pct = gst ? gym.gstPercent : 0;
-    const gstPaise = gstOn(amountPaise, pct);
-    const inv = await tx.invoice.create({
-      data: { gymId, memberId, number: formatInvoiceNumber(gym.invoiceSeq, new Date().getFullYear()), subtotalPaise: amountPaise, gstPercent: pct, gstPaise, totalPaise: amountPaise + gstPaise, dueDate: new Date(), notes: description },
-      select: { id: true },
-    });
-    return inv.id;
+    return member ? raiseCharge(tx, gymId, memberId, description, amountPaise, gst) : null;
   });
   if (!id) return { message: "Member not found" };
   await audit(gymId, userId, "invoice.charge", "invoice", id, `Charged ${rsFmt(amountPaise)}: ${description}`);

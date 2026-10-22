@@ -50,4 +50,4 @@ export const signupInput = z.object({
   password: z.string().min(8, "At least 8 characters").max(100),
 });
 
-export const WRITE_PERMISSIONS = new Set(["gym:manage", "staff:manage", "members:write", "checkin:write", "leads:write", "payments:write", "payments:refund"]);
+export const WRITE_PERMISSIONS = new Set(["gym:manage", "staff:manage", "members:write", "checkin:write", "leads:write", "payments:write", "payments:refund", "fitness:write"]);

@@ -10,6 +10,10 @@ describe("can", () => {
     expect(can("RECEPTION", "payments:refund")).toBe(false);
     expect(can("RECEPTION", "staff:manage")).toBe(false);
   });
+  it("lets trainers record progress but not money", () => {
+    expect(can("TRAINER", "fitness:write")).toBe(true);
+    expect(can("TRAINER", "payments:write")).toBe(false);
+  });
   it("gives members no staff permissions", () => {
     expect(can("MEMBER", "members:read")).toBe(false);
   });
