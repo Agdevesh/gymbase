@@ -63,6 +63,8 @@ model Gym {
   measurements  Measurement[]
   fitnessPlans  FitnessPlan[]
   lockers       Locker[]
+  classes       GymClass[]
+  classBookings ClassBooking[]
 }
 
 model User {
@@ -94,6 +96,7 @@ model User {
   auditLogs       AuditLog[]
   measurementsTaken Measurement[]
   fitnessPlansWritten FitnessPlan[]
+  classesLed      GymClass[]
 
   @@unique([gymId, email])
   @@index([gymId, role])
@@ -160,6 +163,7 @@ model Member {
   measurements  Measurement[]
   fitnessPlans  FitnessPlan[]
   locker        Locker?
+  classBookings ClassBooking[]
 
   @@unique([gymId, code])
   @@unique([gymId, phone])
@@ -689,4 +693,50 @@ model Locker {
   notes      String?
 
   @@unique([gymId, number])
+}
+
+// ---------- Group classes ----------
+
+model GymClass {
+  id          String   @id @default(cuid())
+  gymId       String
+  gym         Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  name        String
+  trainerId   String?
+  trainer     User?    @relation(fields: [trainerId], references: [id], onDelete: SetNull)
+  weekdays    Int[] // 0 = Sunday … 6 = Saturday
+  startTime   String // "07:00"
+  durationMin Int      @default(60)
+  capacity    Int      @default(20)
+  notes       String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  bookings ClassBooking[]
+
+  @@index([gymId, active])
+}
+
+enum BookingStatus {
+  BOOKED
+  ATTENDED
+  NO_SHOW
+  CANCELLED
+}
+
+model ClassBooking {
+  id        String        @id @default(cuid())
+  gymId     String
+  gym       Gym           @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  classId   String
+  class     GymClass      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  memberId  String
+  member    Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  date      DateTime      @db.Date
+  status    BookingStatus @default(BOOKED)
+  createdAt DateTime      @default(now())
+
+  @@unique([classId, memberId, date])
+  @@index([gymId, date])
+  @@index([memberId, date])
 }
