@@ -9,7 +9,7 @@ async function login(formData: FormData) {
       gym: formData.get("gym"),
       email: formData.get("email"),
       password: formData.get("password"),
-      redirectTo: "/dashboard",
+      redirectTo: String(formData.get("next") ?? "").startsWith("/") ? String(formData.get("next")) : "/dashboard",
     });
   } catch (err) {
     if (err instanceof AuthError) redirect(err instanceof CredentialsSignin && err.code === "throttled" ? "/login?error=throttled" : "/login?error=1");
@@ -17,8 +17,8 @@ async function login(formData: FormData) {
   }
 }
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; gym?: string; email?: string; joined?: string }> }) {
-  const { error, gym, email, joined } = await searchParams;
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; gym?: string; email?: string; joined?: string; next?: string }> }) {
+  const { error, gym, email, joined, next } = await searchParams;
   const input = "w-full rounded border border-neutral-300 px-3 py-2 text-base";
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
@@ -26,6 +26,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       {error && <p className="mb-4 rounded bg-red-50 p-2 text-sm text-red-700">{error === "throttled" ? "Too many failed attempts. Wait 15 minutes and try again." : "Wrong gym, email or password."}</p>}
       {joined && <p className="mb-4 rounded bg-green-50 p-2 text-sm text-green-800">Your login is ready. Sign in below.</p>}
       <form action={login} className="space-y-3">
+        {next && <input type="hidden" name="next" value={next} />}
         <input name="gym" placeholder="Gym code (e.g. demo)" defaultValue={gym ?? ""} required autoFocus className={input} />
         <input name="email" placeholder="Email (staff) or phone (members)" defaultValue={email ?? ""} required className={input} autoComplete="username" />
         <input name="password" type="password" placeholder="Password or PIN" required className={input} />

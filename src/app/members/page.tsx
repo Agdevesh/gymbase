@@ -42,7 +42,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
   const pages = Math.max(1, Math.ceil(total / PAGE));
 
   return (
-    <AppShell title={`Members (${total})`} actions={can(role, "members:write") && <ButtonLink href="/members/new">+ Add member</ButtonLink>}>
+    <AppShell title={`Members (${total})`} actions={can(role, "members:write") && <><ButtonLink href="/members/import" secondary>Import</ButtonLink><ButtonLink href="/members/new">+ Add member</ButtonLink></>}>
       <form className="mb-4 flex gap-2" action="/members">
         <input name="q" defaultValue={q} placeholder="Search name, phone, code or email" autoFocus className={inputClass} type="search" />
         <button className="rounded border border-neutral-300 bg-white px-4 text-sm">Search</button>

@@ -36,7 +36,7 @@ export async function signupGym(_prev: FormState, formData: FormData): Promise<F
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") return { errors: { slug: "That gym code is taken, try another" } };
     throw e;
   }
-  redirect(`/login?gym=${slug}&email=${encodeURIComponent(email)}&joined=1`);
+  redirect(`/login?gym=${slug}&email=${encodeURIComponent(email)}&joined=1&next=/setup`);
 }
 
 // Owner picks a plan: create a Razorpay subscription and send them to the hosted checkout.

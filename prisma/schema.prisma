@@ -40,6 +40,7 @@ model Gym {
   upiAlertToken String? @unique // secret in the bank-SMS webhook URL (/api/upi/alerts/<token>)
   receiptNote String? // footer on invoices and receipts
   whatsapp    String? // gym's WhatsApp number shown to members
+  setupDoneAt DateTime? // owner dismissed the getting-started checklist
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -402,6 +403,7 @@ model Invoice {
   dueDate       DateTime?
   issuedAt      DateTime    @default(now())
   notes         String?
+  publicToken   String?     @unique // shareable receipt link /r/<token>
 
   payments    Payment[]
   upiRequests UpiRequest[]

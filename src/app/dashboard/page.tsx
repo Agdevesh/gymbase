@@ -10,6 +10,7 @@ import { sessionsLeft } from "@/lib/staff";
 import { requireTenant } from "@/server/tenant";
 import { subscriptionState } from "@/lib/saas";
 import { expireMemberships } from "@/server/memberships";
+import { setupStatus } from "@/server/setup";
 import { AppShell, Avatar, ButtonLink } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +61,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const bySource = Object.entries(leadsMonth.reduce<Record<string, number>>((acc, l) => ((acc[l.source] = (acc[l.source] ?? 0) + 1), acc), {})).sort((a, b) => b[1] - a[1]);
   const series = bucketByDay(payments30, now, 14);
   const subState = subscriptionState(gym.subscription, now);
+  const setup = role === "OWNER" && !gym.setupDoneAt ? await setupStatus(gymId) : null;
   const max = Math.max(1, ...series.map((s) => s.total));
 
   return (
@@ -72,6 +74,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           {subState.locked ? subState.reason : subState.label === "trial" ? `Free trial: ${subState.daysLeft} day${subState.daysLeft === 1 ? "" : "s"} left.` : subState.label === "payment failed" ? `Payment failed. ${subState.daysLeft} days before access pauses.` : `Subscription ends in ${subState.daysLeft} days.`}{" "}
           <Link href="/billing" className="underline">Choose a plan</Link>
         </p>
+      )}
+      {setup && !setup.complete && (
+        <section className="mb-4 rounded border border-green-200 bg-green-50 p-3 text-sm">
+          <div className="flex items-center justify-between"><span className="font-medium">Getting started: {setup.done}/{setup.total} done</span><Link href="/setup" className="underline">Open checklist</Link></div>
+          <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-neutral-700">{setup.steps.filter((s) => !s.done).slice(0, 4).map((s) => <li key={s.key}><Link href={s.href} className="hover:underline">○ {s.label}</Link></li>)}</ul>
+        </section>
       )}
       {denied && <p className="mb-4 rounded bg-amber-50 p-3 text-sm text-amber-900">Your {role.toLowerCase()} login does not have access to that screen ({denied}). Ask the owner if you need it.</p>}
 

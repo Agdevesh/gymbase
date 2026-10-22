@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+/* Phone polish: tables scroll sideways instead of squashing, and tap targets stay comfortable. */
+@media (max-width: 640px) {
+  table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  input, select, textarea, button { font-size: 16px; }
+}
