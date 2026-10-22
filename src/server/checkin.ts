@@ -15,7 +15,7 @@ export type Candidate = {
 
 const memberSelect = {
   id: true, code: true, firstName: true, lastName: true, phone: true, photoUrl: true,
-  memberships: { where: { status: { in: ["ACTIVE", "FROZEN", "EXPIRED"] } }, orderBy: { endDate: "desc" }, take: 1, select: { status: true, endDate: true, plan: { select: { name: true } } } },
+  memberships: { where: { status: { in: ["ACTIVE", "FROZEN", "SUSPENDED", "EXPIRED"] } }, orderBy: { endDate: "desc" }, take: 1, select: { status: true, endDate: true, plan: { select: { name: true } } } },
   checkIns: { where: { checkedOutAt: null }, orderBy: { checkedInAt: "desc" }, take: 1, select: { checkedInAt: true } },
 } satisfies Prisma.MemberSelect;
 

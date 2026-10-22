@@ -27,20 +27,20 @@ export default async function PortalHome({ searchParams }: { searchParams: Promi
     db.ptAssignment.findFirst({ where: { memberId: m.id, endDate: null }, include: { trainer: { select: { name: true } }, slots: { where: { status: "SCHEDULED", at: { gte: now } }, orderBy: { at: "asc" }, take: 3 } } }),
     db.plan.findMany({ where: { gymId: gym.id, active: true, type: { not: "PT" } }, orderBy: { durationDays: "asc" } }),
   ]);
-  const current = memberships.find((x) => x.status === "ACTIVE" || x.status === "FROZEN");
+  const current = memberships.find((x) => x.status === "ACTIVE" || x.status === "FROZEN" || x.status === "SUSPENDED");
   const due = invoices.reduce((s, i) => s + i.totalPaise - i.paidPaise, 0);
   const left = current ? daysLeft(current.endDate, now) : 0;
   const svg = await QRCode.toString(qrPayload(m.qrToken), { type: "svg", margin: 1, width: 200 });
   const holiday = holidayOn(gym.holidays, localDateKey(now));
   const gymWa = gym.whatsapp ?? gym.phone;
   const name = [m.firstName, m.lastName].filter(Boolean).join(" ");
-  const tone = !current ? "bg-neutral-100" : current.status === "FROZEN" ? "bg-blue-50" : left <= 7 ? "bg-amber-50" : "bg-green-50";
+  const tone = !current ? "bg-neutral-100" : current.status === "FROZEN" ? "bg-blue-50" : current.status === "SUSPENDED" ? "bg-red-50" : left <= 7 ? "bg-amber-50" : "bg-green-50";
 
   return (
     <MemberShell gymName={gym.name} title={`Hi ${m.firstName}`}>
       <section className={`rounded-lg p-4 ${tone}`}>
         {current ? <>
-          <div className="text-sm text-neutral-600">{current.plan.name}{current.status === "FROZEN" && " · frozen"}</div>
+          <div className="text-sm text-neutral-600">{current.plan.name}{current.status === "FROZEN" && " · frozen"}{current.status === "SUSPENDED" && " · suspended until dues are paid"}</div>
           <div className="text-2xl font-semibold">{left > 0 ? `${left} day${left === 1 ? "" : "s"} left` : "Expires today"}</div>
           <div className="text-sm text-neutral-600">Valid till {fmt(current.endDate)}</div>
         </> : <>

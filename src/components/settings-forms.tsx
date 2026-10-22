@@ -5,7 +5,7 @@ import type { FormState } from "@/server/members";
 import type { ResetState } from "@/server/settings";
 import { Field, buttonClass, inputClass } from "@/components/ui";
 
-export type SettingsValues = { name: string; phone: string | null; whatsapp: string | null; email: string | null; address: string | null; gstin: string | null; gstPercent: number; upiId: string | null; receiptNote: string | null; openTime: string | null; closeTime: string | null; weeklyOff: string | null; holidays: string[]; logoUrl: string | null };
+export type SettingsValues = { name: string; phone: string | null; whatsapp: string | null; email: string | null; address: string | null; gstin: string | null; gstPercent: number; upiId: string | null; receiptNote: string | null; openTime: string | null; closeTime: string | null; weeklyOff: string | null; holidays: string[]; logoUrl: string | null; autoSuspendEnabled: boolean; autoSuspendDays: number };
 
 export function SettingsForm({ action, initial }: { action: (prev: FormState, fd: FormData) => Promise<FormState>; initial: SettingsValues }) {
   const [state, formAction, pending] = useActionState(action, undefined);
@@ -38,6 +38,14 @@ export function SettingsForm({ action, initial }: { action: (prev: FormState, fd
           <Field label="GST % on new invoices" error={e.gstPercent}><input name="gstPercent" type="number" min={0} max={28} defaultValue={initial.gstPercent} className={inputClass} /></Field>
           <Field label="UPI ID" error={e.upiId} hint="Members get a Pay-by-UPI link for dues, e.g. gymname@okaxis"><input name="upiId" defaultValue={initial.upiId ?? ""} className={inputClass} /></Field>
           <Field label="Receipt footer" error={e.receiptNote} hint="Printed at the bottom of invoices"><input name="receiptNote" defaultValue={initial.receiptNote ?? ""} className={inputClass} /></Field>
+        </div>
+      </section>
+      <section className="rounded border bg-white p-4">
+        <h2 className="mb-1 font-medium">Unpaid dues</h2>
+        <p className="mb-3 text-sm text-neutral-500">When a member's dues stay unpaid this long, their membership is suspended automatically (no check-in) and restored the moment they pay. Staff can also restore it from the profile.</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Auto-suspend" error={e.autoSuspendEnabled}><select name="autoSuspendEnabled" defaultValue={initial.autoSuspendEnabled ? "on" : "off"} className={inputClass}><option value="on">On (recommended)</option><option value="off">Off</option></select></Field>
+          <Field label="After how many days unpaid" error={e.autoSuspendDays}><input name="autoSuspendDays" type="number" min={1} max={90} defaultValue={initial.autoSuspendDays} className={inputClass} /></Field>
         </div>
       </section>
       <section className="rounded border bg-white p-4">

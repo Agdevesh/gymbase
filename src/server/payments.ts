@@ -21,6 +21,7 @@ export async function receiptLink(invoiceId: string, paidPaise: number, method?:
   return { receipt: url, wa: waLink(inv.member.phone, receiptMessage({ gymName: inv.gym.name, memberName: inv.member.firstName, number: inv.number, paidPaise, duePaise: inv.totalPaise - inv.paidPaise, url, method })) };
 }
 import { audit } from "@/server/audit";
+import { restoreIfSettled } from "@/server/dues";
 const rsFmt = (p: number) => `Rs ${(p / 100).toLocaleString("en-IN")}`;
 import type { FormState } from "@/server/members";
 import { baseUrl } from "@/lib/base-url";
@@ -57,6 +58,7 @@ export async function collectPayment(memberId: string, _prev: CollectState, form
       await tx.payment.create({ data: { gymId, memberId, invoiceId: a.invoiceId, method, amountPaise: a.amountPaise, reference, takenById: userId } });
       await tx.invoice.update({ where: { id: a.invoiceId }, data: { paidPaise: { increment: a.amountPaise } } });
     }
+    await restoreIfSettled(tx, gymId, memberId, userId);
     return { ids: alloc.map((a) => a.invoiceId) };
   });
   if ("errors" in result) return result;

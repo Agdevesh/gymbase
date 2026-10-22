@@ -2,12 +2,12 @@
 
 import { useActionState, useState } from "react";
 import type { FormState } from "@/server/members";
-import { assignPlan, cancelMembership, freezeMembership, unfreezeMembership } from "@/server/memberships";
+import { assignPlan, cancelMembership, freezeMembership, restoreMembership, unfreezeMembership } from "@/server/memberships";
 import { paise, toDateInput } from "@/lib/memberships";
 import { Field, buttonClass, inputClass, secondaryButtonClass } from "@/components/ui";
 
 export type PlanOption = { id: string; name: string; pricePaise: number; durationDays: number };
-export type CurrentMembership = { id: string; status: "ACTIVE" | "FROZEN"; endDate: Date; planName: string; credit: number } | null;
+export type CurrentMembership = { id: string; status: "ACTIVE" | "FROZEN" | "SUSPENDED"; endDate: Date; planName: string; credit: number } | null;
 
 function AssignForm({ memberId, plans, mode, defaultStart, credit, onClose }: { memberId: string; plans: PlanOption[]; mode: "new" | "upgrade"; defaultStart: Date; credit: number; onClose: () => void }) {
   const [state, action, pending] = useActionState(assignPlan.bind(null, memberId, mode), undefined);
@@ -48,6 +48,7 @@ export function MembershipPanel({ memberId, plans, current, renewFrom }: { membe
         {current?.status === "ACTIVE" && plans.length > 0 && <button onClick={() => setOpen(open === "upgrade" ? null : "upgrade")} className={secondaryButtonClass}>Upgrade / change</button>}
         {current?.status === "ACTIVE" && <form action={freezeMembership.bind(null, memberId, current.id)}><button className={secondaryButtonClass}>Freeze</button></form>}
         {current?.status === "FROZEN" && <form action={unfreezeMembership.bind(null, memberId, current.id)}><button className={buttonClass}>Unfreeze</button></form>}
+        {current?.status === "SUSPENDED" && <form action={restoreMembership.bind(null, memberId, current.id)}><button className={buttonClass}>Restore membership</button></form>}
         {current && <button onClick={() => setOpen(open === "cancel" ? null : "cancel")} className={`${secondaryButtonClass} text-red-700`}>Cancel plan</button>}
       </div>
       {(open === "new" || open === "upgrade") && <AssignForm key={open} memberId={memberId} plans={plans} mode={open} defaultStart={renewFrom} credit={current?.credit ?? 0} onClose={close} />}

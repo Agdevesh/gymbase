@@ -25,3 +25,15 @@
   table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
   input, select, textarea, button { font-size: 16px; }
 }
+
+/* Tables everywhere share one look: quiet header, hairline rows, roomy cells. */
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+thead th { text-align: left; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-slate-500); background: var(--color-slate-50); padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--color-slate-200); }
+tbody td { padding: 0.625rem 0.75rem; border-bottom: 1px solid var(--color-slate-100); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: var(--color-slate-50); }
+
+/* Grid and flex children may shrink below their content, so a long word or a wide input never pushes the page sideways. */
+.app-main .grid > *, .app-main .flex-1 { min-width: 0; }
+.app-main input, .app-main select, .app-main textarea { min-width: 0; max-width: 100%; }
+.app-main p, .app-main li, .app-main dd { overflow-wrap: anywhere; }

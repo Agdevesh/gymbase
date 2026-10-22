@@ -16,6 +16,8 @@ export const settingsInput = z.object({
   openTime: time,
   closeTime: time,
   weeklyOff: opt(20),
+  autoSuspendEnabled: z.string().transform((v) => v === "on"),
+  autoSuspendDays: z.coerce.number().int().min(1, "At least 1 day").max(90, "At most 90 days"),
   holidays: z.string().transform((v) => v.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).slice(0, 100)),
 });
 export type SettingsInput = z.infer<typeof settingsInput>;

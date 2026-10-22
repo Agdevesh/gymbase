@@ -8,6 +8,7 @@ import { UPI_REQUEST_MINUTES, alertFromBody, matchAlert, newRequestCode, newToke
 import { requireTenant } from "@/server/tenant";
 import { requireMember } from "@/server/portal";
 import { audit } from "@/server/audit";
+import { restoreIfSettled } from "@/server/dues";
 import type { FormState } from "@/server/members";
 
 type Tx = Prisma.TransactionClient;
@@ -78,6 +79,7 @@ async function settle(tx: Tx, request: { id: string; gymId: string; invoiceId: s
   const payment = await tx.payment.create({ data: { gymId: request.gymId, memberId: request.memberId, invoiceId: request.invoiceId, method: "UPI", amountPaise: amount, reference: utr, takenById: byUserId ?? request.createdById } });
   await tx.invoice.update({ where: { id: request.invoiceId }, data: { paidPaise: { increment: amount } } });
   await tx.upiRequest.update({ where: { id: request.id }, data: { status: "PAID", utr, paymentId: payment.id, paidAt: new Date() } });
+  await restoreIfSettled(tx, request.gymId, request.memberId, byUserId);
   await tx.bankAlert.update({ where: { id: alertId }, data: { requestId: request.id, note: null } });
   return payment;
 }
