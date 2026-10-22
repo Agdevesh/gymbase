@@ -3,13 +3,14 @@ import { requireTenant } from "@/server/tenant";
 import { updateSettings } from "@/server/settings";
 import { AppShell, ButtonLink } from "@/components/ui";
 import { SettingsForm } from "@/components/settings-forms";
+import { baseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const { gymId } = await requireTenant("gym:manage");
   const gym = await db.gym.findUniqueOrThrow({ where: { id: gymId } });
-  const base = process.env.AUTH_URL ?? "";
+  const base = baseUrl();
   return (
     <AppShell title="Settings" actions={<><ButtonLink href="/settings/upi" secondary>UPI verification</ButtonLink><ButtonLink href="/settings/audit" secondary>Activity log</ButtonLink><ButtonLink href="/billing" secondary>GYMBASE plan</ButtonLink></>}>
       <p className="mb-4 text-sm text-neutral-500">Gym code <span className="font-mono">{gym.slug}</span> · staff sign in at <span className="font-mono">{base}/login</span></p>

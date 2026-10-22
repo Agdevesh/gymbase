@@ -11,6 +11,7 @@ import { acceptInput, commissionFor, commissionInput, inviteInput, percentInput,
 import { requireTenant } from "@/server/tenant";
 import { audit } from "@/server/audit";
 import type { FormState } from "@/server/members";
+import { baseUrl } from "@/lib/base-url";
 
 function errorsOf(issues: { path: PropertyKey[]; message: string }[]) {
   const errors: Record<string, string> = {};
@@ -38,7 +39,7 @@ export async function inviteStaff(_prev: InviteState, formData: FormData): Promi
   const invite = await db.invite.create({
     data: { gymId, email, role, token: randomBytes(24).toString("hex"), invitedBy: userId, expiresAt: new Date(Date.now() + 7 * 86400_000) },
   });
-  const base = process.env.AUTH_URL ?? "";
+  const base = baseUrl();
   const link = `${base}/invite/${invite.token}`;
   const gym = await db.gym.findUniqueOrThrow({ where: { id: gymId }, select: { name: true } });
   // Email goes out when a provider is configured; the link is always shown so the owner can WhatsApp it.

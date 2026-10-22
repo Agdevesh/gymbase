@@ -17,12 +17,13 @@ export async function receiptLink(invoiceId: string, paidPaise: number, method?:
   const inv = await db.invoice.findUnique({ where: { id: invoiceId }, include: { member: { select: { firstName: true, phone: true } }, gym: { select: { name: true } } } });
   if (!inv) return null;
   const token = inv.publicToken ?? (await db.invoice.update({ where: { id: invoiceId }, data: { publicToken: newReceiptToken() }, select: { publicToken: true } })).publicToken!;
-  const url = receiptUrl(process.env.AUTH_URL ?? "", token);
+  const url = receiptUrl(baseUrl(), token);
   return { receipt: url, wa: waLink(inv.member.phone, receiptMessage({ gymName: inv.gym.name, memberName: inv.member.firstName, number: inv.number, paidPaise, duePaise: inv.totalPaise - inv.paidPaise, url, method })) };
 }
 import { audit } from "@/server/audit";
 const rsFmt = (p: number) => `Rs ${(p / 100).toLocaleString("en-IN")}`;
 import type { FormState } from "@/server/members";
+import { baseUrl } from "@/lib/base-url";
 
 function errorsOf(issues: { path: PropertyKey[]; message: string }[]) {
   const errors: Record<string, string> = {};

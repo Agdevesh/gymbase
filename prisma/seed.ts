@@ -7,6 +7,11 @@ const DAY = 24 * 3600 * 1000;
 const daysFromNow = (n: number) => new Date(Date.now() + n * DAY);
 
 async function main() {
+  // `--if-missing` (used by the Vercel build) keeps an existing demo gym instead of resetting it.
+  if (process.argv.includes("--if-missing") && (await db.gym.findUnique({ where: { slug: "demo" } }))) {
+    console.log("Demo gym already exists; skipping seed.");
+    return;
+  }
   await db.gym.deleteMany({ where: { slug: "demo" } });
   const password = await hash("password123", 10);
 
