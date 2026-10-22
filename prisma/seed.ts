@@ -83,9 +83,9 @@ async function main() {
       include: { memberships: true },
     });
     const membership = member.memberships[0];
-    // Arjun still owes half; everyone else paid in full.
-    const paid = firstName === "Arjun" ? plan.pricePaise / 2 : plan.pricePaise;
+    // Arjun still owes half; everyone else paid in full (including GST).
     const gstPaise = Math.round(plan.pricePaise * 0.18);
+    const paid = firstName === "Arjun" ? (plan.pricePaise + gstPaise) / 2 : plan.pricePaise + gstPaise;
     await db.invoice.create({
       data: {
         gymId: gym.id,
@@ -98,7 +98,7 @@ async function main() {
         totalPaise: plan.pricePaise + gstPaise,
         paidPaise: paid,
         issuedAt: startDate,
-        dueDate: firstName === "Arjun" ? daysFromNow(5) : null,
+        dueDate: startDate,
         payments: {
           create: { gymId: gym.id, memberId: member.id, method: i % 2 ? "UPI" : "CASH", amountPaise: paid, takenById: reception.id, paidAt: startDate },
         },

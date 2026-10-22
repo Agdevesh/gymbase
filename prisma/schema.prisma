@@ -389,6 +389,9 @@ model Payment {
   paidAt      DateTime      @default(now())
   closingId   String?
   closing     CashClosing?  @relation(fields: [closingId], references: [id])
+  refundOfId  String?
+  refundOf    Payment?      @relation("Refund", fields: [refundOfId], references: [id])
+  refunds     Payment[]     @relation("Refund")
 
   @@index([gymId, paidAt])
   @@index([gymId, closingId])
