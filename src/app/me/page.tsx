@@ -1,6 +1,4 @@
-import QRCode from "qrcode";
 import { db } from "@/lib/db";
-import { qrPayload } from "@/lib/checkin";
 import { paise } from "@/lib/payments";
 import { daysLeft, waLink } from "@/lib/portal";
 import { holidayOn, upiLink } from "@/lib/settings";
@@ -19,18 +17,16 @@ export default async function PortalHome({ searchParams }: { searchParams: Promi
   const { member: m, gym } = await requireMember();
   const { upi: upiError } = await searchParams;
   await expireMemberships(gym.id);
-  const now = new Date(), since30 = new Date(now.getTime() - 30 * 86400_000);
-  const [memberships, invoices, visits, pt, plans] = await Promise.all([
+  const now = new Date();
+  const [memberships, invoices, pt, plans] = await Promise.all([
     db.membership.findMany({ where: { memberId: m.id }, orderBy: { endDate: "desc" }, take: 3, include: { plan: { select: { name: true } } } }),
     db.invoice.findMany({ where: { memberId: m.id, paidPaise: { lt: db.invoice.fields.totalPaise } }, select: { id: true, number: true, totalPaise: true, paidPaise: true }, orderBy: { issuedAt: "asc" } }),
-    db.checkIn.findMany({ where: { memberId: m.id, checkedInAt: { gte: since30 } }, orderBy: { checkedInAt: "desc" }, select: { checkedInAt: true } }),
     db.ptAssignment.findFirst({ where: { memberId: m.id, endDate: null }, include: { trainer: { select: { name: true } }, slots: { where: { status: "SCHEDULED", at: { gte: now } }, orderBy: { at: "asc" }, take: 3 } } }),
     db.plan.findMany({ where: { gymId: gym.id, active: true, type: { not: "PT" } }, orderBy: { durationDays: "asc" } }),
   ]);
   const current = memberships.find((x) => x.status === "ACTIVE" || x.status === "FROZEN" || x.status === "SUSPENDED");
   const due = invoices.reduce((s, i) => s + i.totalPaise - i.paidPaise, 0);
   const left = current ? daysLeft(current.endDate, now) : 0;
-  const svg = await QRCode.toString(qrPayload(m.qrToken), { type: "svg", margin: 1, width: 200 });
   const holiday = holidayOn(gym.holidays, localDateKey(now));
   const gymWa = gym.whatsapp ?? gym.phone;
   const name = [m.firstName, m.lastName].filter(Boolean).join(" ");
@@ -63,12 +59,6 @@ export default async function PortalHome({ searchParams }: { searchParams: Promi
         </section>
       )}
 
-      <section className="mt-3 rounded-lg border bg-white p-4 text-center">
-        <div className="mx-auto w-48" dangerouslySetInnerHTML={{ __html: svg }} />
-        <p className="mt-1 font-mono text-slate-500">{m.code}</p>
-        <p className="text-xs text-slate-500">Show this QR at reception to check in</p>
-      </section>
-
       {(left <= 10 || !current) && plans.length > 0 && (
         <section className="mt-3 rounded-lg border bg-white p-4">
           <h2 className="mb-2 font-semibold text-slate-900">{current ? "Renew now" : "Join a plan"}</h2>
@@ -86,14 +76,6 @@ export default async function PortalHome({ searchParams }: { searchParams: Promi
           <p className="mt-2 text-xs text-slate-500">Pay, then message reception; they activate the plan and your receipt appears under Payments.</p>
         </section>
       )}
-
-      <section className="mt-3 rounded-lg border bg-white p-4">
-        <h2 className="mb-1 flex justify-between font-semibold text-slate-900">Attendance <span className="text-sm font-normal text-slate-500">{visits.length} visits in 30 days</span></h2>
-        <div className="flex flex-wrap gap-1">
-          {Array.from({ length: 30 }, (_, i) => { const d = new Date(now.getTime() - (29 - i) * 86400_000); const key = localDateKey(d); const hit = visits.some((v) => localDateKey(v.checkedInAt) === key); return <span key={key} title={key} className={`h-4 w-4 rounded-sm ${hit ? "bg-green-500" : "bg-slate-200"}`} />; })}
-        </div>
-        {visits[0] && <p className="mt-1 text-xs text-slate-500">Last visit {visits[0].checkedInAt.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>}
-      </section>
 
       {pt && <section className="mt-3 rounded-lg border bg-white p-4 text-sm"><h2 className="font-semibold text-slate-900">Personal training</h2><p>Trainer {pt.trainer.name} · {sessionsLeft(pt)} of {pt.sessionsTotal} sessions left</p>{pt.slots.length > 0 && <ul className="mt-1 text-slate-600">{pt.slots.map((s) => <li key={s.id}>Next: {fmtSlot(s.at)}</li>)}</ul>}</section>}
 

@@ -18,7 +18,7 @@ Read this first in each session instead of rescanning the repo.
 - Stage 3, Plans & memberships: `/plans` (owner: create/edit/retire plans; `Plan.active` gates assignment). Member profile gets a Membership panel: start plan, renew (chains from current end date via `renewedFromId`), upgrade (old one CANCELLED with `cancelReason`, pro-rata credit becomes `discountPaise` on the new one), freeze/unfreeze (`frozenDays` extends `endDate`), cancel with reason. Every new membership raises an Invoice (`Gym.invoiceSeq`, `Gym.gstPercent`) with `paidPaise` 0, so dues appear until Payments collects them. Logic + zod in `src/lib/memberships.ts`, actions in `src/server/plans.ts` / `src/server/memberships.ts`.
 - Auto-expiry: `expireMemberships()` runs on member page loads and daily from `/api/cron/expire` (Vercel cron in `vercel.json`, guarded by `CRON_SECRET`).
 
-- Stage 4, Entry/check-in: `/checkin` desk (`CheckinDesk` client component: debounced search by name/phone/code, ↑↓/Enter/Esc, hardware QR scanners type `GB:<qrToken>` + Enter), live "in gym now" list with check-out, today's count, refresh every 30 s. `/checkin/scan/[token]` for phone-camera scans (logged-in staff). `/members/[id]/card` printable QR card (`qrcode` SVG). `/attendance` by day or `?member=`. Gate logic in `src/lib/checkin.ts` (`entryGate` blocks NO_PLAN/EXPIRED/FROZEN/CANCELLED), actions in `src/server/checkin.ts`. A member counts as in-gym for 4 h without checkout; the daily cron closes visits older than 6 h at 90 min.
+- Stage 4, Entry/check-in: removed in stage 21 (owner's call, 2026-10-22). Members just come or don't; nothing is logged at the door.
 
 - Stage 5, Inquiries/leads: `/leads` pipeline with status chips (Open, Due today, each stage) and source chips (walk-in, phone, WhatsApp, Instagram, website, referral, other), combinable with search. `/leads/new`, `/leads/[id]` (follow-up form: note + stage + next date with +1d/+2d/+7d, lost reason; activity log; tel: and wa.me links), `/leads/[id]/edit`. "Convert to member" creates the Member from the lead (or links an existing member with the same phone) and redirects to the profile to start a plan. Logic in `src/lib/leads.ts`, actions in `src/server/leads.ts`. `LeadSource` gained WHATSAPP and INSTAGRAM.
 - `requireTenant(permission)` now redirects a logged-in user lacking the permission to `/dashboard?denied=…` (notice shown there) instead of throwing.
@@ -55,6 +55,8 @@ All 10 MVP modules are built.
 
 - Stage 20, Design system everywhere: every staff page, form, table, chip and empty state uses the slate + indigo `brand-*` palette (cards `rounded-xl border-slate-200 shadow-sm`, primary buttons `bg-brand-600`, links `text-brand-700`); default border colour is slate-200 (Tailwind 4 otherwise uses currentColor); shared table look in `globals.css`. Login page is a branded card; member portal bottom nav has icons. Verified 21 staff pages with no horizontal scroll at 1366px and 360px.
 
+- Stage 21, Member check-in removed: dropped `CheckIn` table, `CheckInSource` enum and `Member.qrToken` (migration `20261023090000_remove_member_checkin`); deleted `/checkin`, `/checkin/scan/[token]`, `/attendance`, `/members/[id]/card`, `CheckinDesk`, `src/lib/checkin.ts`, `src/server/checkin.ts`, the attendance CSV export, check-in tiles/lists on the dashboard ("Active members" tile instead), recent check-ins on the profile, portal QR + 30-day attendance strip, reports peak hours (`visitHistogram`), cron `closeStaleCheckIns`. Permission `checkin:write` renamed `attendance:write`; it still gates staff attendance, class Present/No-show and PT logging/slots. Phone bottom tabs are now Home, Members, Payments, Dues, More. Suspension still happens (and shows on profile/portal); it just no longer blocks a door. Older stage notes that mention check-in describe removed code.
+
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
@@ -71,7 +73,7 @@ Asked by the owner on 2026-10-22, to land in their modules:
 - Phones stored as E.164; `normalizePhone` assumes +91 for bare 10-digit numbers.
 - `Membership.renewedFromId` chains renewals and upgrades; freeze extends `endDate` by `frozenDays`.
 - Editing a plan never changes existing memberships (they keep their own `pricePaise`); retire a plan instead of deleting it.
-- QR payload is `GB:<32-hex qrToken>`; `tokenFromScan` also accepts bare tokens and `/checkin/scan/<token>` URLs. Duplicate check-ins within the 4 h window are ignored (reported as "already in").
+- No member gym-entry tracking (removed 2026-10-22): reception should not have to log visits. Do not add check-in, QR cards, visit history or peak hours back unless the owner asks.
 - Payments never carry credit: an amount above the outstanding total is rejected. Refunds are separate `Payment` rows (`kind` REFUND) that decrement `Invoice.paidPaise`. Cash closing only stamps CASH payments; UPI/card reconcile with the bank.
 - Razorpay plan ids map to GYMBASE plan codes through env (`RAZORPAY_PLAN_STARTER` etc.); the gymId and planCode travel in subscription `notes` so the webhook needs no lookup table.
 - Any FK to `User` that is reachable from `Gym` must cascade (seed deletes the demo gym); RESTRICT there breaks teardown.

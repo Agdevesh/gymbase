@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { inGymSince } from "@/lib/checkin";
 import { DAY, bucketByDay, conversionRate, dayStart, monthStart, signedTotal } from "@/lib/dashboard";
 import { daysOverdue, dueAmount, dueBucket, duesReminderText, waLink } from "@/lib/dues";
 import { OPEN_STATUSES, SOURCE_LABELS } from "@/lib/leads";
@@ -19,7 +18,6 @@ import { Avatar, ButtonLink, Card, EmptyState, Notice, StatTile, TONES } from "@
 export const dynamic = "force-dynamic";
 
 const fmtDate = (d: Date) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
-const time = (d: Date) => d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
 const name = (m: { firstName: string; lastName: string | null }) => [m.firstName, m.lastName].filter(Boolean).join(" ");
 const greeting = (h: number) => (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening");
 
@@ -33,12 +31,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const today = dayStart(now), tomorrow = new Date(today.getTime() + DAY), week = new Date(today.getTime() + 7 * DAY), month = monthStart(now), last30 = new Date(today.getTime() - 29 * DAY);
   const reports = can(role, "reports:read"), money = can(role, "payments:write"), leadsOk = can(role, "leads:write");
 
-  const [gym, me, checkInsToday, inGym, recentCheckIns, activeMembers, expiring, endingToday, payments30, unpaid, leadsMonth, followUps, newMembersMonth, expensesMonth, ptClients] = await Promise.all([
+  const [gym, me, activeMembers, expiring, endingToday, payments30, unpaid, leadsMonth, followUps, newMembersMonth, expensesMonth, ptClients] = await Promise.all([
     db.gym.findUniqueOrThrow({ where: { id: gymId }, include: { subscription: true } }),
     db.user.findUnique({ where: { id: userId }, select: { name: true } }),
-    db.checkIn.count({ where: { gymId, checkedInAt: { gte: today } } }),
-    db.checkIn.count({ where: { gymId, checkedOutAt: null, checkedInAt: { gte: inGymSince(now) } } }),
-    db.checkIn.findMany({ where: { gymId, checkedInAt: { gte: today } }, orderBy: { checkedInAt: "desc" }, take: 8, include: { member: { select: { id: true, firstName: true, lastName: true, photoUrl: true } } } }),
     db.membership.count({ where: { gymId, status: { in: ["ACTIVE", "FROZEN"] } } }),
     db.membership.findMany({ where: { gymId, status: "ACTIVE", endDate: { gte: today, lt: week }, renewedTo: null }, orderBy: { endDate: "asc" }, include: { member: { select: { id: true, firstName: true, lastName: true, phone: true } }, plan: { select: { name: true } } } }),
     money ? db.membership.findMany({ where: { gymId, status: "ACTIVE", endDate: { gte: today, lt: tomorrow }, renewedTo: null }, include: { member: { select: { id: true, firstName: true, lastName: true, phone: true, photoUrl: true } }, plan: { select: { name: true, pricePaise: true } } } }) : [],
@@ -106,8 +101,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       title={`${greeting(now.getHours())}, ${(me?.name ?? "").split(" ")[0] || role.toLowerCase()}`}
       subtitle={<>{now.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })} · {gym.name}{role === "OWNER" && <> · <Link href="/billing" className="hover:underline">{gym.subscription?.planCode?.toLowerCase()} plan, {subState.label}</Link></>}</>}
       actions={<>
-        {can(role, "checkin:write") && <ButtonLink href="/checkin"><Icon name="checkin" size={16} />Check-in desk</ButtonLink>}
-        {can(role, "members:write") && <ButtonLink href="/members/new" secondary><Icon name="plus" size={16} />Member</ButtonLink>}
+        {can(role, "members:write") && <ButtonLink href="/members/new"><Icon name="plus" size={16} />Member</ButtonLink>}
         {leadsOk && <ButtonLink href="/leads/new" secondary><Icon name="plus" size={16} />Inquiry</ButtonLink>}
       </>}
     >
@@ -127,10 +121,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
       <div className="flex flex-col gap-5">
       <dl className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
-        <StatTile label="Check-ins today" value={checkInsToday} sub={`${inGym} in gym now`} href="/checkin" icon="checkin" tone="green" />
+        <StatTile label="Active members" value={activeMembers} sub={`${newMembersMonth} joined this month`} href="/members" icon="members" tone="green" />
         {money && <StatTile label="Collected today" value={paise(revenueToday)} sub={byMethod.length ? byMethod.map(([m, v]) => `${METHOD_LABELS[m]} ${paise(v)}`).join(" · ") : "Nothing yet"} href="/payments" icon="payments" tone="brand" />}
         {money && <StatTile label="Dues outstanding" value={paise(dueTotal)} sub={`${dueMembers} member${dueMembers === 1 ? "" : "s"}`} href="/defaulters" icon="defaulters" tone="red" alert={dueTotal > 0} />}
-        <StatTile label="Expiring in 7 days" value={expiring.length} sub={`${activeMembers} active members`} href="/members" icon="clock" tone="amber" alert={expiring.length > 0} />
+        <StatTile label="Expiring in 7 days" value={expiring.length} sub="Call them to renew" href="/members" icon="clock" tone="amber" alert={expiring.length > 0} />
         {leadsOk && <StatTile label="Inquiries this month" value={leadsMonth.length} sub={`${converted} joined · ${conversionRate(converted, leadsMonth.length)}% conversion`} href="/leads" icon="leads" tone="violet" />}
         {leadsOk && <StatTile label="Follow-ups due" value={followUps.length} sub={followUps.length ? "Call them today" : "All caught up"} href="/leads?status=DUE" icon="phone" tone="sky" alert={followUps.length > 0} />}
         {reports && <StatTile label="Revenue this month" value={paise(revenueMonth)} sub={`${newMembersMonth} new member${newMembersMonth === 1 ? "" : "s"}`} href="/reports" icon="trend" tone="brand" />}
@@ -183,9 +177,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             {followUps.length === 0 ? <EmptyState icon="check" title="All caught up" /> : <ul className="divide-y divide-slate-100 text-sm">{followUps.map((l) => <li key={l.id} className="flex items-center justify-between py-2"><Link href={`/leads/${l.id}`} className="font-medium text-slate-800 hover:text-brand-700">{l.name}</Link><span className={`text-xs ${l.followUpAt && l.followUpAt < today ? "font-medium text-red-600" : "text-slate-500"}`}>{SOURCE_LABELS[l.source]}{l.followUpAt && l.followUpAt < today ? " · overdue" : ""}</span></li>)}</ul>}
           </Card>
         )}
-        <Card title={<><Icon name="checkin" size={16} className="text-emerald-500" />Today&apos;s check-ins</>} href="/attendance">
-          {recentCheckIns.length === 0 ? <EmptyState icon="members" title="Nobody yet today" /> : <ul className="divide-y divide-slate-100 text-sm">{recentCheckIns.map((c) => <li key={c.id} className="flex items-center gap-2 py-1.5"><Avatar name={name(c.member)} photoUrl={c.member.photoUrl} size={28} /><Link href={`/members/${c.member.id}`} className="flex-1 font-medium text-slate-800 hover:text-brand-700">{name(c.member)}</Link><span className="text-xs text-slate-500">{time(c.checkedInAt)}</span></li>)}</ul>}
-        </Card>
         {role === "TRAINER" && (
           <Card title="My PT clients" href="/staff/pt">
             {ptClients.length === 0 ? <EmptyState title="No clients assigned" /> : <ul className="divide-y divide-slate-100 text-sm">{ptClients.map((a) => <li key={a.id} className="flex items-center gap-2 py-1.5"><Avatar name={name(a.member)} photoUrl={a.member.photoUrl} size={28} /><Link href={`/members/${a.member.id}`} className="flex-1 font-medium text-slate-800">{name(a.member)}</Link><span className="text-xs text-slate-500">{sessionsLeft(a)} left</span></li>)}</ul>}

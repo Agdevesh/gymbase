@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { expireMemberships } from "@/server/memberships";
-import { closeStaleCheckIns } from "@/server/checkin";
 import { dispatchReminders, generateAllReminders } from "@/server/reminders";
 import { expireUpiRequests } from "@/server/upi";
 import { suspendDefaulters } from "@/server/dues";
@@ -9,9 +8,9 @@ import { suspendDefaulters } from "@/server/dues";
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) return new NextResponse("Unauthorized", { status: 401 });
-  const [expired, closedVisits, upiExpired] = await Promise.all([expireMemberships(), closeStaleCheckIns(), expireUpiRequests()]);
+  const [expired, upiExpired] = await Promise.all([expireMemberships(), expireUpiRequests()]);
   const suspended = await suspendDefaulters();
   const remindersCreated = await generateAllReminders();
   const remindersSent = await dispatchReminders();
-  return NextResponse.json({ expired, suspended, closedVisits, upiExpired, remindersCreated, remindersSent });
+  return NextResponse.json({ expired, suspended, upiExpired, remindersCreated, remindersSent });
 }

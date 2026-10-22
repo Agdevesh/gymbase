@@ -3,9 +3,7 @@ import type { SVGProps } from "react";
 // Hand-drawn 24px outline icons (no icon dependency, so cheap phones download nothing extra).
 const PATHS = {
   home: "M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10",
-  checkin: "M9 12l2 2 4-4M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z",
   members: "M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21a8 8 0 0 1 16 0",
-  attendance: "M8 2v4M16 2v4M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z",
   leads: "M21 12a8 8 0 0 1-11.7 7.1L4 21l1.9-5.3A8 8 0 1 1 21 12zM8 12h.01M12 12h.01M16 12h.01",
   payments: "M3 7h18v10H3zM3 11h18M7 15h3",
   upi: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM20 14v6h-3",

@@ -6,7 +6,7 @@ export type Permission =
   | "staff:manage"
   | "members:write"
   | "members:read"
-  | "checkin:write"
+  | "attendance:write"
   | "leads:write"
   | "payments:write"
   | "payments:refund"
@@ -19,15 +19,15 @@ const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "staff:manage",
     "members:write",
     "members:read",
-    "checkin:write",
+    "attendance:write",
     "leads:write",
     "payments:write",
     "payments:refund",
     "reports:read",
     "fitness:write",
   ],
-  RECEPTION: ["members:write", "members:read", "checkin:write", "leads:write", "payments:write", "fitness:write"],
-  TRAINER: ["members:read", "checkin:write", "fitness:write"],
+  RECEPTION: ["members:write", "members:read", "attendance:write", "leads:write", "payments:write", "fitness:write"],
+  TRAINER: ["members:read", "attendance:write", "fitness:write"],
   MEMBER: [],
 };
 

@@ -6,20 +6,19 @@ import { PLAN_CODES, SAAS_PLANS, limitLabel } from "@/lib/saas";
 
 export const metadata: Metadata = {
   title: "GYMBASE · Gym management software for Indian gyms",
-  description: "Check-in with QR, memberships and renewals, dues with UPI, WhatsApp reminders, leads, PT scheduling, classes, expenses and reports. Built for gyms in India. 14-day free trial.",
+  description: "Memberships and renewals, dues with UPI, WhatsApp reminders, leads, PT scheduling, classes, expenses and reports. Built for gyms in India. 14-day free trial.",
   openGraph: { title: "GYMBASE · Run your gym from your phone", description: "Members, dues, UPI, WhatsApp reminders, PT, classes and reports in one simple app for Indian gyms.", type: "website" },
 };
 
 const FEATURES: [string, string][] = [
-  ["QR check-in desk", "Members scan a card or their phone; see who is in the gym right now and who stopped coming."],
   ["Memberships & renewals", "Monthly to yearly plans, freeze, upgrade with pro-rata, auto-expiry and a defaulters list."],
   ["Dues with UPI", "Invoices with GST, Pay-by-UPI links and QR, cash closing at the end of the day."],
   ["WhatsApp receipts & reminders", "Receipts, renewal, dues, birthday and PT reminders go out on WhatsApp (or by hand with one tap)."],
   ["Inquiries & follow-ups", "Walk-ins, Instagram and WhatsApp leads with follow-up dates and one-click conversion."],
   ["Trainers & PT", "PT plans with session counts, trainer time slots, commissions and attendance."],
   ["Classes & lockers", "Zumba, yoga and batch timetables with bookings; numbered lockers with rent."],
-  ["Member app", "Members see their plan, dues, QR, diet and workout plan, progress and classes on their phone."],
-  ["Expenses & reports", "Rent, salaries, electricity; monthly profit & loss, peak hours, renewal rate, best plans."],
+  ["Member app", "Members see their plan, dues, UPI payments, diet and workout plan, progress and classes on their phone."],
+  ["Expenses & reports", "Rent, salaries, electricity; monthly profit & loss, renewal rate, best plans."],
 ];
 
 export default async function Home() {
@@ -33,7 +32,7 @@ export default async function Home() {
       </header>
       <section className="py-10 text-center sm:py-16">
         <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">Run your gym from your phone.</h1>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">Check-ins, memberships, dues on UPI, WhatsApp reminders, leads, trainers and reports. Made for gyms in India, simple enough for reception to learn in a day.</p>
+        <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">Memberships, dues on UPI, WhatsApp reminders, leads, trainers and reports. Made for gyms in India, simple enough for reception to learn in a day.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link href="/signup" className="rounded-lg bg-brand-600 hover:bg-brand-700 px-6 py-3 font-medium text-white">Start 14-day free trial</Link>
           <Link href="/login?gym=demo&email=owner@demo.gym" className="rounded border bg-white px-6 py-3 font-medium">See the demo</Link>

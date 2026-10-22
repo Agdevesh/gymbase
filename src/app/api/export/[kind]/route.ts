@@ -4,7 +4,7 @@ import { toCsv } from "@/lib/settings";
 import { audit } from "@/server/audit";
 import { requireTenant } from "@/server/tenant";
 
-const KINDS = ["members", "memberships", "payments", "invoices", "attendance", "leads", "expenses"] as const;
+const KINDS = ["members", "memberships", "payments", "invoices", "leads", "expenses"] as const;
 const rs = (p: number) => (p / 100).toFixed(2);
 const name = (m: { firstName: string; lastName: string | null }) => [m.firstName, m.lastName].filter(Boolean).join(" ");
 const dt = (d: Date | null) => (d ? d.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: false }) : "");
@@ -35,11 +35,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ kind: st
     const is = await db.invoice.findMany({ where: { gymId, ...(range && { issuedAt: range }) }, orderBy: { issuedAt: "desc" }, include: { member: true, membership: { include: { plan: true } } } });
     headers = ["Invoice", "Date", "Member code", "Member", "Phone", "Item", "Subtotal (Rs)", "GST %", "GST (Rs)", "Total (Rs)", "Paid (Rs)", "Due (Rs)"];
     rows = is.map((i) => [i.number, i.issuedAt, i.member.code, name(i.member), i.member.phone, i.membership ? `${i.membership.plan.name} membership` : i.notes ?? "Charge", rs(i.subtotalPaise), i.gstPercent, rs(i.gstPaise), rs(i.totalPaise), rs(i.paidPaise), rs(Math.max(0, i.totalPaise - i.paidPaise))]);
-  } else if (kind === "attendance") {
-    const since = range ?? { gte: new Date(Date.now() - 90 * 86400_000) };
-    const cs = await db.checkIn.findMany({ where: { gymId, checkedInAt: since }, orderBy: { checkedInAt: "desc" }, include: { member: true } });
-    headers = ["In", "Out", "Member code", "Member", "Phone", "Source"];
-    rows = cs.map((c) => [dt(c.checkedInAt), dt(c.checkedOutAt), c.member.code, name(c.member), c.member.phone, c.source]);
   } else if (kind === "expenses") {
     const es = await db.expense.findMany({ where: { gymId, ...(range && { paidAt: range }) }, orderBy: { paidAt: "desc" }, include: { createdBy: { select: { name: true } } } });
     headers = ["Date", "Category", "Amount (Rs)", "Paid by", "Paid to", "Notes", "Added by"];
