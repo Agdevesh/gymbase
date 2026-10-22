@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { activityInput, leadFields, leadInput, splitName } from "@/lib/leads";
 import { formatMemberCode } from "@/lib/members";
-import { requireTenant } from "@/server/tenant";
+import { memberLimitError, requireTenant } from "@/server/tenant";
 import type { FormState } from "@/server/members";
 
 function errorsOf(issues: { path: PropertyKey[]; message: string }[]) {
@@ -78,6 +78,8 @@ export async function convertLead(leadId: string) {
   const lead = await db.lead.findFirst({ where: { id: leadId, gymId }, include: { member: { select: { id: true } } } });
   if (!lead) return;
   if (lead.member) redirect(`/members/${lead.member.id}`);
+  const existingByPhone = await db.member.findFirst({ where: { gymId, phone: lead.phone }, select: { id: true } });
+  if (!existingByPhone && (await memberLimitError(gymId))) redirect(`/billing?locked=1`);
   const memberId = await db.$transaction(async (tx) => {
     const existing = await tx.member.findFirst({ where: { gymId, phone: lead.phone }, select: { id: true, leadId: true } });
     let id: string;

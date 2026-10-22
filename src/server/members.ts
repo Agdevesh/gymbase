@@ -15,7 +15,7 @@ import {
   memberInput,
   noteInput,
 } from "@/lib/members";
-import { requireTenant } from "@/server/tenant";
+import { memberLimitError, requireTenant } from "@/server/tenant";
 
 export type FormState = { errors?: Record<string, string>; message?: string } | undefined;
 
@@ -45,6 +45,8 @@ export async function createMember(_prev: FormState, formData: FormData): Promis
   const { gymId } = await requireTenant("members:write");
   const parsed = readMemberForm(formData);
   if (!parsed.success) return fieldErrors(parsed.error.issues);
+  const limit = await memberLimitError(gymId);
+  if (limit) return { message: limit };
   const photo = formData.get("photo");
   const photoError = photo instanceof File && photo.size > 0 ? checkUpload(photo, "photo") : null;
   if (photoError) return { errors: { photo: photoError } };

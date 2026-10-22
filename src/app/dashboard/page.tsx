@@ -8,6 +8,7 @@ import { METHOD_LABELS, PAYMENT_METHODS, paise } from "@/lib/payments";
 import { can } from "@/lib/rbac";
 import { sessionsLeft } from "@/lib/staff";
 import { requireTenant } from "@/server/tenant";
+import { subscriptionState } from "@/lib/saas";
 import { expireMemberships } from "@/server/memberships";
 import { AppShell, Avatar, ButtonLink } from "@/components/ui";
 
@@ -57,13 +58,20 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const converted = leadsMonth.filter((l) => l.status === "CONVERTED").length;
   const bySource = Object.entries(leadsMonth.reduce<Record<string, number>>((acc, l) => ((acc[l.source] = (acc[l.source] ?? 0) + 1), acc), {})).sort((a, b) => b[1] - a[1]);
   const series = bucketByDay(payments30, now, 14);
+  const subState = subscriptionState(gym.subscription, now);
   const max = Math.max(1, ...series.map((s) => s.total));
 
   return (
     <AppShell title={gym.name} actions={<>
-      <span className="self-center text-xs text-neutral-500">{role.toLowerCase()} · {gym.subscription?.planCode} {gym.subscription?.status.toLowerCase()}</span>
+      <Link href="/billing" className="self-center text-xs text-neutral-500 hover:underline">{role.toLowerCase()} · {gym.subscription?.planCode} {subState.label}</Link>
       <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}><button className="rounded border bg-white px-3 py-1 text-sm">Sign out</button></form>
     </>}>
+      {role === "OWNER" && (subState.locked || subState.label === "trial" || subState.label === "payment failed" || subState.label === "cancelling") && (
+        <p className={`mb-4 rounded p-3 text-sm ${subState.locked ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-900"}`}>
+          {subState.locked ? subState.reason : subState.label === "trial" ? `Free trial: ${subState.daysLeft} day${subState.daysLeft === 1 ? "" : "s"} left.` : subState.label === "payment failed" ? `Payment failed. ${subState.daysLeft} days before access pauses.` : `Subscription ends in ${subState.daysLeft} days.`}{" "}
+          <Link href="/billing" className="underline">Choose a plan</Link>
+        </p>
+      )}
       {denied && <p className="mb-4 rounded bg-amber-50 p-3 text-sm text-amber-900">Your {role.toLowerCase()} login does not have access to that screen ({denied}). Ask the owner if you need it.</p>}
 
       <div className="mb-4 flex flex-wrap gap-2">
