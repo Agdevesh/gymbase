@@ -9,5 +9,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/((?!api/auth|api/cron|api/billing/webhook|invite/|signup|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api/auth|api/cron|api/billing/webhook|invite/|signup|forgot|reset/|_next/static|_next/image|favicon.ico).*)"],
 };

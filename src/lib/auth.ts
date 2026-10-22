@@ -1,9 +1,10 @@
-import NextAuth, { type DefaultSession } from "next-auth";
+import NextAuth, { CredentialsSignin, type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { z } from "zod";
 import type { Role } from "@prisma/client";
 import { db } from "@/lib/db";
+import { clearRateLimit, rateLimit } from "@/lib/ratelimit";
 
 declare module "next-auth" {
   interface Session {
@@ -14,6 +15,8 @@ declare module "next-auth" {
     role: Role;
   }
 }
+
+export class Throttled extends CredentialsSignin { code = "throttled"; }
 
 const credentialsSchema = z.object({
   gym: z.string().min(1),
@@ -31,10 +34,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
         const { gym, email, password } = parsed.data;
+        // 10 failed attempts per login per 15 minutes; a correct password clears the counter.
+        const key = `login:${gym.toLowerCase()}:${email.toLowerCase()}`;
+        if (!(await rateLimit(key, 10, 15 * 60_000))) throw new Throttled();
         const user = await db.user.findFirst({
           where: { email: email.toLowerCase(), active: true, gym: { slug: gym } },
         });
         if (!user || !(await compare(password, user.passwordHash))) return null;
+        await clearRateLimit(key);
         return { id: user.id, name: user.name, email: user.email, gymId: user.gymId, role: user.role };
       },
     }),

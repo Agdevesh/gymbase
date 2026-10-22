@@ -16,6 +16,7 @@ import {
   noteInput,
 } from "@/lib/members";
 import { memberLimitError, requireTenant } from "@/server/tenant";
+import { audit } from "@/server/audit";
 
 export type FormState = { errors?: Record<string, string>; message?: string } | undefined;
 
@@ -42,7 +43,7 @@ const isDuplicatePhone = (e: unknown) =>
   e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
 
 export async function createMember(_prev: FormState, formData: FormData): Promise<FormState> {
-  const { gymId } = await requireTenant("members:write");
+  const { gymId, userId } = await requireTenant("members:write");
   const parsed = readMemberForm(formData);
   if (!parsed.success) return fieldErrors(parsed.error.issues);
   const limit = await memberLimitError(gymId);
@@ -67,12 +68,13 @@ export async function createMember(_prev: FormState, formData: FormData): Promis
     if (isDuplicatePhone(e)) return { errors: { phone: "A member with this phone already exists" } };
     throw e;
   }
+  await audit(gymId, userId, "member.create", "member", id, `Added member ${parsed.data.firstName} ${parsed.data.lastName ?? ""} (${parsed.data.phone})`);
   revalidatePath("/members");
   redirect(`/members/${id}`);
 }
 
 export async function updateMember(memberId: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const { gymId } = await requireTenant("members:write");
+  const { gymId, userId } = await requireTenant("members:write");
   const parsed = readMemberForm(formData);
   if (!parsed.success) return fieldErrors(parsed.error.issues);
   const photo = formData.get("photo");
@@ -98,6 +100,7 @@ export async function updateMember(memberId: string, _prev: FormState, formData:
     if (isDuplicatePhone(e)) return { errors: { phone: "A member with this phone already exists" } };
     throw e;
   }
+  await audit(gymId, userId, "member.update", "member", memberId, `Edited member ${parsed.data.firstName} ${parsed.data.lastName ?? ""}`);
   revalidatePath("/members");
   revalidatePath(`/members/${memberId}`);
   redirect(`/members/${memberId}`);

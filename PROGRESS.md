@@ -33,13 +33,15 @@ Read this first in each session instead of rescanning the repo.
 
 - Stage 10, SaaS billing: `/signup` (public) creates a gym + owner + 14-day TRIAL with Growth limits and default plans. Catalog in `src/lib/saas.ts` (starter ₹999 / growth ₹2,499 / pro ₹4,999 per month; `UNLIMITED` = 1,000,000). `subscriptionState()` decides lock: trial ended, cancelled, or past due beyond 7-day grace → `requireTenant` redirects every write permission to `/billing?locked=1` (reads keep working; `/billing` itself passes `skipSubscriptionCheck`). `memberLimitError()` guards member creation and lead conversion; staff invites already respect `staffLimit`. `/billing` (owner): plan, status, usage vs limits, plan cards → `startCheckout` creates a Razorpay Subscription and redirects to its hosted page (needs `RAZORPAY_*` env; otherwise an honest "not set up" message), cancel at period end. `/api/billing/webhook` verifies the Razorpay signature and maps activated/charged/resumed → ACTIVE (+ plan limits from `notes.planCode`), pending/halted → PAST_DUE, cancelled/completed → CANCELLED. Dashboard shows trial/lock banners to the owner.
 
-All 10 MVP modules are built. Remaining ideas: owner settings page (gym details, GST %, logo), member self-service login, CSV export, platform super-admin for manual plan activation.
+All 10 MVP modules are built.
+
+- Stage 11, Settings/exports/audit/security: `/settings` (owner): gym profile + logo (StoredFile, printed on invoice PDFs), GSTIN/GST %, UPI ID (invoice PDFs with dues get a UPI QR + `upi://pay` link via `upiLink` in `src/lib/settings.ts`), receipt footer, open/close times, weekly off, holidays (one per line `YYYY-MM-DD label`; check-in desk shows a banner on holidays). CSV exports at `/api/export/{members|memberships|payments|invoices|attendance|leads}` (owner, `?from=&to=` optional, BOM for Excel, `toCsv`). `AuditLog` written by `audit()` in `src/server/audit.ts` from member create/edit, membership start/upgrade/freeze/unfreeze/cancel, payment collect/refund/charge, cash close, staff deactivate, settings, password resets, exports; viewed at `/settings/audit`. `/account` change password (any role). `/forgot` (public, rate-limited 3/h) emails a reset link when email is configured; owner can issue a reset link from `/staff` ("Reset password", link shown to WhatsApp). `/reset/[token]` public (2 h, single use). Login throttled 10 failures / 15 min per gym+email via `RateLimit` table (`src/lib/ratelimit.ts`), `Throttled` CredentialsSignin subclass → `/login?error=throttled`.
 
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
 
-1. Polish: settings page (gym profile, GST %), member self-login, exports, super-admin.
+1. Member self-service portal, measurements/diet/workout, lockers, classes, expenses/reports, WhatsApp receipts, onboarding, import, landing page (thread "Gap analysis and missing features", 2026-10-22).
 
 ## Decisions
 

@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 import { formatInvoiceNumber, gstOn } from "@/lib/memberships";
 import { allocatePayment, chargeInput, closingInput, collectInput, refundInput } from "@/lib/payments";
 import { requireTenant } from "@/server/tenant";
+import { audit } from "@/server/audit";
+const rsFmt = (p: number) => `Rs ${(p / 100).toLocaleString("en-IN")}`;
 import type { FormState } from "@/server/members";
 
 function errorsOf(issues: { path: PropertyKey[]; message: string }[]) {
@@ -43,13 +45,14 @@ export async function collectPayment(memberId: string, _prev: FormState, formDat
     return { ids: alloc.map((a) => a.invoiceId) };
   });
   if ("errors" in result) return result;
+  await audit(gymId, userId, "payment.collect", "member", memberId, `Collected ${rsFmt(amountPaise)} by ${method}${reference ? ` (${reference})` : ""}`);
   refresh(memberId, result.ids);
   return {};
 }
 
 // A one-off charge (registration fee, supplements, locker) raises its own invoice.
 export async function addCharge(memberId: string, _prev: FormState, formData: FormData): Promise<FormState> {
-  const { gymId } = await requireTenant("payments:write");
+  const { gymId, userId } = await requireTenant("payments:write");
   const parsed = chargeInput.safeParse({ description: str(formData, "description"), amountPaise: str(formData, "amountPaise"), gst: str(formData, "gst") });
   if (!parsed.success) return errorsOf(parsed.error.issues);
   const { description, amountPaise, gst } = parsed.data;
@@ -66,6 +69,7 @@ export async function addCharge(memberId: string, _prev: FormState, formData: Fo
     return inv.id;
   });
   if (!id) return { message: "Member not found" };
+  await audit(gymId, userId, "invoice.charge", "invoice", id, `Charged ${rsFmt(amountPaise)}: ${description}`);
   refresh(memberId, [id]);
   redirect(`/invoices/${id}`);
 }
@@ -83,6 +87,7 @@ export async function refundPayment(paymentId: string, _prev: FormState, formDat
     db.payment.create({ data: { gymId, memberId: original.memberId, invoiceId: original.invoiceId, kind: "REFUND", method, amountPaise, reference: reason, takenById: userId, refundOfId: original.id } }),
     ...(original.invoiceId ? [db.invoice.update({ where: { id: original.invoiceId }, data: { paidPaise: { decrement: amountPaise } } })] : []),
   ]);
+  await audit(gymId, userId, "payment.refund", "member", original.memberId, `Refunded ${rsFmt(amountPaise)} by ${method}: ${reason ?? ""}`);
   refresh(original.memberId, original.invoiceId ? [original.invoiceId] : []);
   return {};
 }
@@ -103,6 +108,7 @@ export async function closeDay(_prev: FormState, formData: FormData): Promise<Fo
     await tx.payment.updateMany({ where: { id: { in: cash.map((p) => p.id) } }, data: { closingId: closing.id } });
     return {};
   });
+  if (!result.message) await audit(gymId, userId, "cash.close", "cashclosing", null, `Closed cash for ${date}: counted ${rsFmt(countedPaise)}`);
   revalidatePath("/payments");
   return result;
 }
