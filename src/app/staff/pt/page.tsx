@@ -20,7 +20,7 @@ export default async function PtPage({ searchParams }: { searchParams: Promise<{
     include: { member: { select: { id: true, firstName: true, lastName: true, photoUrl: true, phone: true } }, trainer: { select: { name: true } }, sessions: { orderBy: { at: "desc" }, take: 1 } },
   });
   return (
-    <AppShell title={mineOnly ? "My PT clients" : "PT clients"} back={{ href: "/staff", label: "Staff" }} actions={<Link href={all ? "/staff/pt" : "/staff/pt?all=1"} className="text-sm underline">{all ? "Active only" : "Include finished"}</Link>}>
+    <AppShell title={mineOnly ? "My PT clients" : "PT clients"} back={{ href: "/staff", label: "Staff" }} actions={<><Link href="/staff/pt/schedule" className="rounded border bg-white px-3 py-1 text-sm">Today's schedule</Link><Link href={all ? "/staff/pt" : "/staff/pt?all=1"} className="self-center text-sm underline">{all ? "Active only" : "Include finished"}</Link></>}>
       {rows.length === 0 ? <p className="rounded border bg-white p-6 text-center text-neutral-500">No PT clients.</p> : (
         <ul className="divide-y rounded border bg-white">
           {rows.map((a) => {

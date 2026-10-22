@@ -19,6 +19,9 @@ import { disableMemberAccess, enableMemberAccess } from "@/server/portal";
 import { MEASURE_FIELDS, bmi, trend } from "@/lib/fitness";
 import { setPlanActive } from "@/server/fitness";
 import { MeasurementForm, PlanEditor } from "@/components/fitness-forms";
+import { PtSlotForm } from "@/components/pt-slot-form";
+import { fmtSlot } from "@/lib/pt";
+import { markSlot } from "@/server/ptslots";
 
 const fmtDate = (d: Date | null) => (d ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—");
 const paise = (p: number) => `₹${(p / 100).toLocaleString("en-IN")}`;
@@ -32,7 +35,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
     where: { id, gymId },
     include: {
       memberships: { orderBy: { endDate: "desc" }, include: { plan: { select: { name: true, type: true, ptSessions: true } } } },
-      ptAssignments: { orderBy: { createdAt: "desc" }, include: { trainer: { select: { name: true } }, sessions: { orderBy: { at: "desc" }, take: 5, include: { trainer: { select: { name: true } } } } } },
+      ptAssignments: { orderBy: { createdAt: "desc" }, include: { trainer: { select: { name: true } }, slots: { where: { status: "SCHEDULED" }, orderBy: { at: "asc" }, take: 12 }, sessions: { orderBy: { at: "desc" }, take: 5, include: { trainer: { select: { name: true } } } } } },
       documents: { orderBy: { createdAt: "desc" } },
       user: { select: { active: true } },
       measurements: { orderBy: { at: "desc" }, take: 10 },
@@ -136,6 +139,11 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
           <div className="space-y-2">
             <p className="text-sm">{activePt.trainer.name} · {activePt.sessionsUsed}/{activePt.sessionsTotal} sessions, <strong>{sessionsLeft(activePt)} left</strong>{activePt.feePaise > 0 && ` · fee ${paise(activePt.feePaise)}`} · since {fmtDate(activePt.startDate)}</p>
             {can(role, "checkin:write") && <div className="flex gap-2"><div className="flex-1"><LogSessionForm assignmentId={activePt.id} /></div>{write && <form action={endPt.bind(null, activePt.id)}><button className="rounded border px-2 py-1 text-xs text-red-700">End</button></form>}</div>}
+            <div className="rounded bg-neutral-50 p-2 text-sm">
+              <div className="mb-1 flex items-center justify-between"><span className="font-medium">Upcoming slots</span><Link href={`/staff/pt/schedule?trainer=${activePt.trainerId}`} className="text-xs underline">Trainer's day</Link></div>
+              {activePt.slots.length === 0 ? <p className="text-xs text-neutral-500">No slots booked.</p> : <ul className="space-y-0.5">{activePt.slots.map((s) => <li key={s.id} className="flex items-center justify-between"><span>{fmtSlot(s.at)} · {s.durationMin} min</span>{can(role, "checkin:write") && <form action={markSlot.bind(null, s.id, "CANCELLED")}><button className="text-xs text-red-700 underline">Cancel</button></form>}</li>)}</ul>}
+              {can(role, "checkin:write") && <div className="mt-2"><PtSlotForm assignmentId={activePt.id} left={sessionsLeft(activePt) - activePt.slots.length} /></div>}
+            </div>
             {activePt.sessions.length > 0 && <ul className="text-xs text-neutral-500">{activePt.sessions.map((s) => <li key={s.id}>{s.at.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })} · {s.trainer.name}{s.notes && ` · ${s.notes}`}</li>)}</ul>}
           </div>
         ) : <p className="mb-2 text-sm text-neutral-500">{m.ptAssignments[0] ? `Last PT with ${m.ptAssignments[0].trainer.name}, ${m.ptAssignments[0].sessionsUsed}/${m.ptAssignments[0].sessionsTotal} sessions.` : "No trainer assigned."}</p>}

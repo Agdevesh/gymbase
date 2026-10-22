@@ -65,6 +65,7 @@ model Gym {
   lockers       Locker[]
   classes       GymClass[]
   classBookings ClassBooking[]
+  ptSlots       PtSlot[]
 }
 
 model User {
@@ -97,6 +98,7 @@ model User {
   measurementsTaken Measurement[]
   fitnessPlansWritten FitnessPlan[]
   classesLed      GymClass[]
+  ptSlotsLed      PtSlot[]         @relation("SlotTrainer")
 
   @@unique([gymId, email])
   @@index([gymId, role])
@@ -164,6 +166,7 @@ model Member {
   fitnessPlans  FitnessPlan[]
   locker        Locker?
   classBookings ClassBooking[]
+  ptSlots       PtSlot[]
 
   @@unique([gymId, code])
   @@unique([gymId, phone])
@@ -454,6 +457,7 @@ enum ReminderType {
   DUES
   BIRTHDAY
   LEAD_FOLLOWUP
+  PT_SESSION
   CUSTOM
 }
 
@@ -536,6 +540,7 @@ model PtAssignment {
 
   sessions    PtSession[]
   commissions Commission[]
+  slots       PtSlot[]
 
   @@index([gymId, trainerId])
   @@index([memberId])
@@ -549,8 +554,40 @@ model PtSession {
   trainer      User         @relation(fields: [trainerId], references: [id], onDelete: Cascade)
   at           DateTime     @default(now())
   notes        String?
+  slot         PtSlot?
 
   @@index([assignmentId, at])
+}
+
+enum PtSlotStatus {
+  SCHEDULED
+  DONE
+  NO_SHOW
+  CANCELLED
+}
+
+// A booked PT time slot. Marking it DONE creates the PtSession that counts against the plan.
+model PtSlot {
+  id           String       @id @default(cuid())
+  gymId        String
+  gym          Gym          @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  assignmentId String
+  assignment   PtAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  trainerId    String
+  trainer      User         @relation("SlotTrainer", fields: [trainerId], references: [id], onDelete: Cascade)
+  memberId     String
+  member       Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  at           DateTime
+  durationMin  Int          @default(60)
+  status       PtSlotStatus @default(SCHEDULED)
+  notes        String?
+  sessionId    String?      @unique
+  session      PtSession?   @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  createdAt    DateTime     @default(now())
+
+  @@index([gymId, at])
+  @@index([trainerId, at])
+  @@index([memberId, at])
 }
 
 model Commission {
