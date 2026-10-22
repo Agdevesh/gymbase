@@ -5,6 +5,9 @@ import { requireTenant } from "@/server/tenant";
 import { deleteDocument, deleteNote } from "@/server/members";
 import { AppShell, Avatar, ButtonLink, StatusBadge } from "@/components/ui";
 import { DocumentForm, NoteForm } from "@/components/member-detail-forms";
+import { MembershipPanel } from "@/components/membership-panel";
+import { expireMemberships } from "@/server/memberships";
+import { prorataCredit, renewalStart } from "@/lib/memberships";
 
 const fmtDate = (d: Date | null) => (d ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—");
 const paise = (p: number) => `₹${(p / 100).toLocaleString("en-IN")}`;
@@ -12,6 +15,8 @@ const paise = (p: number) => `₹${(p / 100).toLocaleString("en-IN")}`;
 export default async function MemberPage({ params }: { params: Promise<{ id: string }> }) {
   const { gymId, role } = await requireTenant("members:read");
   const { id } = await params;
+  await expireMemberships(gymId);
+  const plansQ = db.plan.findMany({ where: { gymId, active: true }, orderBy: { durationDays: "asc" }, select: { id: true, name: true, pricePaise: true, durationDays: true } });
   const m = await db.member.findFirst({
     where: { id, gymId },
     include: {
@@ -23,9 +28,12 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
     },
   });
   if (!m) notFound();
+  const plans = await plansQ;
   const write = can(role, "members:write");
   const name = [m.firstName, m.lastName].filter(Boolean).join(" ");
-  const current = m.memberships[0];
+  const current = m.memberships.find((ms) => ms.status === "ACTIVE" || ms.status === "FROZEN") ?? m.memberships[0];
+  const live = current && (current.status === "ACTIVE" || current.status === "FROZEN") ? current : null;
+  const now = new Date();
   const dues = m.invoices.reduce((s, i) => s + i.totalPaise - i.paidPaise, 0);
   const row = (k: string, v: React.ReactNode) => (
     <div className="flex justify-between gap-4 py-1 text-sm"><dt className="text-neutral-500">{k}</dt><dd className="text-right">{v || "—"}</dd></div>
@@ -41,6 +49,24 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
           {current && <div className="text-sm text-neutral-500">{current.plan.name} · {fmtDate(current.startDate)} to {fmtDate(current.endDate)}</div>}
           {dues > 0 && <div className="text-sm font-medium text-red-700">Dues {paise(dues)}</div>}
         </div>
+      </section>
+
+      <section className="mb-4 rounded border bg-white p-4">
+        <h2 className="mb-2 font-medium">Membership</h2>
+        {live ? (
+          <p className="mb-3 text-sm text-neutral-600">
+            {live.plan.name}, {live.status === "FROZEN" ? `frozen since ${fmtDate(live.frozenAt)}` : `${Math.max(0, Math.ceil((live.endDate.getTime() - now.getTime()) / 86400000))} days left`}, ends {fmtDate(live.endDate)}
+            {live.frozenDays > 0 && ` (${live.frozenDays} frozen days added)`}
+          </p>
+        ) : <p className="mb-3 text-sm text-neutral-600">{current ? `Last plan ${current.plan.name} ${current.status.toLowerCase()} on ${fmtDate(current.endDate)}.` : "No plan yet."}</p>}
+        {write && (
+          <MembershipPanel
+            memberId={m.id}
+            plans={plans}
+            current={live ? { id: live.id, status: live.status as "ACTIVE" | "FROZEN", endDate: live.endDate, planName: live.plan.name, credit: prorataCredit(live, now) } : null}
+            renewFrom={renewalStart(live, new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())))}
+          />
+        )}
       </section>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -101,10 +127,10 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
         )}
       </section>
 
-      {m.memberships.length > 1 && (
+      {m.memberships.length > 0 && (
         <section className="mt-4 rounded border bg-white p-4">
           <h2 className="mb-2 font-medium">Membership history</h2>
-          <ul className="divide-y text-sm">{m.memberships.map((ms) => <li key={ms.id} className="flex justify-between py-1"><span>{ms.plan.name}</span><span className="text-neutral-500">{fmtDate(ms.startDate)} – {fmtDate(ms.endDate)}</span><StatusBadge status={ms.status} /></li>)}</ul>
+          <ul className="divide-y text-sm">{m.memberships.map((ms) => <li key={ms.id} className="flex flex-wrap items-center justify-between gap-2 py-1"><span>{ms.plan.name} <span className="text-neutral-400">{paise(ms.pricePaise - ms.discountPaise)}{ms.discountPaise > 0 && ` (−${paise(ms.discountPaise)})`}</span></span><span className="text-neutral-500">{fmtDate(ms.startDate)} – {fmtDate(ms.endDate)}{ms.cancelReason && ` · ${ms.cancelReason}`}</span><StatusBadge status={ms.status} /></li>)}</ul>
         </section>
       )}
     </AppShell>

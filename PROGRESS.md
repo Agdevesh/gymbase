@@ -15,15 +15,17 @@ Read this first in each session instead of rescanning the repo.
 - Uploads (photo, documents) are stored as `StoredFile` bytes in Postgres and served by `/api/files/[id]`, which checks the session's gymId. Limits: photo 2 MB, document 4 MB (server-action body limit 4.5 MB, Vercel's cap).
 - Member codes come from an atomic `Gym.memberSeq` counter (`GB-0001`…). Free-form `Member.notes` stays on the profile; `MemberNote` is the dated log with author.
 
+- Stage 3, Plans & memberships: `/plans` (owner: create/edit/retire plans; `Plan.active` gates assignment). Member profile gets a Membership panel: start plan, renew (chains from current end date via `renewedFromId`), upgrade (old one CANCELLED with `cancelReason`, pro-rata credit becomes `discountPaise` on the new one), freeze/unfreeze (`frozenDays` extends `endDate`), cancel with reason. Every new membership raises an Invoice (`Gym.invoiceSeq`, `Gym.gstPercent`) with `paidPaise` 0, so dues appear until Payments collects them. Logic + zod in `src/lib/memberships.ts`, actions in `src/server/plans.ts` / `src/server/memberships.ts`.
+- Auto-expiry: `expireMemberships()` runs on member page loads and daily from `/api/cron/expire` (Vercel cron in `vercel.json`, guarded by `CRON_SECRET`).
+
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
 - Payments (module 6): a "Defaulters" screen on the main nav: member name, last plan, days since dues started, amount.
 - Inquiries (module 5): filter leads by source, including WhatsApp and Instagram (add to `LeadSource` enum alongside walk-in/phone/web).
 
-1. Module 3, Plans & memberships.
-3. Modules 4 to 10 in the order of the build prompt.
-4. Invite accept page (`/invite/[token]`) and staff list in settings.
+1. Modules 4 to 10 in the order of the build prompt.
+2. Invite accept page (`/invite/[token]`) and staff list in settings.
 
 ## Decisions
 
@@ -33,7 +35,9 @@ Asked by the owner on 2026-10-22, to land in their modules:
 - Prisma 6 chosen over 8 (rc) for stability. shadcn/ui deferred until a module needs real components; plain Tailwind so far.
 - Files in Postgres rather than S3/Blob to keep the stack to Vercel + Neon; swap `storeFile` in `src/server/members.ts` for object storage if the DB grows.
 - Phones stored as E.164; `normalizePhone` assumes +91 for bare 10-digit numbers.
-- `Membership.renewedFromId` chains renewals; freeze extends `endDate` by `frozenDays`.
+- `Membership.renewedFromId` chains renewals and upgrades; freeze extends `endDate` by `frozenDays`.
+- Editing a plan never changes existing memberships (they keep their own `pricePaise`); retire a plan instead of deleting it.
+- Form checkboxes use a hidden `off` input before the checkbox; server actions read `formData.getAll(name).includes("on")`.
 
 ## Setup
 

@@ -18,6 +18,8 @@ async function main() {
       email: "hello@irontemple.in",
       address: "12 MG Road, Indore, MP 452001",
       gstin: "23ABCDE1234F1Z5",
+      gstPercent: 18,
+      invoiceSeq: 6,
       subscription: { create: { planCode: "growth", status: "TRIAL", memberLimit: 500, staffLimit: 10, trialEndsAt: daysFromNow(14) } },
       users: {
         create: [
@@ -30,6 +32,7 @@ async function main() {
         create: [
           { name: "Monthly", type: "MONTHLY", durationDays: 30, pricePaise: 150000 },
           { name: "Quarterly", type: "QUARTERLY", durationDays: 90, pricePaise: 400000 },
+          { name: "Half-yearly", type: "HALF_YEARLY", durationDays: 180, pricePaise: 750000 },
           { name: "Yearly", type: "YEARLY", durationDays: 365, pricePaise: 1200000 },
           { name: "PT 12 sessions", type: "PT", durationDays: 45, pricePaise: 600000, ptSessions: 12 },
         ],
