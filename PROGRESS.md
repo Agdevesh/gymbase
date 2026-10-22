@@ -37,6 +37,9 @@ All 10 MVP modules are built.
 
 - Stage 11, Settings/exports/audit/security: `/settings` (owner): gym profile + logo (StoredFile, printed on invoice PDFs), GSTIN/GST %, UPI ID (invoice PDFs with dues get a UPI QR + `upi://pay` link via `upiLink` in `src/lib/settings.ts`), receipt footer, open/close times, weekly off, holidays (one per line `YYYY-MM-DD label`; check-in desk shows a banner on holidays). CSV exports at `/api/export/{members|memberships|payments|invoices|attendance|leads}` (owner, `?from=&to=` optional, BOM for Excel, `toCsv`). `AuditLog` written by `audit()` in `src/server/audit.ts` from member create/edit, membership start/upgrade/freeze/unfreeze/cancel, payment collect/refund/charge, cash close, staff deactivate, settings, password resets, exports; viewed at `/settings/audit`. `/account` change password (any role). `/forgot` (public, rate-limited 3/h) emails a reset link when email is configured; owner can issue a reset link from `/staff` ("Reset password", link shown to WhatsApp). `/reset/[token]` public (2 h, single use). Login throttled 10 failures / 15 min per gym+email via `RateLimit` table (`src/lib/ratelimit.ts`), `Throttled` CredentialsSignin subclass → `/login?error=throttled`.
 
+- Stage 12, Phone app: the site is an installable PWA (`public/manifest.webmanifest`, icons in `public/icons/`, `public/sw.js` network-first with `/offline` fallback, Apple touch icon + iOS meta in `src/app/layout.tsx`, `RegisterServiceWorker`/`InstallButton` in `src/components/pwa.tsx`). Public `/install` page: one-tap Chrome install prompt, add-to-home-screen steps for Android Chrome and iPhone Safari, and an "Download Android app (APK)" link (`NEXT_PUBLIC_APK_URL`, default = latest GitHub release asset `gymbase.apk`). Linked from `/login` and the nav ("Get app").
+- Android APK: `android-app/` is a Capacitor 8 shell (`appId app.gymbase.android`) whose WebView loads the deployed site (`GYMBASE_URL` at `cap sync` time, default `https://gymbase.vercel.app`), so web deploys reach phones without a new APK. `.github/workflows/android.yml` builds a signed release APK on every PR/main push touching `android-app/`, on `workflow_dispatch`, and on `v*` tags, where it also attaches `gymbase.apk` to the GitHub release (that is what `/install` links to). `versionCode` = run number.
+
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
@@ -60,6 +63,13 @@ Asked by the owner on 2026-10-22, to land in their modules:
 - Reminders without an API provider are a to-do list for reception (wa.me / sms: / mailto: links + "Mark sent"), never silently faked. Cron runs at 04:30 UTC = 10:00 IST, matching `sendTimeFor`.
 - pdfkit's built-in Helvetica has no ₹ glyph, so PDFs print "Rs.".
 - Form checkboxes use a hidden `off` input before the checkbox; server actions read `formData.getAll(name).includes("on")`.
+
+## Android app: build, sign, Play Store
+
+- Local build: `cd android-app && npm ci && GYMBASE_URL=https://<your-domain> npx cap sync android && cd android && ./gradlew assembleDebug` (needs Android SDK + Java 21). Debug APK lands in `android/app/build/outputs/apk/debug/`.
+- Release via CI: push a tag `v1.2.3` (or run the "Android APK" workflow manually and grab the `gymbase-apk` artifact). Set repo variable `GYMBASE_URL` to the production domain once it exists.
+- Signing: generate a key once, `keytool -genkeypair -keystore gymbase.jks -alias gymbase -keyalg RSA -keysize 2048 -validity 10000`, then add repo secrets `ANDROID_KEYSTORE_BASE64` (`base64 -w0 gymbase.jks`), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`. Until those exist CI signs with a throwaway key, so phones must uninstall before installing a newer APK. Never commit the keystore.
+- Play Store later: switch the workflow to `bundleRelease` (`.aab`), enrol the keystore in Play App Signing, add a privacy-policy URL on `/install`, and set `targetSdkVersion` to Play's current minimum (Capacitor's `variables.gradle`). Google rejects pure web wrappers only when they add no value; GYMBASE is the owner's own SaaS so it qualifies, but a Trusted Web Activity (Bubblewrap) is the alternative if a review complains.
 
 ## Setup
 

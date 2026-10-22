@@ -33,6 +33,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       </form>
       <p className="mt-3 text-center text-sm"><a href="/forgot" className="text-neutral-500 underline">Forgot password?</a></p>
       <p className="mt-2 text-center text-sm text-neutral-500">New gym? <a href="/signup" className="underline">Start a free trial</a></p>
+      <p className="mt-2 text-center text-sm text-neutral-500"><a href="/install" className="underline">Get the app on your phone</a></p>
     </main>
   );
 }

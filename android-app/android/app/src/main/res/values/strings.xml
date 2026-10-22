@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GYMBASE</string>
+    <string name="title_activity_main">GYMBASE</string>
+    <string name="package_name">app.gymbase.android</string>
+    <string name="custom_url_scheme">app.gymbase.android</string>
+</resources>

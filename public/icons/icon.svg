@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#171717"/>
+  <g fill="#fafafa">
+    <rect x="96" y="196" width="40" height="120" rx="8"/>
+    <rect x="136" y="166" width="40" height="180" rx="8"/>
+    <rect x="336" y="166" width="40" height="180" rx="8"/>
+    <rect x="376" y="196" width="40" height="120" rx="8"/>
+    <rect x="176" y="236" width="160" height="40" rx="8"/>
+  </g>
+  <text x="256" y="430" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="700" fill="#fafafa" text-anchor="middle">GYMBASE</text>
+</svg>
