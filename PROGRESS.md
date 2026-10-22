@@ -25,6 +25,8 @@ Read this first in each session instead of rescanning the repo.
 
 - Stage 6, Payments: member profile Billing section (collect against oldest unpaid invoices first, partial payments, "other charge" raises an invoice with optional GST), `/invoices/[id]` (lines, payments, collect, owner-only refund linked via `Payment.refundOfId`), `/invoices/[id]/pdf` (pdfkit, `serverExternalPackages`), `/payments?date=` (day ledger by method + cash closing: expected = unclosed cash of the day, counted, short/excess; `CashClosing` unique per gym+date), `/defaulters` (unpaid dues sorted by days overdue with amount and last plan, plus expired-not-renewed members sorted by days since expiry). Logic in `src/lib/payments.ts`, actions in `src/server/payments.ts`.
 
+- Stage 7, Reminders: `ReminderRule` per gym and type (renewal N days before expiry, dues every N days after due date, birthday on the day, lead follow-up on the follow-up date) with channel + template placeholders (`{name} {gym} {plan} {endDate} {amount} {days}`), defaults in `RULE_DEFAULTS`. `generateReminders(gymId)` runs from the daily cron (idempotent via `Reminder.dedupeKey`), `dispatchReminders()` sends due ones through `src/lib/messaging.ts` (WhatsApp Cloud API, Twilio SMS, Resend email via fetch; unconfigured channel → FAILED with a clear error). `/reminders` (pending/sent/failed/cancelled; Open WhatsApp wa.me link, Mark sent, Send now/Retry when a provider is configured, Cancel, Generate today's), `/reminders/settings` (owner). Member profile has a one-off "send a message" box (type CUSTOM).
+
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
@@ -44,6 +46,7 @@ Asked by the owner on 2026-10-22, to land in their modules:
 - Editing a plan never changes existing memberships (they keep their own `pricePaise`); retire a plan instead of deleting it.
 - QR payload is `GB:<32-hex qrToken>`; `tokenFromScan` also accepts bare tokens and `/checkin/scan/<token>` URLs. Duplicate check-ins within the 4 h window are ignored (reported as "already in").
 - Payments never carry credit: an amount above the outstanding total is rejected. Refunds are separate `Payment` rows (`kind` REFUND) that decrement `Invoice.paidPaise`. Cash closing only stamps CASH payments; UPI/card reconcile with the bank.
+- Reminders without an API provider are a to-do list for reception (wa.me / sms: / mailto: links + "Mark sent"), never silently faked. Cron runs at 04:30 UTC = 10:00 IST, matching `sendTimeFor`.
 - pdfkit's built-in Helvetica has no ₹ glyph, so PDFs print "Rs.".
 - Form checkboxes use a hidden `off` input before the checkbox; server actions read `formData.getAll(name).includes("on")`.
 

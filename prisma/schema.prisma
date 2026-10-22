@@ -45,6 +45,7 @@ model Gym {
   invoices      Invoice[]
   cashClosings  CashClosing[]
   reminders     Reminder[]
+  reminderRules ReminderRule[]
   staffAttend   StaffAttendance[]
   ptAssignments PtAssignment[]
   commissions   Commission[]
@@ -453,9 +454,26 @@ model Reminder {
   scheduledAt DateTime
   sentAt      DateTime?
   error       String?
+  providerRef String?
+  dedupeKey   String?         @unique // type:target:day, so the daily generator never duplicates
   createdAt   DateTime        @default(now())
 
   @@index([gymId, status, scheduledAt])
+}
+
+// Per-gym rule for each reminder type: when to send, through which channel, with which text.
+model ReminderRule {
+  id         String          @id @default(cuid())
+  gymId      String
+  gym        Gym             @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  type       ReminderType
+  channel    ReminderChannel
+  enabled    Boolean         @default(true)
+  daysBefore Int             @default(0) // renewal: days before expiry; dues: days after due date; others ignore
+  template   String
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([gymId, type])
 }
 
 // ---------- Staff & trainers ----------
