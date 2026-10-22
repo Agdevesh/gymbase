@@ -36,7 +36,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const today = dayStart(now), tomorrow = new Date(today.getTime() + DAY), week = new Date(today.getTime() + 7 * DAY), month = monthStart(now), last30 = new Date(today.getTime() - 29 * DAY);
   const reports = can(role, "reports:read"), money = can(role, "payments:write"), leadsOk = can(role, "leads:write");
 
-  const [gym, checkInsToday, inGym, recentCheckIns, activeMembers, expiring, payments30, duesInvoices, leadsMonth, followUps, newMembersMonth, ptClients] = await Promise.all([
+  const [gym, checkInsToday, inGym, recentCheckIns, activeMembers, expiring, payments30, duesInvoices, leadsMonth, followUps, newMembersMonth, expensesMonth, ptClients] = await Promise.all([
     db.gym.findUniqueOrThrow({ where: { id: gymId }, include: { subscription: true } }),
     db.checkIn.count({ where: { gymId, checkedInAt: { gte: today } } }),
     db.checkIn.count({ where: { gymId, checkedOutAt: null, checkedInAt: { gte: inGymSince(now) } } }),
@@ -48,6 +48,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     leadsOk ? db.lead.findMany({ where: { gymId, createdAt: { gte: month } }, select: { status: true, source: true } }) : [],
     leadsOk ? db.lead.findMany({ where: { gymId, status: { in: OPEN_STATUSES }, followUpAt: { lt: tomorrow } }, orderBy: { followUpAt: "asc" }, take: 8, select: { id: true, name: true, phone: true, source: true, followUpAt: true } }) : [],
     db.member.count({ where: { gymId, joinedAt: { gte: month } } }),
+    reports ? db.expense.aggregate({ where: { gymId, paidAt: { gte: month } }, _sum: { amountPaise: true } }) : null,
     role === "TRAINER" ? db.ptAssignment.findMany({ where: { gymId, trainerId: userId, endDate: null }, include: { member: { select: { id: true, firstName: true, lastName: true, photoUrl: true } } }, take: 10 }) : [],
   ]);
 
@@ -88,7 +89,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <Tile label="Expiring in 7 days" value={expiring.length} sub={`${activeMembers} active members`} href="/members" tone={expiring.length ? "amber" : undefined} />
         {leadsOk && <Tile label="Leads this month" value={leadsMonth.length} sub={`${converted} joined · ${conversionRate(converted, leadsMonth.length)}% conversion`} href="/leads" />}
         {leadsOk && <Tile label="Follow-ups due" value={followUps.length} href="/leads?status=DUE" tone={followUps.length ? "amber" : undefined} />}
-        {reports && <Tile label="Revenue this month" value={paise(revenueMonth)} sub={`${newMembersMonth} new members`} href="/payments" />}
+        {reports && <Tile label="Revenue this month" value={paise(revenueMonth)} sub={`${newMembersMonth} new members`} href="/reports" />}
+        {reports && <Tile label="Net this month" value={paise(revenueMonth - (expensesMonth?._sum.amountPaise ?? 0))} sub={`after ${paise(expensesMonth?._sum.amountPaise ?? 0)} expenses`} href="/expenses" tone={revenueMonth - (expensesMonth?._sum.amountPaise ?? 0) < 0 ? "red" : undefined} />}
         {role === "TRAINER" && <Tile label="My PT clients" value={ptClients.length} href="/staff/pt" />}
       </dl>
 

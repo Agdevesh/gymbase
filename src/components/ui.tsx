@@ -51,6 +51,8 @@ export function AppShell({ title, actions, children, back }: { title: string; ac
         <Link href="/leads" className="hover:text-neutral-900">Inquiries</Link>
         <Link href="/payments" className="hover:text-neutral-900">Payments</Link>
         <Link href="/defaulters" className="hover:text-neutral-900">Defaulters</Link>
+        <Link href="/expenses" className="hover:text-neutral-900">Expenses</Link>
+        <Link href="/reports" className="hover:text-neutral-900">Reports</Link>
         <Link href="/reminders" className="hover:text-neutral-900">Reminders</Link>
         <Link href="/staff" className="hover:text-neutral-900">Staff</Link>
         <Link href="/plans" className="hover:text-neutral-900">Plans</Link>
