@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { sendMessage } from "@/lib/messaging";
 import { acceptInput, commissionFor, commissionInput, inviteInput, percentInput, periodOf, ptAssignInput, localDay } from "@/lib/staff";
 import { requireTenant } from "@/server/tenant";
+import { audit } from "@/server/audit";
 import type { FormState } from "@/server/members";
 
 function errorsOf(issues: { path: PropertyKey[]; message: string }[]) {
@@ -76,6 +77,7 @@ export async function setStaffActive(staffId: string, active: boolean) {
   const { gymId, userId } = await requireTenant("staff:manage");
   if (staffId === userId) return;
   await db.user.updateMany({ where: { id: staffId, gymId, role: { not: "MEMBER" } }, data: { active } });
+  await audit(gymId, userId, active ? "staff.reactivate" : "staff.deactivate", "user", staffId, `${active ? "Reactivated" : "Deactivated"} a staff login`);
   revalidatePath("/staff");
 }
 

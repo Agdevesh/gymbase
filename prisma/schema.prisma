@@ -31,6 +31,14 @@ model Gym {
   memberSeq   Int      @default(0) // last number used for Member.code
   invoiceSeq  Int      @default(0) // last number used for Invoice.number
   gstPercent  Int      @default(0) // applied to new invoices, e.g. 18
+  logoUrl     String?
+  openTime    String? // "06:00"
+  closeTime   String? // "22:00"
+  weeklyOff   String? // e.g. "Sunday"
+  holidays    String[] @default([]) // "2026-10-20 Diwali"
+  upiId       String? // for UPI pay links / QR on receipts
+  receiptNote String? // footer on invoices and receipts
+  whatsapp    String? // gym's WhatsApp number shown to members
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -51,6 +59,7 @@ model Gym {
   commissions   Commission[]
   subscription  Subscription?
   files         StoredFile[]
+  auditLogs     AuditLog[]
 }
 
 model User {
@@ -78,6 +87,8 @@ model User {
   ptAssignments   PtAssignment[]   @relation("Trainer")
   commissions     Commission[]
   memberNotes     MemberNote[]
+  passwordResets  PasswordReset[]
+  auditLogs       AuditLog[]
 
   @@unique([gymId, email])
   @@index([gymId, role])
@@ -571,4 +582,39 @@ model Subscription {
   lastEventAt DateTime?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
+}
+
+// ---------- Settings, audit & security ----------
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String // e.g. member.create, payment.refund
+  entity    String // member | invoice | membership | ...
+  entityId  String?
+  summary   String
+  createdAt DateTime @default(now())
+
+  @@index([gymId, createdAt])
+  @@index([gymId, entity, entityId])
+}
+
+model PasswordReset {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+// Fixed-window counters for login and reset throttling; works across serverless instances.
+model RateLimit {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime
 }

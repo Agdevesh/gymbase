@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { inGymSince } from "@/lib/checkin";
+import { holidayOn } from "@/lib/settings";
+import { localDateKey } from "@/lib/payments";
 import { requireTenant } from "@/server/tenant";
 import { checkOut } from "@/server/checkin";
 import { AppShell, Avatar } from "@/components/ui";
@@ -12,16 +14,19 @@ export default async function CheckinPage() {
   const { gymId } = await requireTenant("checkin:write");
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const [inGym, todayCount] = await Promise.all([
+  const [inGym, todayCount, gym] = await Promise.all([
     db.checkIn.findMany({
       where: { gymId, checkedOutAt: null, checkedInAt: { gte: inGymSince(now) } },
       orderBy: { checkedInAt: "desc" },
       include: { member: { select: { id: true, firstName: true, lastName: true, photoUrl: true, code: true } } },
     }),
     db.checkIn.count({ where: { gymId, checkedInAt: { gte: todayStart } } }),
+    db.gym.findUniqueOrThrow({ where: { id: gymId }, select: { holidays: true, openTime: true, closeTime: true } }),
   ]);
+  const holiday = holidayOn(gym.holidays, localDateKey(now));
   return (
     <AppShell title="Check-in" actions={<span className="text-sm text-neutral-500">{todayCount} today</span>}>
+      {holiday && <p className="mb-3 rounded bg-amber-50 p-2 text-sm text-amber-900">Today is marked as a holiday: {holiday}.</p>}
       <section className="rounded border bg-white p-4"><CheckinDesk /></section>
       <section className="mt-4 rounded border bg-white p-4">
         <h2 className="mb-2 flex items-center justify-between font-medium">In gym now <span className="rounded-full bg-green-100 px-3 py-0.5 text-lg text-green-800">{inGym.length}</span></h2>

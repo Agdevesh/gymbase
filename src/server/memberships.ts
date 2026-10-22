@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { assignInput, cancelInput, endDateFor, formatInvoiceNumber, gstOn, prorataCredit, renewalStart, unfreezeDates } from "@/lib/memberships";
 import { requireTenant } from "@/server/tenant";
+import { audit } from "@/server/audit";
 import type { FormState } from "@/server/members";
 
 type Tx = Prisma.TransactionClient;
@@ -65,7 +66,7 @@ function done(memberId: string) {
 
 // mode: "new" starts a plan (used for first plan and renewals), "upgrade" replaces the current plan with a pro-rata credit.
 export async function assignPlan(memberId: string, mode: "new" | "upgrade", _prev: FormState, formData: FormData): Promise<FormState> {
-  const { gymId } = await requireTenant("members:write");
+  const { gymId, userId } = await requireTenant("members:write");
   const r = parseAssign(formData);
   if (!r.data) return { errors: r.errors };
   const { planId, startDate, discountPaise } = r.data;
@@ -95,31 +96,35 @@ export async function assignPlan(memberId: string, mode: "new" | "upgrade", _pre
     return {};
   });
   if (result.message || result.errors) return result;
+  await audit(gymId, userId, mode === "upgrade" ? "membership.upgrade" : "membership.start", "member", memberId, `${mode === "upgrade" ? "Upgraded to" : "Started"} plan ${(await db.plan.findUnique({ where: { id: planId }, select: { name: true } }))?.name ?? planId}${discountPaise ? ` with discount ${discountPaise / 100}` : ""}`);
   return done(memberId);
 }
 
 export async function freezeMembership(memberId: string, membershipId: string) {
-  const { gymId } = await requireTenant("members:write");
+  const { gymId, userId } = await requireTenant("members:write");
   await db.membership.updateMany({ where: { id: membershipId, memberId, gymId, status: "ACTIVE" }, data: { status: "FROZEN", frozenAt: new Date() } });
+  await audit(gymId, userId, "membership.freeze", "member", memberId, "Froze membership");
   done(memberId);
 }
 
 export async function unfreezeMembership(memberId: string, membershipId: string) {
-  const { gymId } = await requireTenant("members:write");
+  const { gymId, userId } = await requireTenant("members:write");
   const m = await db.membership.findFirst({ where: { id: membershipId, memberId, gymId, status: "FROZEN" } });
   if (!m?.frozenAt) return;
   const next = unfreezeDates({ frozenAt: m.frozenAt, endDate: m.endDate, frozenDays: m.frozenDays }, new Date());
   await db.membership.update({ where: { id: m.id }, data: { ...next, status: "ACTIVE", frozenAt: null } });
+  await audit(gymId, userId, "membership.unfreeze", "member", memberId, `Unfroze membership, new end ${next.endDate.toLocaleDateString("en-IN")}`);
   done(memberId);
 }
 
 export async function cancelMembership(memberId: string, membershipId: string, formData: FormData) {
-  const { gymId } = await requireTenant("members:write");
+  const { gymId, userId } = await requireTenant("members:write");
   const { reason } = cancelInput.parse({ reason: String(formData.get("reason") ?? "") });
   const now = new Date();
   await db.membership.updateMany({
     where: { id: membershipId, memberId, gymId, status: { in: ["ACTIVE", "FROZEN"] } },
     data: { status: "CANCELLED", cancelledAt: now, cancelReason: reason, frozenAt: null, endDate: now },
   });
+  await audit(gymId, userId, "membership.cancel", "member", memberId, `Cancelled membership${reason ? `: ${reason}` : ""}`);
   done(memberId);
 }

@@ -1,6 +1,9 @@
 import PDFDocument from "pdfkit";
 import { NextResponse } from "next/server";
+import QRCode from "qrcode";
 import { db } from "@/lib/db";
+import { fileIdFromUrl } from "@/lib/members";
+import { upiLink } from "@/lib/settings";
 import { METHOD_LABELS } from "@/lib/payments";
 import { requireTenant } from "@/server/tenant";
 
@@ -27,6 +30,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
   const due = inv.totalPaise - inv.paidPaise;
   const name = [inv.member.firstName, inv.member.lastName].filter(Boolean).join(" ");
+  const logoId = fileIdFromUrl(gym.logoUrl);
+  const logo = logoId ? await db.storedFile.findFirst({ where: { id: logoId, gymId }, select: { data: true, mime: true } }) : null;
+  if (logo && /png|jpe?g/.test(logo.mime)) { try { doc.image(Buffer.from(logo.data), 50, 40, { fit: [60, 60] }); doc.x = 120; doc.y = 50; } catch { /* unsupported image, skip */ } }
   doc.fontSize(18).text(gym.name, { continued: true }).fontSize(18).text(due > 0 ? "INVOICE" : "RECEIPT", { align: "right" });
   doc.fontSize(9).fillColor("#555").text([gym.address, gym.phone, gym.gstin && `GSTIN ${gym.gstin}`].filter(Boolean).join("\n"));
   doc.moveDown().fillColor("#000").fontSize(11);
@@ -52,7 +58,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     doc.moveDown().font("Helvetica-Bold").text("Payments").font("Helvetica");
     for (const p of inv.payments) line(`${date(p.paidAt)}  ${p.kind === "REFUND" ? "Refund" : METHOD_LABELS[p.method]}${p.reference ? ` (${p.reference})` : ""}`, `${p.kind === "REFUND" ? "- " : ""}${rs(p.amountPaise)}`);
   }
-  doc.moveDown(2).fontSize(9).fillColor("#555").text("Thank you for training with us. This is a computer-generated document.", { align: "center" });
+  if (due > 0 && gym.upiId) {
+    doc.moveDown().font("Helvetica-Bold").fontSize(11).fillColor("#000").text("Pay by UPI").font("Helvetica").text(`UPI ID: ${gym.upiId}  (${rs(due)})`);
+    const png = await QRCode.toBuffer(upiLink(gym.upiId, gym.name, due, inv.number), { margin: 1, width: 120 });
+    doc.image(png, left, doc.y + 4, { width: 100 });
+    doc.y += 110;
+  }
+  doc.moveDown(2).fontSize(9).fillColor("#555").text(gym.receiptNote ?? "Thank you for training with us. This is a computer-generated document.", { align: "center" });
   doc.end();
 
   const pdf = await done;

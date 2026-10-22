@@ -6,6 +6,8 @@ import { requireTenant } from "@/server/tenant";
 import { revokeInvite, setCommissionPercent, setStaffActive, staffMarkIn, staffMarkOut } from "@/server/staff";
 import { AppShell, Avatar, ButtonLink, inputClass } from "@/components/ui";
 import { InviteForm } from "@/components/staff-forms";
+import { ResetLinkButton } from "@/components/settings-forms";
+import { adminResetPassword } from "@/server/settings";
 
 export const dynamic = "force-dynamic";
 const time = (d: Date | null) => (d ? d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "—");
@@ -54,6 +56,7 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
                 <td className="p-2 text-right whitespace-nowrap">
                   {canMark && s.active && !a && <form action={staffMarkIn.bind(null, s.id)} className="inline"><button className={`${btn} text-green-800`}>{me ? "I'm in" : "Mark in"}</button></form>}
                   {canMark && a && !a.outAt && <form action={staffMarkOut.bind(null, s.id)} className="inline"><button className={btn}>{me ? "I'm out" : "Mark out"}</button></form>}
+                  {manage && !me && s.active && <span className="ml-2"><ResetLinkButton action={adminResetPassword.bind(null, s.id)} name={s.name} /></span>}
                   {manage && !me && <form action={setStaffActive.bind(null, s.id, !s.active)} className="ml-2 inline"><button className={`${btn} ${s.active ? "text-red-700" : ""}`}>{s.active ? "Deactivate" : "Reactivate"}</button></form>}
                 </td>
               </tr>
