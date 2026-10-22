@@ -31,11 +31,15 @@ Read this first in each session instead of rescanning the repo.
 
 - Stage 9, Dashboard: `/dashboard` rebuilt on `AppShell`. Tiles: check-ins today + in gym now, collected today by method, dues outstanding (members), expiring in 7 days (active count), leads this month with conversion %, follow-ups due, revenue this month + 14-day collections bar chart (owner, `reports:read`), trainer's PT clients. Lists: expiring this week, follow-ups due today (overdue flagged), today's check-ins, lead sources this month. Quick actions by role. Helpers in `src/lib/dashboard.ts`.
 
+- Stage 10, SaaS billing: `/signup` (public) creates a gym + owner + 14-day TRIAL with Growth limits and default plans. Catalog in `src/lib/saas.ts` (starter ₹999 / growth ₹2,499 / pro ₹4,999 per month; `UNLIMITED` = 1,000,000). `subscriptionState()` decides lock: trial ended, cancelled, or past due beyond 7-day grace → `requireTenant` redirects every write permission to `/billing?locked=1` (reads keep working; `/billing` itself passes `skipSubscriptionCheck`). `memberLimitError()` guards member creation and lead conversion; staff invites already respect `staffLimit`. `/billing` (owner): plan, status, usage vs limits, plan cards → `startCheckout` creates a Razorpay Subscription and redirects to its hosted page (needs `RAZORPAY_*` env; otherwise an honest "not set up" message), cancel at period end. `/api/billing/webhook` verifies the Razorpay signature and maps activated/charged/resumed → ACTIVE (+ plan limits from `notes.planCode`), pending/halted → PAST_DUE, cancelled/completed → CANCELLED. Dashboard shows trial/lock banners to the owner.
+
+All 10 MVP modules are built. Remaining ideas: owner settings page (gym details, GST %, logo), member self-service login, CSV export, platform super-admin for manual plan activation.
+
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
 
-1. Modules 4 to 10 in the order of the build prompt.
+1. Polish: settings page (gym profile, GST %), member self-login, exports, super-admin.
 
 ## Decisions
 
@@ -49,6 +53,7 @@ Asked by the owner on 2026-10-22, to land in their modules:
 - Editing a plan never changes existing memberships (they keep their own `pricePaise`); retire a plan instead of deleting it.
 - QR payload is `GB:<32-hex qrToken>`; `tokenFromScan` also accepts bare tokens and `/checkin/scan/<token>` URLs. Duplicate check-ins within the 4 h window are ignored (reported as "already in").
 - Payments never carry credit: an amount above the outstanding total is rejected. Refunds are separate `Payment` rows (`kind` REFUND) that decrement `Invoice.paidPaise`. Cash closing only stamps CASH payments; UPI/card reconcile with the bank.
+- Razorpay plan ids map to GYMBASE plan codes through env (`RAZORPAY_PLAN_STARTER` etc.); the gymId and planCode travel in subscription `notes` so the webhook needs no lookup table.
 - Any FK to `User` that is reachable from `Gym` must cascade (seed deletes the demo gym); RESTRICT there breaks teardown.
 - Reminders without an API provider are a to-do list for reception (wa.me / sms: / mailto: links + "Mark sent"), never silently faked. Cron runs at 04:30 UTC = 10:00 IST, matching `sendTimeFor`.
 - pdfkit's built-in Helvetica has no ₹ glyph, so PDFs print "Rs.".

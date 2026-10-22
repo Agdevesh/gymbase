@@ -31,6 +31,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <input name="password" type="password" placeholder="Password" required className={input} />
         <button className="w-full rounded bg-neutral-900 py-2 font-medium text-white">Sign in</button>
       </form>
+      <p className="mt-4 text-center text-sm text-neutral-500">New gym? <a href="/signup" className="underline">Start a free trial</a></p>
     </main>
   );
 }

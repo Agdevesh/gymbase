@@ -566,7 +566,9 @@ model Subscription {
   staffLimit  Int                @default(3)
   trialEndsAt DateTime
   renewsAt    DateTime?
-  providerRef String? // Razorpay/Stripe subscription id
+  providerRef String? // Razorpay subscription id
+  cancelAtPeriodEnd Boolean      @default(false)
+  lastEventAt DateTime?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 }
