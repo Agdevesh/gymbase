@@ -14,7 +14,6 @@ const time = (d: Date | null) => (d ? d.toLocaleTimeString("en-IN", { hour: "2-d
 
 export default async function StaffPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const { gymId, userId, role } = await requireTenant();
-  if (role === "MEMBER") return null;
   const manage = can(role, "staff:manage");
   const { date } = await searchParams;
   const now = new Date();

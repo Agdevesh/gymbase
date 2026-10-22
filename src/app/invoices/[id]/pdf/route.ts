@@ -5,18 +5,20 @@ import { db } from "@/lib/db";
 import { fileIdFromUrl } from "@/lib/members";
 import { upiLink } from "@/lib/settings";
 import { METHOD_LABELS } from "@/lib/payments";
-import { requireTenant } from "@/server/tenant";
+import { auth } from "@/lib/auth";
 
 // pdfkit's built-in Helvetica has no rupee glyph, so amounts are printed as "Rs."
 const rs = (p: number) => `Rs. ${(p / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 const date = (d: Date) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { gymId } = await requireTenant("members:read");
+  const session = await auth();
+  if (!session?.user) return new NextResponse("Unauthorized", { status: 401 });
+  const { gymId, role, id: userId } = session.user;
   const { id } = await params;
   const [inv, gym] = await Promise.all([
     db.invoice.findFirst({
-      where: { id, gymId },
+      where: { id, gymId, ...(role === "MEMBER" && { member: { userId } }) },
       include: { member: true, membership: { include: { plan: true } }, payments: { orderBy: { paidAt: "asc" } } },
     }),
     db.gym.findUniqueOrThrow({ where: { id: gymId } }),

@@ -54,16 +54,16 @@ export function SettingsForm({ action, initial }: { action: (prev: FormState, fd
   );
 }
 
-export function PasswordForm({ action, needsCurrent, submitLabel = "Change password" }: { action: (prev: FormState, fd: FormData) => Promise<FormState>; needsCurrent: boolean; submitLabel?: string }) {
+export function PasswordForm({ action, needsCurrent, submitLabel = "Change password", minLength = 8 }: { action: (prev: FormState, fd: FormData) => Promise<FormState>; needsCurrent: boolean; submitLabel?: string; minLength?: number }) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const e = state?.errors ?? {};
   if (state?.message === "done") return <p className="rounded bg-green-50 p-3 text-sm text-green-800">Password set. <a href="/login" className="underline">Sign in</a></p>;
   return (
     <form action={formAction} className="space-y-3">
-      {state?.message && <p className={`rounded p-2 text-sm ${state.message.startsWith("Password") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-700"}`}>{state.message}</p>}
-      {needsCurrent && <Field label="Current password" error={e.current}><input name="current" type="password" required className={inputClass} /></Field>}
-      <Field label="New password" error={e.password}><input name="password" type="password" minLength={8} required className={inputClass} /></Field>
-      <Field label="Confirm new password" error={e.confirm}><input name="confirm" type="password" required className={inputClass} /></Field>
+      {state?.message && <p className={`rounded p-2 text-sm ${/changed\.$/.test(state.message) ? "bg-green-50 text-green-800" : "bg-red-50 text-red-700"}`}>{state.message}</p>}
+      {needsCurrent && <Field label={minLength < 8 ? "Current PIN" : "Current password"} error={e.current}><input name="current" type="password" required className={inputClass} /></Field>}
+      <Field label={minLength < 8 ? "New PIN (4-8 digits)" : "New password"} error={e.password}><input name="password" type="password" minLength={minLength} inputMode={minLength < 8 ? "numeric" : undefined} required className={inputClass} /></Field>
+      <Field label={minLength < 8 ? "Confirm new PIN" : "Confirm new password"} error={e.confirm}><input name="confirm" type="password" required className={inputClass} /></Field>
       <button disabled={pending} className={buttonClass}>{pending ? "Saving…" : submitLabel}</button>
     </form>
   );
