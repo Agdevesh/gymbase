@@ -43,7 +43,7 @@ export function StatusBadge({ status }: { status: "ACTIVE" | "FROZEN" | "EXPIRED
 export function AppShell({ title, actions, children, back }: { title: string; actions?: React.ReactNode; back?: { href: string; label: string }; children: React.ReactNode }) {
   return (
     <main className="mx-auto max-w-4xl p-4">
-      <nav className="mb-4 flex gap-4 text-sm text-neutral-500">
+      <nav className="mb-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-500">
         <Link href="/dashboard" className="hover:text-neutral-900">Dashboard</Link>
         <Link href="/checkin" className="hover:text-neutral-900">Check-in</Link>
         <Link href="/members" className="hover:text-neutral-900">Members</Link>

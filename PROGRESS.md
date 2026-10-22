@@ -29,6 +29,8 @@ Read this first in each session instead of rescanning the repo.
 
 - Stage 8, Staff & trainers: `/staff` (staff list with role, today's attendance in/out per person: staff mark themselves, owner marks anyone; owner sets trainer commission %, deactivates logins, invites staff; invite link shown and emailed when a provider is set), `/invite/[token]` public accept page (proxy exempt) → `/login` prefilled. `/staff/pt` (trainers see own clients, owner/reception all; log session with notes, end), `/staff/commissions` (owner; by period, auto commission = fee × trainer % on PT assignment, manual commissions, mark period paid). Member profile has a Personal training section (assign trainer, optionally linked to a PT membership which prefills sessions and fee). Schema: `User.commissionPercent`, `PtAssignment.membershipId/feePaise`, `PtSession`, `Commission.ptAssignmentId`.
 
+- Stage 9, Dashboard: `/dashboard` rebuilt on `AppShell`. Tiles: check-ins today + in gym now, collected today by method, dues outstanding (members), expiring in 7 days (active count), leads this month with conversion %, follow-ups due, revenue this month + 14-day collections bar chart (owner, `reports:read`), trainer's PT clients. Lists: expiring this week, follow-ups due today (overdue flagged), today's check-ins, lead sources this month. Quick actions by role. Helpers in `src/lib/dashboard.ts`.
+
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
