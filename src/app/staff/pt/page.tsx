@@ -5,7 +5,8 @@ import { sessionsLeft } from "@/lib/staff";
 import { requireTenant } from "@/server/tenant";
 import { endPt } from "@/server/staff";
 import { can } from "@/lib/rbac";
-import { AppShell, Avatar } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { Avatar } from "@/components/ui";
 import { LogSessionForm } from "@/components/staff-forms";
 
 export const dynamic = "force-dynamic";

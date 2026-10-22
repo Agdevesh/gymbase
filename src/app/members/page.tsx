@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { normalizePhone } from "@/lib/members";
 import { can } from "@/lib/rbac";
 import { requireTenant } from "@/server/tenant";
-import { AppShell, Avatar, ButtonLink, StatusBadge, inputClass } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { Avatar, ButtonLink, StatusBadge, inputClass } from "@/components/ui";
 
 const PAGE = 50;
 

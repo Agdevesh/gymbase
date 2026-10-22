@@ -5,7 +5,8 @@ import { holidayOn } from "@/lib/settings";
 import { localDateKey } from "@/lib/payments";
 import { requireTenant } from "@/server/tenant";
 import { checkOut } from "@/server/checkin";
-import { AppShell, Avatar } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { Avatar } from "@/components/ui";
 import { CheckinDesk } from "@/components/checkin-desk";
 
 export const dynamic = "force-dynamic";

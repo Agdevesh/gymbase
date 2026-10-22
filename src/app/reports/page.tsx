@@ -5,7 +5,7 @@ import { METHOD_LABELS, paise } from "@/lib/payments";
 import { CATEGORY_LABELS, monthRange, pct, renewalRate, sumBy, visitHistogram } from "@/lib/reports";
 import { WEEKDAYS } from "@/lib/classes";
 import { requireTenant } from "@/server/tenant";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 
 export const dynamic = "force-dynamic";
 

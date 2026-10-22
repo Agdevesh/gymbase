@@ -5,7 +5,8 @@ import { WEEKDAYS, dateKey, dbDate, fmtTime, occurrences, runsOn } from "@/lib/c
 import { can } from "@/lib/rbac";
 import { requireTenant } from "@/server/tenant";
 import { setBookingStatus } from "@/server/classes";
-import { AppShell, Avatar } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { Avatar } from "@/components/ui";
 import { BookMemberForm } from "@/components/class-forms";
 
 export const dynamic = "force-dynamic";

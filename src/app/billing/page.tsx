@@ -4,7 +4,7 @@ import { razorpayConfigured } from "@/lib/razorpay";
 import { PLAN_CODES, SAAS_PLANS, limitLabel, subscriptionState } from "@/lib/saas";
 import { requireTenant } from "@/server/tenant";
 import { cancelPlan } from "@/server/saas";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { ChoosePlanButton } from "@/components/saas-forms";
 
 export const dynamic = "force-dynamic";

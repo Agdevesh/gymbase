@@ -4,7 +4,8 @@ import { db } from "@/lib/db";
 import { OPEN_STATUSES, SOURCE_LABELS, STATUS_LABELS, followUpBucket } from "@/lib/leads";
 import { requireTenant } from "@/server/tenant";
 import { convertLead } from "@/server/leads";
-import { AppShell, ButtonLink, buttonClass } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { ButtonLink, buttonClass } from "@/components/ui";
 import { LeadActivityForm } from "@/components/lead-activity-form";
 
 const fmt = (d: Date) => d.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });

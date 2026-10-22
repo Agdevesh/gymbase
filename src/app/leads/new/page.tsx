@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { requireTenant } from "@/server/tenant";
 import { createLead } from "@/server/leads";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { LeadForm } from "@/components/lead-form";
 
 export default async function NewLeadPage() {

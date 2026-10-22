@@ -3,7 +3,7 @@ import { paise } from "@/lib/payments";
 import { periodOf } from "@/lib/staff";
 import { requireTenant } from "@/server/tenant";
 import { deleteCommission, markCommissionsPaid } from "@/server/staff";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { CommissionForm } from "@/components/staff-forms";
 
 export const dynamic = "force-dynamic";

@@ -4,7 +4,7 @@ import { paise } from "@/lib/payments";
 import { can } from "@/lib/rbac";
 import { requireTenant } from "@/server/tenant";
 import { deleteLocker, releaseLocker } from "@/server/fitness";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { AddLockersForm, AssignLockerForm } from "@/components/fitness-forms";
 
 export const dynamic = "force-dynamic";

@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { checkInByToken } from "@/server/checkin";
 import { requireTenant } from "@/server/tenant";
-import { AppShell, Avatar, ButtonLink, buttonClass } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { Avatar, ButtonLink, buttonClass } from "@/components/ui";
 
 // Opened by scanning a member's QR with a logged-in phone. GET shows the member; the button records the visit.
 export default async function ScanPage({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ r?: string }> }) {

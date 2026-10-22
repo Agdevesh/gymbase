@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { ROLE_LABELS } from "@/lib/staff";
 import { requireTenant } from "@/server/tenant";
 import { changePassword } from "@/server/settings";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { PasswordForm } from "@/components/settings-forms";
 
 export default async function AccountPage() {

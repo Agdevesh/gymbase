@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { daysSince, paise } from "@/lib/payments";
 import { requireTenant } from "@/server/tenant";
 import { expireMemberships } from "@/server/memberships";
-import { AppShell, Avatar } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { Avatar } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 

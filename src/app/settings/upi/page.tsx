@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { requireTenant } from "@/server/tenant";
 import { regenerateUpiAlertToken } from "@/server/upi";
-import { AppShell, ButtonLink, secondaryButtonClass } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { ButtonLink, secondaryButtonClass } from "@/components/ui";
 import { baseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";

@@ -11,7 +11,8 @@ import { requireTenant } from "@/server/tenant";
 import { subscriptionState } from "@/lib/saas";
 import { expireMemberships } from "@/server/memberships";
 import { setupStatus } from "@/server/setup";
-import { AppShell, Avatar, ButtonLink } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { Avatar, ButtonLink } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 

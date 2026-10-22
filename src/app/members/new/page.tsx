@@ -1,6 +1,6 @@
 import { requireTenant } from "@/server/tenant";
 import { createMember } from "@/server/members";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { MemberForm } from "@/components/member-form";
 
 export default async function NewMemberPage() {

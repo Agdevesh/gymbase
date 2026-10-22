@@ -2,7 +2,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { dayRange } from "@/lib/checkin";
 import { requireTenant } from "@/server/tenant";
-import { AppShell, Avatar, inputClass } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { Avatar, inputClass } from "@/components/ui";
 
 const time = (d: Date | null) => (d ? d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "—");
 

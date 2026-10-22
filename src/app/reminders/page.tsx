@@ -5,7 +5,8 @@ import { CHANNEL_LABELS, TYPE_LABELS, statusFilter, waLink } from "@/lib/reminde
 import { can } from "@/lib/rbac";
 import { requireTenant } from "@/server/tenant";
 import { cancelReminder, generateNow, markSent, retryReminder, sendNow } from "@/server/reminders";
-import { AppShell, ButtonLink } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { ButtonLink } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 const chip = (a: boolean) => `rounded-full border px-3 py-1 text-sm ${a ? "border-neutral-900 bg-neutral-900 text-white" : "bg-white hover:bg-neutral-100"}`;

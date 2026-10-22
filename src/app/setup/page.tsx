@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { requireTenant } from "@/server/tenant";
 import { dismissSetup, setupStatus } from "@/server/setup";
-import { AppShell, ButtonLink } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { ButtonLink } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 

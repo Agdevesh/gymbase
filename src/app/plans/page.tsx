@@ -4,7 +4,8 @@ import { paise } from "@/lib/memberships";
 import { can } from "@/lib/rbac";
 import { requireTenant } from "@/server/tenant";
 import { togglePlan } from "@/server/plans";
-import { AppShell, ButtonLink } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
+import { ButtonLink } from "@/components/ui";
 
 export default async function PlansPage() {
   const { gymId, role } = await requireTenant("members:read");

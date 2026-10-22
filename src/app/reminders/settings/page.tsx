@@ -2,7 +2,7 @@ import { configuredChannels } from "@/lib/messaging";
 import { RULE_DEFAULTS, TYPE_LABELS } from "@/lib/reminders";
 import { requireTenant } from "@/server/tenant";
 import { rulesFor } from "@/server/reminders";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { RuleForm } from "@/components/reminder-forms";
 
 export default async function ReminderSettingsPage() {

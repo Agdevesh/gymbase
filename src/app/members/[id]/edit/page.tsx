@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireTenant } from "@/server/tenant";
 import { updateMember } from "@/server/members";
-import { AppShell } from "@/components/ui";
+import { AppShell } from "@/components/app-shell";
 import { MemberForm } from "@/components/member-form";
 
 export default async function EditMemberPage({ params }: { params: Promise<{ id: string }> }) {
