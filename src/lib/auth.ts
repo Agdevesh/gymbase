@@ -4,6 +4,7 @@ import { compare } from "bcryptjs";
 import { z } from "zod";
 import type { Role } from "@prisma/client";
 import { db } from "@/lib/db";
+import { normalizePhone } from "@/lib/members";
 import { clearRateLimit, rateLimit } from "@/lib/ratelimit";
 
 declare module "next-auth" {
@@ -20,7 +21,7 @@ export class Throttled extends CredentialsSignin { code = "throttled"; }
 
 const credentialsSchema = z.object({
   gym: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().min(1),
   password: z.string().min(1),
 });
 
@@ -37,8 +38,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // 10 failed attempts per login per 15 minutes; a correct password clears the counter.
         const key = `login:${gym.toLowerCase()}:${email.toLowerCase()}`;
         if (!(await rateLimit(key, 10, 15 * 60_000))) throw new Throttled();
+        // Staff sign in with email; members with the phone number reception registered.
+        const phone = email.includes("@") ? null : normalizePhone(email);
         const user = await db.user.findFirst({
-          where: { email: email.toLowerCase(), active: true, gym: { slug: gym } },
+          where: phone ? { phone, role: "MEMBER", active: true, gym: { slug: gym } } : { email: email.toLowerCase(), active: true, gym: { slug: gym } },
         });
         if (!user || !(await compare(password, user.passwordHash))) return null;
         await clearRateLimit(key);

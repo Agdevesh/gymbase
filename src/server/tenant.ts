@@ -15,6 +15,8 @@ export async function requireTenant(permission?: Permission, opts: { skipSubscri
   const session = await auth();
   if (!session?.user) redirect("/login");
   const { id: userId, gymId, role } = session.user;
+  // Member logins only ever see the portal.
+  if (role === "MEMBER") redirect("/me");
   // Staff who open a screen outside their role land on the dashboard with a notice instead of an error page.
   if (permission && !can(role, permission)) redirect(`/dashboard?denied=${permission}`);
   // A gym whose GYMBASE trial or subscription has lapsed can still read everything, but every write goes to /billing.

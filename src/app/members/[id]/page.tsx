@@ -14,6 +14,8 @@ import { CustomMessageForm } from "@/components/reminder-forms";
 import { AssignPtForm, LogSessionForm } from "@/components/staff-forms";
 import { endPt } from "@/server/staff";
 import { sessionsLeft } from "@/lib/staff";
+import { MemberAccessButton } from "@/components/portal-forms";
+import { disableMemberAccess, enableMemberAccess } from "@/server/portal";
 
 const fmtDate = (d: Date | null) => (d ? d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—");
 const paise = (p: number) => `₹${(p / 100).toLocaleString("en-IN")}`;
@@ -29,6 +31,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
       memberships: { orderBy: { endDate: "desc" }, include: { plan: { select: { name: true, type: true, ptSessions: true } } } },
       ptAssignments: { orderBy: { createdAt: "desc" }, include: { trainer: { select: { name: true } }, sessions: { orderBy: { at: "desc" }, take: 5, include: { trainer: { select: { name: true } } } } } },
       documents: { orderBy: { createdAt: "desc" } },
+      user: { select: { active: true } },
       noteLog: { orderBy: { createdAt: "desc" }, include: { author: { select: { name: true } } } },
       checkIns: { orderBy: { checkedInAt: "desc" }, take: 5 },
       invoices: { orderBy: { issuedAt: "desc" }, select: { id: true, number: true, totalPaise: true, paidPaise: true, issuedAt: true, notes: true, membership: { select: { plan: { select: { name: true } } } } } },
@@ -146,6 +149,15 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
           </ul>
         )}
         {can(role, "payments:write") && <ChargeForm memberId={m.id} />}
+      </section>
+
+      <section className="mt-4 rounded border bg-white p-4">
+        <h2 className="mb-1 font-medium">Member app login</h2>
+        <p className="mb-2 text-sm text-neutral-500">{m.user?.active ? "Login is on. The member signs in at /login with gym code, phone and PIN to see plan, dues, QR and attendance." : m.user ? "Login is switched off." : "Not set up. Enable to give the member a PIN for the member portal."}</p>
+        {write && <div className="flex flex-wrap items-start gap-2">
+          <MemberAccessButton action={enableMemberAccess.bind(null, m.id)} label={m.user ? "Reset PIN" : "Enable login"} phone={m.phone} />
+          {m.user?.active && <form action={disableMemberAccess.bind(null, m.id)}><button className="rounded border bg-white px-3 py-1 text-sm text-red-700 hover:bg-neutral-100">Disable</button></form>}
+        </div>}
       </section>
 
       <section className="mt-4 rounded border bg-white p-4">
