@@ -119,6 +119,7 @@ model Member {
   emergencyName  String?
   emergencyPhone String?
   notes          String?
+  usualTime      String? // when they normally come, free text like "Morning 6-8"
   userId         String?   @unique
   user           User?     @relation(fields: [userId], references: [id])
   leadId         String?   @unique
@@ -157,7 +158,7 @@ model MemberNote {
   memberId  String
   member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   authorId  String
-  author    User     @relation(fields: [authorId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   body      String
   createdAt DateTime @default(now())
 

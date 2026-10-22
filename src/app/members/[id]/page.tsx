@@ -50,6 +50,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
             {row("Email", m.email)}
             {row("Gender", m.gender?.toLowerCase())}
             {row("Date of birth", fmtDate(m.dob))}
+            {row("Usual time", m.usualTime)}
             {row("Joined", fmtDate(m.joinedAt))}
             {row("Address", m.address)}
           </dl>

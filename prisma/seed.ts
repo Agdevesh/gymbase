@@ -69,6 +69,7 @@ async function main() {
         phone,
         gender: i % 2 ? "MALE" : "FEMALE",
         dob: new Date(1990 + i, i, 10 + i),
+        usualTime: i % 2 ? "Morning 6-8" : "Evening 7-9",
         emergencyName: "Family",
         emergencyPhone: "+919900009999",
         joinedAt: startDate,

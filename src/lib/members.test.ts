@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { checkUpload, fileIdFromUrl, fileUrl, formatMemberCode, memberInput, normalizePhone } from "./members";
 
-const base = { firstName: "Asha", lastName: "", phone: "98765 43210", email: "", gender: "", dob: "", address: "", emergencyName: "", emergencyPhone: "", notes: "" };
+const base = { firstName: "Asha", lastName: "", phone: "98765 43210", email: "", gender: "", dob: "", address: "", emergencyName: "", emergencyPhone: "", usualTime: "", notes: "" };
 
 describe("normalizePhone", () => {
   it("adds the country code to local numbers", () => {

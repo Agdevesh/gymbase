@@ -17,6 +17,10 @@ Read this first in each session instead of rescanning the repo.
 
 ## Next
 
+Asked by the owner on 2026-10-22, to land in their modules:
+- Payments (module 6): a "Defaulters" screen on the main nav: member name, last plan, days since dues started, amount.
+- Inquiries (module 5): filter leads by source, including WhatsApp and Instagram (add to `LeadSource` enum alongside walk-in/phone/web).
+
 1. Module 3, Plans & memberships.
 3. Modules 4 to 10 in the order of the build prompt.
 4. Invite accept page (`/invite/[token]`) and staff list in settings.

@@ -43,6 +43,7 @@ export const memberInput = z.object({
   address: optionalText(300),
   emergencyName: optionalText(80),
   emergencyPhone: optionalPhone,
+  usualTime: optionalText(40),
   notes: optionalText(2000),
 });
 export type MemberInput = z.infer<typeof memberInput>;

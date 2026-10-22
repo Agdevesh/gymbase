@@ -33,7 +33,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
       skip: (page - 1) * PAGE,
       take: PAGE,
       select: {
-        id: true, code: true, firstName: true, lastName: true, phone: true, photoUrl: true,
+        id: true, code: true, firstName: true, lastName: true, phone: true, photoUrl: true, usualTime: true,
         memberships: { orderBy: { endDate: "desc" }, take: 1, select: { status: true, endDate: true, plan: { select: { name: true } } } },
       },
     }),
@@ -60,7 +60,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
                   <Avatar name={name} photoUrl={m.photoUrl} />
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-medium">{name} <span className="font-normal text-neutral-400">{m.code}</span></div>
-                    <div className="truncate text-sm text-neutral-500">{m.phone}{ms && ` · ${ms.plan.name} till ${ms.endDate.toLocaleDateString("en-IN")}`}</div>
+                    <div className="truncate text-sm text-neutral-500">{m.phone}{m.usualTime && ` · ${m.usualTime}`}{ms && ` · ${ms.plan.name} till ${ms.endDate.toLocaleDateString("en-IN")}`}</div>
                   </div>
                   <StatusBadge status={ms?.status ?? "NONE"} />
                 </Link>

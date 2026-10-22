@@ -6,7 +6,7 @@ import { Avatar, ButtonLink, Field, buttonClass, inputClass } from "@/components
 
 export type MemberFormValues = {
   firstName: string; lastName: string | null; phone: string; email: string | null; gender: string | null;
-  dob: Date | null; address: string | null; emergencyName: string | null; emergencyPhone: string | null; notes: string | null; photoUrl: string | null;
+  dob: Date | null; address: string | null; emergencyName: string | null; emergencyPhone: string | null; usualTime: string | null; notes: string | null; photoUrl: string | null;
 };
 
 export function MemberForm({ action, initial, cancelHref }: { action: (prev: FormState, fd: FormData) => Promise<FormState>; initial?: MemberFormValues; cancelHref: string }) {
@@ -27,6 +27,12 @@ export function MemberForm({ action, initial, cancelHref }: { action: (prev: For
           </select>
         </Field>
         <Field label="Date of birth" error={e.dob}><input name="dob" type="date" defaultValue={v?.dob ? v.dob.toISOString().slice(0, 10) : ""} className={inputClass} /></Field>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Usual gym time" error={e.usualTime} hint="e.g. Morning 6-8, Evening 7-9">
+          <input name="usualTime" list="usual-times" defaultValue={v?.usualTime ?? ""} className={inputClass} />
+          <datalist id="usual-times"><option value="Morning 6-8" /><option value="Morning 8-10" /><option value="Afternoon 12-3" /><option value="Evening 5-7" /><option value="Evening 7-9" /><option value="Night 9-11" /></datalist>
+        </Field>
       </div>
       <Field label="Address" error={e.address}><textarea name="address" rows={2} defaultValue={v?.address ?? ""} className={inputClass} /></Field>
       <fieldset className="grid gap-4 rounded border p-3 sm:grid-cols-2">
