@@ -8,19 +8,21 @@ import { localDateKey } from "@/lib/payments";
 import { sessionsLeft } from "@/lib/staff";
 import { fmtSlot } from "@/lib/pt";
 import { requireMember } from "@/server/portal";
+import { startMemberUpiRequest } from "@/server/upi";
 import { expireMemberships } from "@/server/memberships";
 import { MemberShell } from "@/components/member-shell";
 
 export const dynamic = "force-dynamic";
 const fmt = (d: Date) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
-export default async function PortalHome() {
+export default async function PortalHome({ searchParams }: { searchParams: Promise<{ upi?: string }> }) {
   const { member: m, gym } = await requireMember();
+  const { upi: upiError } = await searchParams;
   await expireMemberships(gym.id);
   const now = new Date(), since30 = new Date(now.getTime() - 30 * 86400_000);
   const [memberships, invoices, visits, pt, plans] = await Promise.all([
     db.membership.findMany({ where: { memberId: m.id }, orderBy: { endDate: "desc" }, take: 3, include: { plan: { select: { name: true } } } }),
-    db.invoice.findMany({ where: { memberId: m.id, paidPaise: { lt: db.invoice.fields.totalPaise } }, select: { number: true, totalPaise: true, paidPaise: true } }),
+    db.invoice.findMany({ where: { memberId: m.id, paidPaise: { lt: db.invoice.fields.totalPaise } }, select: { id: true, number: true, totalPaise: true, paidPaise: true }, orderBy: { issuedAt: "asc" } }),
     db.checkIn.findMany({ where: { memberId: m.id, checkedInAt: { gte: since30 } }, orderBy: { checkedInAt: "desc" }, select: { checkedInAt: true } }),
     db.ptAssignment.findFirst({ where: { memberId: m.id, endDate: null }, include: { trainer: { select: { name: true } }, slots: { where: { status: "SCHEDULED", at: { gte: now } }, orderBy: { at: "asc" }, take: 3 } } }),
     db.plan.findMany({ where: { gymId: gym.id, active: true, type: { not: "PT" } }, orderBy: { durationDays: "asc" } }),
@@ -53,10 +55,11 @@ export default async function PortalHome() {
           <div className="text-sm text-red-800">Pending dues</div>
           <div className="text-2xl font-semibold text-red-800">{paise(due)}</div>
           <div className="mt-2 flex flex-wrap gap-2 text-sm">
-            {gym.upiId && <a href={upiLink(gym.upiId, gym.name, due, invoices.map((i) => i.number).join(" "))} className="rounded bg-neutral-900 px-3 py-1.5 text-white">Pay {paise(due)} by UPI</a>}
+            {gym.upiId && invoices.map((i) => <form key={i.id} action={startMemberUpiRequest.bind(null, i.id)}><button className="rounded bg-neutral-900 px-3 py-1.5 text-white">Pay {paise(i.totalPaise - i.paidPaise)} by UPI{invoices.length > 1 && ` · ${i.number}`}</button></form>)}
             {gymWa && <a href={waLink(gymWa, `Hi, this is ${name} (${m.code}). I have paid ${paise(due)} via UPI. Please update my dues.`)} target="_blank" rel="noreferrer" className="rounded border bg-white px-3 py-1.5">Tell gym I paid</a>}
           </div>
-          {gym.upiId && <p className="mt-1 text-xs text-neutral-500">UPI ID {gym.upiId}. Reception confirms the payment and your dues clear.</p>}
+          {upiError && <p className="mt-1 text-xs text-red-700">{upiError}</p>}
+          {gym.upiId && <p className="mt-1 text-xs text-neutral-500">You get a QR with the exact amount; your dues clear automatically once the gym's bank confirms it.</p>}
         </section>
       )}
 

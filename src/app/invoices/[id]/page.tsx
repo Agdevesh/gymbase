@@ -6,6 +6,7 @@ import { can } from "@/lib/rbac";
 import { requireTenant } from "@/server/tenant";
 import { AppShell, ButtonLink } from "@/components/ui";
 import { CollectForm, RefundForm } from "@/components/payment-forms";
+import { StartUpiButton } from "@/components/upi-start";
 
 const fmt = (d: Date) => d.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 
@@ -17,6 +18,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
     include: {
       member: { select: { id: true, firstName: true, lastName: true, phone: true } },
       membership: { include: { plan: { select: { name: true } } } },
+      gym: { select: { upiId: true } },
       payments: { orderBy: { paidAt: "asc" }, include: { takenBy: { select: { name: true } }, refunds: { select: { amountPaise: true } } } },
     },
   });
@@ -55,7 +57,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
               })}
             </ul>
           )}
-          {due > 0 && can(role, "payments:write") && <div className="mt-3"><CollectForm memberId={inv.member.id} duePaise={due} invoiceId={inv.id} /></div>}
+          {due > 0 && can(role, "payments:write") && <div className="mt-3 space-y-3">{inv.gym.upiId && <StartUpiButton invoiceId={inv.id} duePaise={due} />}<CollectForm memberId={inv.member.id} duePaise={due} invoiceId={inv.id} /></div>}
         </section>
       </div>
       <p className="mt-4 text-sm"><ButtonLink href={`/members/${inv.member.id}`} secondary>Back to member</ButtonLink></p>
