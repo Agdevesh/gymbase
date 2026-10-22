@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { can } from "@/lib/rbac";
@@ -40,7 +41,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
   );
 
   return (
-    <AppShell title={name} back={{ href: "/members", label: "Members" }} actions={write && <ButtonLink href={`/members/${m.id}/edit`} secondary>Edit</ButtonLink>}>
+    <AppShell title={name} back={{ href: "/members", label: "Members" }} actions={<><ButtonLink href={`/members/${m.id}/card`} secondary>QR card</ButtonLink>{write && <ButtonLink href={`/members/${m.id}/edit`} secondary>Edit</ButtonLink>}</>}>
       <section className="mb-4 flex items-center gap-4 rounded border bg-white p-4">
         <Avatar name={name} photoUrl={m.photoUrl} size={72} />
         <div className="flex-1">
@@ -102,7 +103,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
           )}
           {write && <DocumentForm memberId={m.id} />}
 
-          <h2 className="mb-2 mt-6 font-medium">Recent check-ins</h2>
+          <h2 className="mb-2 mt-6 flex justify-between font-medium">Recent check-ins <Link href={`/attendance?member=${m.id}`} className="text-sm font-normal underline">All</Link></h2>
           {m.checkIns.length === 0 ? <p className="text-sm text-neutral-500">No check-ins yet.</p> : (
             <ul className="text-sm text-neutral-700">{m.checkIns.map((c) => <li key={c.id}>{c.checkedInAt.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</li>)}</ul>
           )}

@@ -45,7 +45,9 @@ export function AppShell({ title, actions, children, back }: { title: string; ac
     <main className="mx-auto max-w-4xl p-4">
       <nav className="mb-4 flex gap-4 text-sm text-neutral-500">
         <Link href="/dashboard" className="hover:text-neutral-900">Dashboard</Link>
+        <Link href="/checkin" className="hover:text-neutral-900">Check-in</Link>
         <Link href="/members" className="hover:text-neutral-900">Members</Link>
+        <Link href="/attendance" className="hover:text-neutral-900">Attendance</Link>
         <Link href="/plans" className="hover:text-neutral-900">Plans</Link>
       </nav>
       {back && <Link href={back.href} className="text-sm text-neutral-500 hover:text-neutral-900">← {back.label}</Link>}

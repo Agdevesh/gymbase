@@ -18,6 +18,8 @@ Read this first in each session instead of rescanning the repo.
 - Stage 3, Plans & memberships: `/plans` (owner: create/edit/retire plans; `Plan.active` gates assignment). Member profile gets a Membership panel: start plan, renew (chains from current end date via `renewedFromId`), upgrade (old one CANCELLED with `cancelReason`, pro-rata credit becomes `discountPaise` on the new one), freeze/unfreeze (`frozenDays` extends `endDate`), cancel with reason. Every new membership raises an Invoice (`Gym.invoiceSeq`, `Gym.gstPercent`) with `paidPaise` 0, so dues appear until Payments collects them. Logic + zod in `src/lib/memberships.ts`, actions in `src/server/plans.ts` / `src/server/memberships.ts`.
 - Auto-expiry: `expireMemberships()` runs on member page loads and daily from `/api/cron/expire` (Vercel cron in `vercel.json`, guarded by `CRON_SECRET`).
 
+- Stage 4, Entry/check-in: `/checkin` desk (`CheckinDesk` client component: debounced search by name/phone/code, ↑↓/Enter/Esc, hardware QR scanners type `GB:<qrToken>` + Enter), live "in gym now" list with check-out, today's count, refresh every 30 s. `/checkin/scan/[token]` for phone-camera scans (logged-in staff). `/members/[id]/card` printable QR card (`qrcode` SVG). `/attendance` by day or `?member=`. Gate logic in `src/lib/checkin.ts` (`entryGate` blocks NO_PLAN/EXPIRED/FROZEN/CANCELLED), actions in `src/server/checkin.ts`. A member counts as in-gym for 4 h without checkout; the daily cron closes visits older than 6 h at 90 min.
+
 ## Next
 
 Asked by the owner on 2026-10-22, to land in their modules:
@@ -37,6 +39,7 @@ Asked by the owner on 2026-10-22, to land in their modules:
 - Phones stored as E.164; `normalizePhone` assumes +91 for bare 10-digit numbers.
 - `Membership.renewedFromId` chains renewals and upgrades; freeze extends `endDate` by `frozenDays`.
 - Editing a plan never changes existing memberships (they keep their own `pricePaise`); retire a plan instead of deleting it.
+- QR payload is `GB:<32-hex qrToken>`; `tokenFromScan` also accepts bare tokens and `/checkin/scan/<token>` URLs. Duplicate check-ins within the 4 h window are ignored (reported as "already in").
 - Form checkboxes use a hidden `off` input before the checkbox; server actions read `formData.getAll(name).includes("on")`.
 
 ## Setup
