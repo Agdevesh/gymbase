@@ -28,6 +28,7 @@ model Gym {
   gstin       String?
   currency    String   @default("INR")
   timezone    String   @default("Asia/Kolkata")
+  memberSeq   Int      @default(0) // last number used for Member.code
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -46,6 +47,7 @@ model Gym {
   ptAssignments PtAssignment[]
   commissions   Commission[]
   subscription  Subscription?
+  files         StoredFile[]
 }
 
 model User {
@@ -70,6 +72,7 @@ model User {
   staffAttendance StaffAttendance[]
   ptAssignments   PtAssignment[]   @relation("Trainer")
   commissions     Commission[]
+  memberNotes     MemberNote[]
 
   @@unique([gymId, email])
   @@index([gymId, role])
@@ -116,6 +119,7 @@ model Member {
   emergencyName  String?
   emergencyPhone String?
   notes          String?
+  usualTime      String? // when they normally come, free text like "Morning 6-8"
   userId         String?   @unique
   user           User?     @relation(fields: [userId], references: [id])
   leadId         String?   @unique
@@ -125,6 +129,7 @@ model Member {
   updatedAt      DateTime  @updatedAt
 
   documents     MemberDocument[]
+  noteLog       MemberNote[]
   memberships   Membership[]
   checkIns      CheckIn[]
   payments      Payment[]
@@ -138,12 +143,43 @@ model Member {
 }
 
 model MemberDocument {
+  id        String      @id @default(cuid())
+  memberId  String
+  member    Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  label     String
+  url       String
+  fileId    String?     @unique
+  file      StoredFile? @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+}
+
+model MemberNote {
   id        String   @id @default(cuid())
   memberId  String
   member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  label     String
-  url       String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String
   createdAt DateTime @default(now())
+
+  @@index([memberId, createdAt])
+}
+
+// Uploaded photos and documents, kept in Postgres so the app needs no extra storage service.
+// Served only through /api/files/[id], which checks gymId.
+model StoredFile {
+  id        String   @id @default(cuid())
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  name      String
+  mime      String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  document MemberDocument?
+
+  @@index([gymId])
 }
 
 // ---------- Plans & memberships ----------
