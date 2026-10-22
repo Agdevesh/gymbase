@@ -6,6 +6,7 @@ import { daysLeft, waLink } from "@/lib/portal";
 import { holidayOn, upiLink } from "@/lib/settings";
 import { localDateKey } from "@/lib/payments";
 import { sessionsLeft } from "@/lib/staff";
+import { fmtSlot } from "@/lib/pt";
 import { requireMember } from "@/server/portal";
 import { expireMemberships } from "@/server/memberships";
 import { MemberShell } from "@/components/member-shell";
@@ -21,7 +22,7 @@ export default async function PortalHome() {
     db.membership.findMany({ where: { memberId: m.id }, orderBy: { endDate: "desc" }, take: 3, include: { plan: { select: { name: true } } } }),
     db.invoice.findMany({ where: { memberId: m.id, paidPaise: { lt: db.invoice.fields.totalPaise } }, select: { number: true, totalPaise: true, paidPaise: true } }),
     db.checkIn.findMany({ where: { memberId: m.id, checkedInAt: { gte: since30 } }, orderBy: { checkedInAt: "desc" }, select: { checkedInAt: true } }),
-    db.ptAssignment.findFirst({ where: { memberId: m.id, endDate: null }, include: { trainer: { select: { name: true } } } }),
+    db.ptAssignment.findFirst({ where: { memberId: m.id, endDate: null }, include: { trainer: { select: { name: true } }, slots: { where: { status: "SCHEDULED", at: { gte: now } }, orderBy: { at: "asc" }, take: 3 } } }),
     db.plan.findMany({ where: { gymId: gym.id, active: true, type: { not: "PT" } }, orderBy: { durationDays: "asc" } }),
   ]);
   const current = memberships.find((x) => x.status === "ACTIVE" || x.status === "FROZEN");
@@ -91,7 +92,7 @@ export default async function PortalHome() {
         {visits[0] && <p className="mt-1 text-xs text-neutral-500">Last visit {visits[0].checkedInAt.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>}
       </section>
 
-      {pt && <section className="mt-3 rounded-lg border bg-white p-4 text-sm"><h2 className="font-medium">Personal training</h2><p>Trainer {pt.trainer.name} · {sessionsLeft(pt)} of {pt.sessionsTotal} sessions left</p></section>}
+      {pt && <section className="mt-3 rounded-lg border bg-white p-4 text-sm"><h2 className="font-medium">Personal training</h2><p>Trainer {pt.trainer.name} · {sessionsLeft(pt)} of {pt.sessionsTotal} sessions left</p>{pt.slots.length > 0 && <ul className="mt-1 text-neutral-600">{pt.slots.map((s) => <li key={s.id}>Next: {fmtSlot(s.at)}</li>)}</ul>}</section>}
 
       <section className="mt-3 rounded-lg border bg-white p-4 text-sm text-neutral-600">
         <h2 className="font-medium text-neutral-900">{gym.name}</h2>

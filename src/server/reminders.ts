@@ -81,6 +81,12 @@ export async function generateReminders(gymId: string, now = new Date()) {
       for (const l of leads) { const to = contact(l); if (to) targets.push({ leadId: l.id, to, day: today, targetKey: l.id, vars: { name: l.name.split(" ")[0], plan: l.interestedIn ?? "membership" } }); }
     }
 
+    if (rule.type === "PT_SESSION") {
+      const day = addDays(today, rule.daysBefore);
+      const slots = await db.ptSlot.findMany({ where: { gymId, status: "SCHEDULED", at: { gte: day, lt: addDays(day, 1) } }, include: { member: true, assignment: { select: { trainer: { select: { name: true } } } } } });
+      for (const s of slots) { const mem = s.member; const to = contact(mem); if (to) targets.push({ memberId: s.memberId, to, day: today, targetKey: s.id, vars: { name: mem.firstName, trainer: s.assignment.trainer.name, endDate: fmtDate(s.at), time: s.at.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) } }); }
+    }
+
     for (const t of targets) {
       const r = await db.reminder.createMany({
         data: [{ gymId, type: rule.type, channel: rule.channel, memberId: t.memberId, leadId: t.leadId, to: t.to, body: renderTemplate(rule.template, { ...t.vars, gym: gym.name }), scheduledAt: sendTimeFor(t.day), dedupeKey: dedupeKey(rule.type, t.targetKey, t.day) }],
