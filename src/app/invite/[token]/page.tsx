@@ -8,7 +8,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   return (
     <main className="mx-auto max-w-sm p-6">
       <h1 className="mb-4 text-2xl font-semibold">Join GYMBASE</h1>
-      {valid ? <AcceptInviteForm token={token} email={invite.email} gymName={invite.gym.name} /> : <p className="rounded bg-red-50 p-3 text-sm text-red-700">This invite link is invalid, used or expired. Ask the gym owner for a new one.</p>}
+      {valid ? <AcceptInviteForm token={token} email={invite.email} gymName={invite.gym.name} /> : <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">This invite link is invalid, used or expired. Ask the gym owner for a new one.</p>}
     </main>
   );
 }

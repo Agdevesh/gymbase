@@ -60,29 +60,29 @@ export function CheckinDesk() {
     <div>
       <input ref={input} value={q} onChange={(e) => { setQ(e.target.value); setMsg(null); }} onKeyDown={onKey} autoFocus autoComplete="off"
         placeholder="Name, phone, member code — or scan QR" className={`${inputClass} text-lg`} aria-label="Find member" />
-      <p className="mt-1 text-xs text-neutral-500">↑↓ to choose, Enter to check in, Esc to clear</p>
+      <p className="mt-1 text-xs text-slate-500">↑↓ to choose, Enter to check in, Esc to clear</p>
       {msg && (
-        <div role="status" className={`mt-3 rounded p-3 text-lg font-medium ${msg.ok ? "bg-green-100 text-green-900" : "bg-red-100 text-red-900"}`}>
+        <div role="status" className={`mt-3 rounded-lg p-3 text-lg font-medium ${msg.ok ? "bg-green-100 text-green-900" : "bg-red-100 text-red-900"}`}>
           {msg.ok ? (msg.already ? `${msg.name} is already in the gym` : `✓ ${msg.name} checked in`) : `✕ ${msg.name ? `${msg.name}: ` : ""}${msg.message}`}
         </div>
       )}
       {results.length > 0 && (
-        <ul className="mt-3 divide-y rounded border bg-white" role="listbox">
+        <ul className="rounded-xl border border-slate-200 bg-white shadow-sm mt-3 divide-y divide-slate-100" role="listbox">
           {results.map((m, i) => (
             <li key={m.id} role="option" aria-selected={i === sel} onMouseEnter={() => setSel(i)} onClick={() => doCheckIn(m.id)}
-              className={`flex cursor-pointer items-center gap-3 px-3 py-2 ${i === sel ? "bg-neutral-100" : ""}`}>
+              className={`flex cursor-pointer items-center gap-3 px-3 py-2 ${i === sel ? "bg-slate-100" : ""}`}>
               <Avatar name={m.name} photoUrl={m.photoUrl} />
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">{m.name} <span className="font-normal text-neutral-400">{m.code}</span>{m.inGym && <span className="ml-2 rounded bg-green-100 px-1.5 text-xs text-green-800">in gym</span>}</div>
-                <div className="truncate text-sm text-neutral-500">{m.phone}{m.plan && ` · ${m.plan} till ${fmt(m.endDate!)}`}</div>
-                {!m.allowed && <div className="text-sm text-red-700">{m.blockedReason} <Link href={`/members/${m.id}`} className="underline" onClick={(e) => e.stopPropagation()}>Open profile</Link></div>}
+                <div className="truncate font-medium">{m.name} <span className="font-normal text-slate-400">{m.code}</span>{m.inGym && <span className="ml-2 rounded-lg bg-green-100 px-1.5 text-xs text-green-800">in gym</span>}</div>
+                <div className="truncate text-sm text-slate-500">{m.phone}{m.plan && ` · ${m.plan} till ${fmt(m.endDate!)}`}</div>
+                {!m.allowed && <div className="text-sm text-red-700">{m.blockedReason} <Link href={`/members/${m.id}`} className="font-medium text-brand-700 hover:underline" onClick={(e) => e.stopPropagation()}>Open profile</Link></div>}
               </div>
               <StatusBadge status={(m.status as "ACTIVE" | "FROZEN" | "SUSPENDED" | "EXPIRED" | "CANCELLED" | null) ?? "NONE"} />
             </li>
           ))}
         </ul>
       )}
-      {pending && <p className="mt-2 text-sm text-neutral-500">Checking in…</p>}
+      {pending && <p className="mt-2 text-sm text-slate-500">Checking in…</p>}
     </div>
   );
 }

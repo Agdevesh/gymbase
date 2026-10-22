@@ -29,22 +29,22 @@ export default async function InvoiceUpiPage({ params }: { params: Promise<{ id:
   return (
     <AppShell title={`Collect ${paise(request.amountPaise)} by UPI`} back={{ href: `/invoices/${id}`, label: `Invoice ${inv.number}` }}>
       <div className="grid gap-4 md:grid-cols-2">
-        <section className="rounded border bg-white p-4">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm p-4">
           <UpiWaiting token={request.token} initial={status} amount={paise(request.amountPaise)} paidNote={<p className="mt-2 text-sm"><ButtonLink href={`/invoices/${id}`}>Back to invoice</ButtonLink></p>}>
             <UpiQrPanel uri={uri} amountPaise={request.amountPaise} code={request.code} upiId={inv.gym.upiId} />
           </UpiWaiting>
         </section>
-        <section className="space-y-4 rounded border bg-white p-4 text-sm">
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm space-y-4 p-4 text-sm">
           <p><strong>{name}</strong> · {inv.member.phone} · Invoice {inv.number}</p>
           {status === "PENDING" && <>
-            {!inv.gym.upiAlertToken && <p className="rounded bg-amber-50 p-2 text-amber-900">Automatic verification is not set up yet. Owner: <a href="/settings/upi" className="underline">connect the bank SMS</a>. Until then, confirm by UTR below.</p>}
-            {sameAmount > 0 && <p className="rounded bg-amber-50 p-2 text-amber-900">{sameAmount} other member{sameAmount > 1 ? "s are" : " is"} also paying {paise(request.amountPaise)} right now. If the bank alert cannot tell them apart it will appear under <a href="/payments/upi" className="underline">UPI desk</a> for you to pick.</p>}
+            {!inv.gym.upiAlertToken && <p className="rounded-lg bg-amber-50 p-2 text-amber-900">Automatic verification is not set up yet. Owner: <a href="/settings/upi" className="font-medium text-brand-700 hover:underline">connect the bank SMS</a>. Until then, confirm by UTR below.</p>}
+            {sameAmount > 0 && <p className="rounded-lg bg-amber-50 p-2 text-amber-900">{sameAmount} other member{sameAmount > 1 ? "s are" : " is"} also paying {paise(request.amountPaise)} right now. If the bank alert cannot tell them apart it will appear under <a href="/payments/upi" className="font-medium text-brand-700 hover:underline">UPI desk</a> for you to pick.</p>}
             <UtrForm requestId={request.id} />
             <div className="flex flex-wrap gap-2">
-              <a href={waLink(inv.member.phone, `Hi ${inv.member.firstName}, please pay ${paise(request.amountPaise)} for ${inv.number} at ${inv.gym.name} using this link (amount is fixed): ${base}/pay/${request.token}`)} target="_blank" rel="noreferrer" className="rounded border px-3 py-1.5">Send pay link on WhatsApp</a>
-              <form action={cancelUpiRequest.bind(null, request.id)}><button className="rounded border px-3 py-1.5 text-red-700">Cancel request</button></form>
+              <a href={waLink(inv.member.phone, `Hi ${inv.member.firstName}, please pay ${paise(request.amountPaise)} for ${inv.number} at ${inv.gym.name} using this link (amount is fixed): ${base}/pay/${request.token}`)} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-1.5">Send pay link on WhatsApp</a>
+              <form action={cancelUpiRequest.bind(null, request.id)}><button className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-1.5 text-red-700">Cancel request</button></form>
             </div>
-            <p className="text-xs text-neutral-500">Request {request.code} expires {request.expiresAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}. A payment of any other amount will not be matched to this invoice.</p>
+            <p className="text-xs text-slate-500">Request {request.code} expires {request.expiresAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}. A payment of any other amount will not be matched to this invoice.</p>
           </>}
         </section>
       </div>

@@ -14,7 +14,7 @@ export function ClassForm({ trainers, initial }: { trainers: { id: string; name:
   const e = state?.errors ?? {};
   if (!open) return <button type="button" onClick={() => setOpen(true)} className={initial ? "text-xs underline" : buttonClass}>{initial ? "Edit" : "+ New class"}</button>;
   return (
-    <form action={action} className="mt-2 space-y-3 rounded border bg-neutral-50 p-3">
+    <form action={action} className="mt-2 space-y-3 rounded-lg border bg-slate-50 p-3">
       {state?.message && <p className="text-xs text-red-600">{state.message}</p>}
       <div className="grid gap-3 sm:grid-cols-3">
         <Field label="Class name" error={e.name}><input name="name" defaultValue={initial?.name} placeholder="Zumba, Yoga, HIIT…" required className={inputClass} /></Field>
@@ -25,7 +25,7 @@ export function ClassForm({ trainers, initial }: { trainers: { id: string; name:
         <Field label="Notes" error={e.notes}><input name="notes" defaultValue={initial?.notes ?? ""} placeholder="Bring a mat" className={inputClass} /></Field>
       </div>
       <Field label="Days" error={e.weekdays}>
-        <div className="flex flex-wrap gap-2 text-sm">{WEEKDAYS.map((d, i) => <label key={d} className="flex items-center gap-1 rounded border bg-white px-2 py-1"><input type="checkbox" name="weekdays" value={i} defaultChecked={initial ? initial.weekdays.includes(i) : i >= 1 && i <= 6} /> {d}</label>)}</div>
+        <div className="flex flex-wrap gap-2 text-sm">{WEEKDAYS.map((d, i) => <label key={d} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 flex items-center gap-1 px-2 py-1"><input type="checkbox" name="weekdays" value={i} defaultChecked={initial ? initial.weekdays.includes(i) : i >= 1 && i <= 6} /> {d}</label>)}</div>
       </Field>
       <label className="flex items-center gap-2 text-sm"><input type="hidden" name="active" value="off" /><input type="checkbox" name="active" value="on" defaultChecked={initial?.active ?? true} /> Active (shown on the timetable and bookable)</label>
       <div className="flex gap-2"><button disabled={pending} className={buttonClass}>{pending ? "Saving…" : "Save class"}</button><button type="button" onClick={() => setOpen(false)} className={secondaryButtonClass}>Cancel</button></div>

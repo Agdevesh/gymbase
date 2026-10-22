@@ -15,7 +15,7 @@ export function MemberForm({ action, initial, cancelHref }: { action: (prev: For
   const v = initial;
   return (
     <form action={formAction} className="space-y-4" encType="multipart/form-data">
-      {state?.message && <p className="rounded bg-red-50 p-2 text-sm text-red-700">{state.message}</p>}
+      {state?.message && <p className="rounded-lg bg-red-50 p-2 text-sm text-red-700">{state.message}</p>}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="First name" error={e.firstName}><input name="firstName" defaultValue={v?.firstName} required autoFocus className={inputClass} /></Field>
         <Field label="Last name" error={e.lastName}><input name="lastName" defaultValue={v?.lastName ?? ""} className={inputClass} /></Field>
@@ -35,7 +35,7 @@ export function MemberForm({ action, initial, cancelHref }: { action: (prev: For
         </Field>
       </div>
       <Field label="Address" error={e.address}><textarea name="address" rows={2} defaultValue={v?.address ?? ""} className={inputClass} /></Field>
-      <fieldset className="grid gap-4 rounded border p-3 sm:grid-cols-2">
+      <fieldset className="grid gap-4 rounded-lg border p-3 sm:grid-cols-2">
         <legend className="px-1 text-sm font-medium">Emergency contact</legend>
         <Field label="Name" error={e.emergencyName}><input name="emergencyName" defaultValue={v?.emergencyName ?? ""} className={inputClass} /></Field>
         <Field label="Phone" error={e.emergencyPhone}><input name="emergencyPhone" type="tel" inputMode="tel" defaultValue={v?.emergencyPhone ?? ""} className={inputClass} /></Field>

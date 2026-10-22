@@ -1,6 +1,6 @@
 // Tiny dependency-free line chart for a member's weight (or any metric) over time.
 export function ProgressChart({ points, unit }: { points: { at: Date; value: number }[]; unit: string }) {
-  if (points.length < 2) return <p className="text-xs text-neutral-500">Record two or more readings to see a trend.</p>;
+  if (points.length < 2) return <p className="text-xs text-slate-500">Record two or more readings to see a trend.</p>;
   const W = 320, H = 120, P = 24;
   const xs = points.map((p) => p.at.getTime()), ys = points.map((p) => p.value);
   const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);

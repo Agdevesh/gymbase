@@ -13,7 +13,7 @@ function Bars({ values, labels, highlight }: { values: number[]; labels: string[
   const max = Math.max(1, ...values);
   return (
     <svg viewBox={`0 0 ${values.length * 14} 60`} className="h-20 w-full" role="img">
-      {values.map((v, i) => { const h = Math.round((v / max) * 44); return <g key={i}><rect x={i * 14 + 2} y={48 - h} width={10} height={h} rx={1} className={highlight?.(i) ? "fill-green-600" : "fill-neutral-800"} /><text x={i * 14 + 7} y={57} textAnchor="middle" fontSize={6} className="fill-neutral-500">{labels[i]}</text></g>; })}
+      {values.map((v, i) => { const h = Math.round((v / max) * 44); return <g key={i}><rect x={i * 14 + 2} y={48 - h} width={10} height={h} rx={1} className={highlight?.(i) ? "fill-green-600" : "fill-slate-800"} /><text x={i * 14 + 7} y={57} textAnchor="middle" fontSize={6} className="fill-slate-500">{labels[i]}</text></g>; })}
     </svg>
   );
 }
@@ -57,52 +57,52 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   return (
     <AppShell title="Reports">
       <div className="mb-4 flex items-center gap-2 text-sm">
-        <Link href={`/reports?month=${r.prev}`} className="rounded border bg-white px-3 py-1">←</Link>
+        <Link href={`/reports?month=${r.prev}`} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-1">←</Link>
         <span className="font-medium">{r.label}</span>
-        <Link href={`/reports?month=${r.next}`} className="rounded border bg-white px-3 py-1">→</Link>
-        <span className="ml-auto flex gap-3"><Link href={`/expenses?month=${r.key}`} className="underline">Expenses</Link><Link href="/settings" className="underline">Exports</Link></span>
+        <Link href={`/reports?month=${r.next}`} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-1">→</Link>
+        <span className="ml-auto flex gap-3"><Link href={`/expenses?month=${r.key}`} className="font-medium text-brand-700 hover:underline">Expenses</Link><Link href="/settings" className="font-medium text-brand-700 hover:underline">Exports</Link></span>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <section className={card}>
-          <h2 className="mb-1 font-medium">Profit & loss</h2>
+          <h2 className="mb-1 font-semibold text-slate-900">Profit & loss</h2>
           <Row k="Collected" v={paise(collected)} />
           {refunded > 0 && <Row k="Refunds" v={`- ${paise(refunded)}`} tone="text-red-700" />}
-          {byCat.map(([c, v]) => <Row key={c} k={CATEGORY_LABELS[c]} v={`- ${paise(v)}`} tone="text-neutral-600" />)}
-          {byCat.length === 0 && <Row k="Expenses" v="none recorded" tone="text-neutral-400" />}
+          {byCat.map(([c, v]) => <Row key={c} k={CATEGORY_LABELS[c]} v={`- ${paise(v)}`} tone="text-slate-600" />)}
+          {byCat.length === 0 && <Row k="Expenses" v="none recorded" tone="text-slate-400" />}
           <div className="mt-1 border-t pt-1"><Row k="Net" v={paise(net)} strong tone={net < 0 ? "text-red-700" : "text-green-700"} /></div>
-          <p className="mt-2 text-xs text-neutral-500">Dues still outstanding (all time): {paise(dues)}</p>
+          <p className="mt-2 text-xs text-slate-500">Dues still outstanding (all time): {paise(dues)}</p>
         </section>
         <section className={card}>
-          <h2 className="mb-1 font-medium">Collections by method & plan</h2>
+          <h2 className="mb-1 font-semibold text-slate-900">Collections by method & plan</h2>
           {byMethod.map(([m, v]) => <Row key={m} k={METHOD_LABELS[m]} v={paise(v)} />)}
           <div className="mt-2 border-t pt-1">{byPlan.map(([p, v]) => <Row key={p} k={p} v={`${paise(v)} · ${pct(v, collected - refunded)}%`} />)}</div>
-          {payments.length === 0 && <p className="text-sm text-neutral-500">No payments this month.</p>}
+          {payments.length === 0 && <p className="text-sm text-slate-500">No payments this month.</p>}
         </section>
         <section className={card}>
-          <h2 className="mb-1 font-medium">Members</h2>
+          <h2 className="mb-1 font-semibold text-slate-900">Members</h2>
           <Row k="Active memberships now" v={String(activeNow)} />
           <Row k={`New members in ${r.label.split(" ")[0]}`} v={String(newMembers)} />
           <Row k="Plans ending this month" v={String(endedMemberships.length)} />
           <Row k="Renewal rate" v={renewal == null ? "—" : `${renewal}%`} tone={renewal != null && renewal < 50 ? "text-red-700" : ""} />
-          <p className="mb-1 mt-3 text-xs text-neutral-500">New members, last 6 months</p>
+          <p className="mb-1 mt-3 text-xs text-slate-500">New members, last 6 months</p>
           <Bars values={growth.map((g) => g.n)} labels={growth.map((g) => g.label)} />
         </section>
         <section className={card}>
-          <h2 className="mb-1 font-medium">Peak hours (last 30 days)</h2>
-          <p className="mb-1 text-xs text-neutral-500">{visits.length} visits by {uniqueVisitors} members · busiest around {peakHour}:00</p>
+          <h2 className="mb-1 font-semibold text-slate-900">Peak hours (last 30 days)</h2>
+          <p className="mb-1 text-xs text-slate-500">{visits.length} visits by {uniqueVisitors} members · busiest around {peakHour}:00</p>
           <Bars values={hist.hours.slice(5, 23)} labels={hist.hours.slice(5, 23).map((_, i) => String(i + 5))} highlight={(i) => i + 5 === peakHour} />
-          <p className="mb-1 mt-2 text-xs text-neutral-500">By weekday</p>
+          <p className="mb-1 mt-2 text-xs text-slate-500">By weekday</p>
           <Bars values={hist.days} labels={[...WEEKDAYS]} />
         </section>
         <section className={card}>
-          <h2 className="mb-1 font-medium">Inquiries</h2>
+          <h2 className="mb-1 font-semibold text-slate-900">Inquiries</h2>
           <Row k="Inquiries this month" v={String(leads.length)} />
           <Row k="Converted" v={`${converted} · ${pct(converted, leads.length)}%`} />
-          {bySource.map(([s, n]) => <Row key={s} k={SOURCE_LABELS[s]} v={`${n} · ${pct(leads.filter((l) => l.source === s && l.status === "CONVERTED").length, n)}% joined`} tone="text-neutral-600" />)}
+          {bySource.map(([s, n]) => <Row key={s} k={SOURCE_LABELS[s]} v={`${n} · ${pct(leads.filter((l) => l.source === s && l.status === "CONVERTED").length, n)}% joined`} tone="text-slate-600" />)}
         </section>
         <section className={card}>
-          <h2 className="mb-1 font-medium">Personal training sessions</h2>
-          {staffPt.length === 0 ? <p className="text-sm text-neutral-500">No PT sessions logged this month.</p> : staffPt.map((s) => <Row key={s.trainerId} k={trainers.find((t) => t.id === s.trainerId)?.name ?? "—"} v={`${s._count} sessions`} />)}
+          <h2 className="mb-1 font-semibold text-slate-900">Personal training sessions</h2>
+          {staffPt.length === 0 ? <p className="text-sm text-slate-500">No PT sessions logged this month.</p> : staffPt.map((s) => <Row key={s.trainerId} k={trainers.find((t) => t.id === s.trainerId)?.name ?? "—"} v={`${s._count} sessions`} />)}
         </section>
       </div>
     </AppShell>

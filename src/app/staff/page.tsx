@@ -27,32 +27,32 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
     db.subscription.findUnique({ where: { gymId }, select: { staffLimit: true } }),
   ]);
   const att = (id: string) => attendance.find((a) => a.userId === id);
-  const btn = "rounded border bg-white px-2 py-1 text-xs hover:bg-neutral-100";
+  const btn = "rounded border bg-white px-2 py-1 text-xs hover:bg-slate-100";
   const shift = (n: number) => new Date(day.getTime() + n * 86400_000).toISOString().slice(0, 10);
 
   return (
     <AppShell title="Staff" actions={<><ButtonLink href="/staff/pt" secondary>PT clients</ButtonLink>{manage && <ButtonLink href="/staff/commissions" secondary>Commissions</ButtonLink>}</>}>
       <form className="mb-3 flex items-center gap-2" action="/staff">
-        <Link href={`/staff?date=${shift(-1)}`} className="rounded border bg-white px-3 py-2 text-sm">←</Link>
+        <Link href={`/staff?date=${shift(-1)}`} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">←</Link>
         <input type="date" name="date" defaultValue={day.toISOString().slice(0, 10)} className={`${inputClass} w-auto`} />
-        <button className="rounded border bg-white px-3 py-2 text-sm">Go</button>
-        {!isToday && <Link href={`/staff?date=${shift(1)}`} className="rounded border bg-white px-3 py-2 text-sm">→</Link>}
-        <span className="ml-auto text-sm text-neutral-500">{staff.filter((s) => s.active && s.role !== "OWNER").length}/{sub?.staffLimit ?? "∞"} staff logins</span>
+        <button className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">Go</button>
+        {!isToday && <Link href={`/staff?date=${shift(1)}`} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 px-3 py-2 text-sm">→</Link>}
+        <span className="ml-auto text-sm text-slate-500">{staff.filter((s) => s.active && s.role !== "OWNER").length}/{sub?.staffLimit ?? "∞"} staff logins</span>
       </form>
-      <table className="w-full rounded border bg-white text-sm">
-        <thead className="text-left text-neutral-500"><tr><th className="p-2">Staff</th><th className="p-2">In</th><th className="p-2">Out</th><th className="p-2">Hours</th>{manage && <th className="p-2">Commission %</th>}<th className="p-2" /></tr></thead>
-        <tbody className="divide-y">
+      <table className="rounded-xl border border-slate-200 bg-white shadow-sm w-full text-sm">
+        <thead className="text-left text-slate-500"><tr><th className="p-2">Staff</th><th className="p-2">In</th><th className="p-2">Out</th><th className="p-2">Hours</th>{manage && <th className="p-2">Commission %</th>}<th className="p-2" /></tr></thead>
+        <tbody className="divide-y divide-slate-100">
           {staff.map((s) => {
             const a = att(s.id);
             const me = s.id === userId;
             const canMark = isToday && (me || role === "OWNER");
             return (
-              <tr key={s.id} className={s.active ? "" : "text-neutral-400"}>
-                <td className="p-2"><div className="flex items-center gap-2"><Avatar name={s.name} photoUrl={null} size={28} /><div><div className="font-medium">{s.name}{me && <span className="text-neutral-400"> (you)</span>}</div><div className="text-xs text-neutral-500">{ROLE_LABELS[s.role]} · {s.email}{!s.active && " · deactivated"}</div></div></div></td>
+              <tr key={s.id} className={s.active ? "" : "text-slate-400"}>
+                <td className="p-2"><div className="flex items-center gap-2"><Avatar name={s.name} photoUrl={null} size={28} /><div><div className="font-medium">{s.name}{me && <span className="text-slate-400"> (you)</span>}</div><div className="text-xs text-slate-500">{ROLE_LABELS[s.role]} · {s.email}{!s.active && " · deactivated"}</div></div></div></td>
                 <td className="p-2">{time(a?.inAt ?? null)}</td>
                 <td className="p-2">{time(a?.outAt ?? null)}</td>
                 <td className="p-2">{a?.outAt ? hoursBetween(a.inAt, a.outAt) : a ? <span className="text-green-700">in</span> : ""}</td>
-                {manage && <td className="p-2">{s.role === "TRAINER" ? <form action={setCommissionPercent.bind(null, s.id)} className="flex items-center gap-1"><input name="percent" type="number" min={0} max={100} defaultValue={s.commissionPercent} className="w-16 rounded border px-1 py-0.5" /><button className={btn}>Set</button></form> : "—"}</td>}
+                {manage && <td className="p-2">{s.role === "TRAINER" ? <form action={setCommissionPercent.bind(null, s.id)} className="flex items-center gap-1"><input name="percent" type="number" min={0} max={100} defaultValue={s.commissionPercent} className="rounded-lg border border-slate-300 bg-white font-medium text-slate-700 shadow-xs hover:bg-slate-50 w-16 px-1 py-0.5" /><button className={btn}>Set</button></form> : "—"}</td>}
                 <td className="p-2 text-right whitespace-nowrap">
                   {canMark && s.active && !a && <form action={staffMarkIn.bind(null, s.id)} className="inline"><button className={`${btn} text-green-800`}>{me ? "I'm in" : "Mark in"}</button></form>}
                   {canMark && a && !a.outAt && <form action={staffMarkOut.bind(null, s.id)} className="inline"><button className={btn}>{me ? "I'm out" : "Mark out"}</button></form>}
@@ -65,12 +65,12 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
         </tbody>
       </table>
       {manage && (
-        <section className="mt-6 rounded border bg-white p-4">
-          <h2 className="mb-2 font-medium">Invite staff</h2>
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm mt-6 p-4">
+          <h2 className="mb-2 font-semibold text-slate-900">Invite staff</h2>
           <InviteForm />
           {invites.length > 0 && (
-            <ul className="mt-3 divide-y text-sm">
-              {invites.map((i) => <li key={i.id} className="flex items-center justify-between py-1"><span>{i.email} <span className="text-neutral-500">· {ROLE_LABELS[i.role]} · expires {i.expiresAt.toLocaleDateString("en-IN")}</span></span><span className="flex gap-2"><a href={`/invite/${i.token}`} className="underline">Link</a><form action={revokeInvite.bind(null, i.id)}><button className="text-red-700 underline">Revoke</button></form></span></li>)}
+            <ul className="mt-3 divide-y text-sm divide-slate-100">
+              {invites.map((i) => <li key={i.id} className="flex items-center justify-between py-1"><span>{i.email} <span className="text-slate-500">· {ROLE_LABELS[i.role]} · expires {i.expiresAt.toLocaleDateString("en-IN")}</span></span><span className="flex gap-2"><a href={`/invite/${i.token}`} className="font-medium text-brand-700 hover:underline">Link</a><form action={revokeInvite.bind(null, i.id)}><button className="text-red-700 underline">Revoke</button></form></span></li>)}
             </ul>
           )}
         </section>

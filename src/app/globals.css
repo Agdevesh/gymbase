@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Plain `border` utilities get a soft slate line instead of Tailwind 4's currentColor default. */
+@layer base {
+  *, ::before, ::after, ::backdrop { border-color: var(--color-slate-200); }
+}
+
 @theme {
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
@@ -37,3 +42,6 @@ tbody tr:hover { background: var(--color-slate-50); }
 .app-main .grid > *, .app-main .flex-1 { min-width: 0; }
 .app-main input, .app-main select, .app-main textarea { min-width: 0; max-width: 100%; }
 .app-main p, .app-main li, .app-main dd { overflow-wrap: anywhere; }
+
+/* A table styled as a card keeps its rounded corners. */
+table.rounded-xl { border-collapse: separate; border-spacing: 0; overflow: hidden; }

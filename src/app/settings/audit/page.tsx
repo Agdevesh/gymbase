@@ -19,15 +19,15 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   const link = (e: string | null, i: string | null) => (e === "member" && i ? `/members/${i}` : e === "invoice" && i ? `/invoices/${i}` : e === "lead" && i ? `/leads/${i}` : null);
   return (
     <AppShell title="Activity log" back={{ href: "/settings", label: "Settings" }}>
-      <p className="mb-3 text-sm text-neutral-500">{total.toLocaleString("en-IN")} entries. Every payment, refund, membership change, member edit and settings change is recorded with who did it.</p>
-      {rows.length === 0 ? <p className="rounded border bg-white p-6 text-center text-neutral-500">Nothing yet.</p> : (
-        <ul className="divide-y rounded border bg-white text-sm">
+      <p className="mb-3 text-sm text-slate-500">{total.toLocaleString("en-IN")} entries. Every payment, refund, membership change, member edit and settings change is recorded with who did it.</p>
+      {rows.length === 0 ? <p className="rounded-xl border border-slate-200 bg-white shadow-sm p-6 text-center text-slate-500">Nothing yet.</p> : (
+        <ul className="rounded-xl border border-slate-200 bg-white shadow-sm divide-y text-sm divide-slate-100">
           {rows.map((r) => { const href = link(r.entity, r.entityId); return (
             <li key={r.id} className="flex flex-wrap gap-x-3 px-3 py-2">
-              <span className="w-28 shrink-0 text-neutral-500">{when(r.createdAt)}</span>
+              <span className="w-28 shrink-0 text-slate-500">{when(r.createdAt)}</span>
               <span className="w-28 shrink-0 truncate font-medium">{r.user?.name ?? "System"}</span>
               <span className="flex-1">{href ? <Link href={href} className="hover:underline">{r.summary}</Link> : r.summary}</span>
-              <span className="text-xs text-neutral-400">{r.action}</span>
+              <span className="text-xs text-slate-400">{r.action}</span>
             </li>); })}
         </ul>
       )}

@@ -22,7 +22,7 @@ export function CollectForm({ memberId, duePaise, invoiceId }: { memberId: strin
   const [method, setMethod] = useState("CASH");
   const e = state?.errors ?? {};
   return (
-    <form ref={ref} action={action} className="space-y-2 rounded border bg-neutral-50 p-3">
+    <form ref={ref} action={action} className="space-y-2 rounded-lg border bg-slate-50 p-3">
       {invoiceId && <input type="hidden" name="invoiceId" value={invoiceId} />}
       <div className="grid gap-2 sm:grid-cols-3">
         <Field label="Amount (₹)" error={e.amountPaise}><input name="amountPaise" inputMode="decimal" defaultValue={duePaise > 0 ? duePaise / 100 : ""} required autoFocus className={inputClass} /></Field>
@@ -31,10 +31,10 @@ export function CollectForm({ memberId, duePaise, invoiceId }: { memberId: strin
       </div>
       <div className="flex items-center gap-3">
         <button disabled={pending} className={buttonClass}>{pending ? "Saving…" : "Collect payment"}</button>
-        {duePaise > 0 && <span className="text-sm text-neutral-500">Outstanding {paise(duePaise)}</span>}
+        {duePaise > 0 && <span className="text-sm text-slate-500">Outstanding {paise(duePaise)}</span>}
         {state?.message && <span className="text-xs text-red-600">{state.message}</span>}
         {state && !state.errors && !state.message && <span className="text-sm text-green-700">Recorded ✓</span>}
-        {state?.wa && <a href={state.wa} target="_blank" rel="noreferrer" className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700">Send receipt on WhatsApp</a>}
+        {state?.wa && <a href={state.wa} target="_blank" rel="noreferrer" className="rounded-lg bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700">Send receipt on WhatsApp</a>}
       </div>
     </form>
   );
@@ -61,7 +61,7 @@ export function RefundForm({ paymentId, maxPaise }: { paymentId: string; maxPais
   const e = state?.errors ?? {};
   if (!open) return <button onClick={() => setOpen(true)} className="text-xs text-red-700 underline">Refund</button>;
   return (
-    <form action={action} className="mt-2 grid gap-2 rounded border bg-red-50 p-2 sm:grid-cols-4">
+    <form action={action} className="mt-2 grid gap-2 rounded-lg border bg-red-50 p-2 sm:grid-cols-4">
       <Field label="Refund (₹)" error={e.amountPaise}><input name="amountPaise" inputMode="decimal" defaultValue={maxPaise / 100} autoFocus className={inputClass} /></Field>
       <Field label="Via"><MethodSelect /></Field>
       <Field label="Reason" error={e.reason}><input name="reason" required className={inputClass} /></Field>
@@ -77,10 +77,10 @@ export function ClosingForm({ date, expectedPaise }: { date: string; expectedPai
   const diff = counted ? Math.round(Number(counted.replace(/[,\s₹]/g, "")) * 100) - expectedPaise : null;
   const e = state?.errors ?? {};
   return (
-    <form action={action} className="space-y-2 rounded border bg-neutral-50 p-3">
+    <form action={action} className="space-y-2 rounded-lg border bg-slate-50 p-3">
       <input type="hidden" name="date" value={date} />
       <div className="grid gap-2 sm:grid-cols-3">
-        <Field label="Cash expected"><input value={paise(expectedPaise)} readOnly className={`${inputClass} bg-neutral-100`} /></Field>
+        <Field label="Cash expected"><input value={paise(expectedPaise)} readOnly className={`${inputClass} bg-slate-100`} /></Field>
         <Field label="Cash counted (₹)" error={e.countedPaise}><input name="countedPaise" inputMode="decimal" value={counted} onChange={(ev) => setCounted(ev.target.value)} required className={inputClass} /></Field>
         <Field label="Notes"><input name="notes" className={inputClass} /></Field>
       </div>
